@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 data "google_dns_managed_zone" "tfe" {
   count = var.create_cloud_dns_record == true ? 1 : 0
 

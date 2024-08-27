@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 resource "google_redis_instance" "tfe" {
   count                   = contains(["active-active"], var.tfe_operational_mode) ? 1 : 0
   name                    = "${var.friendly_name_prefix}-tfe-redis"

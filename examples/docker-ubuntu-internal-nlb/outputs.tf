@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 output "tfe_fqdn" {
   value       = module.tfe_fdo_default.url
   description = "Terraform-Enterprise URL based on `tfe_fqdn` input"
