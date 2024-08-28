@@ -2,7 +2,7 @@
 
 Terraform module aligned with HashiCorp Validated Designs (HVD) to deploy Terraform Enterprise (TFE) on Google Cloud Platform (GCP) using Compute Engine instances with a container runtime. This module defaults to deploying TFE in the `active-active` [operational mode](https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/operation-modes), but `external` is also supported. Docker is currently the only supported container runtime, but Podman support is being added.
 
-![TFE on Google](./docs/images/architecture-logical-active-active.png)
+![TFE on Google](https://raw.githubusercontent.com/hashicorp/terraform-google-terraform-enterprise-hvd/main/docs/images/architecture-logical-active-active.png)
 
 ## Prerequisites
 
