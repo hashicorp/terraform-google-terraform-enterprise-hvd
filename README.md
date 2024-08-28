@@ -8,11 +8,13 @@ Terraform module aligned with HashiCorp Validated Designs (HVD) to deploy Terraf
 
 ### General
 
-- TFE license file (`.hclic`).
-- Terraform CLI `>= 1.7` installed on clients/workstations that will be used to deploy TFE.
-- `Git` CLI and Visual Studio Code editor installed on workstations are strongly recommended.
-- AWS account that TFE will be hosted in with permissions to provision these [resources](#resources) via Terraform CLI.
-- (Optional) GCP GCS bucket for [GCS Remote State backend](https://developer.hashicorp.com/terraform/language/settings/backends/gcs) that will solely be used to stand up the TFE infrastructure via Terraform CLI (Community Edition).
+- TFE license file (_e.g._ `terraform.hclic`)
+- Terraform CLI `>= 1.9` installed on clients/workstations that will be used to deploy TFE
+- General understanding of how to use Terraform (Community Edition)
+- General understanding of how to use GCP
+- `git` CLI and Visual Studio Code editor installed on workstations are strongly recommended
+- GCP projeect that TFE will be deployed in with permissions to provision these [resources](#resources) via Terraform CLI
+- (Optional) GCP GCS bucket for [GCS remote state backend](https://developer.hashicorp.com/terraform/language/settings/backends/gcs) that will be used to manage the Terraform state of this TFE deployment (out-of-band from the TFE application) via Terraform CLI (Community Edition)
 
 ### Networking
 
@@ -56,11 +58,11 @@ One of the following logging destinations:
 
 1. Create/configure/validate the applicable [prerequisites](#prerequisites).
 
-2. Nested within the [examples](./examples/) directory are subdirectories that contain ready-made Terraform configurations of example scenarios for how to call and deploy this module. To get started, choose an example scenario. If you are not sure which example scenario to start with, then we recommend starting with the [default](examples/default) example.
+2. Nested within the [examples](./examples/) directory are subdirectories containing ready-made Terraform configurations for example scenarios on how to call and deploy this module. To get started, choose the example scenario that most closely matches your requirements. You can customize your deployment later by adding additional module [inputs](#inputs) as you see fit (see the [Deployment-Customizations](./docs/deployment-customizations.md) doc for more details).
 
-3. Copy all of the Terraform files from your example scenario of choice into a new destination directory to create your root Terraform configuration that will manage your TFE deployment. If you are not sure where to create this new directory, it is common for us to see users create an `environments/` directory at the root of this repo, and then a subdirectory for each TFE instance deployment, like so:
+3. Copy all of the Terraform files from your example scenario of choice into a new destination directory to create your Terraform configuration that will manage your TFE deployment. This is a common directory structure for managing multiple TFE deployments:
 
-    ```sh
+    ```
     .
     └── environments
         ├── production
@@ -118,20 +120,20 @@ One of the following logging destinations:
 
 - the module includes outputs for the initial admin user token retrieval.
 
+---
+
 ## Docs
 
 Below are links to docs pages related to deployment customizations as well as managing day 2 operations of your TFE instance.
 
- - [deployment-customizations.md](./docs/deployment-customizations.md)
- - [operations.md](./docs/operations.md)
- - [tfe-tls-cert-rotation.md](./docs/tfe-tls-cert-rotation.md)
- - [tfe-config-settings.md](./docs/tfe-config-settings.md)
- - [tfe-version-upgrades.md](./docs/tfe-version-upgrades.md)
- - [troubleshooting.md](./docs/troubleshooting.md)
+- [deployment-customizations.md](./docs/deployment-customizations.md)
+- [operations.md](./docs/operations.md)
+- [tfe-tls-cert-rotation.md](./docs/tfe-tls-cert-rotation.md)
+- [tfe-config-settings.md](./docs/tfe-config-settings.md)
+- [tfe-version-upgrades.md](./docs/tfe-version-upgrades.md)
+- [troubleshooting.md](./docs/troubleshooting.md)
 
-## Disclaimer
-
-This Terraform module _accelerator_ is intended to be used by HashiCorp Implementation Services (IS) in tandem with customers during Professional Services engagements in order to _accelerate_, codify, and automate the deployment of Terraform Enterprise via Terraform within the customers' cloud environments. After the Professional Services engagement finishes, the customer owns the code and is responsible for maintaining and supporting it.
+---
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -215,7 +217,7 @@ This Terraform module _accelerator_ is intended to be used by HashiCorp Implemen
 | <a name="input_network"></a> [network](#input\_network) | The VPC network to host the cluster in | `string` | n/a | yes |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | ID of GCP Project to create resources in. | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | Region of GCP Project to create resources in. | `string` | n/a | yes |
-| <a name="input_subnetwork"></a> [subnetwork](#input\_subnetwork) | Existing VPC subnetwork for TFE instance(s) and optionally TFE frontend load balancer. | `string` | n/a | yes |
+| <a name="input_subnet"></a> [subnet](#input\_subnet) | Existing VPC subnet for TFE instance(s) and optionally TFE frontend load balancer. | `string` | n/a | yes |
 | <a name="input_tfe_encryption_password_secret_id"></a> [tfe\_encryption\_password\_secret\_id](#input\_tfe\_encryption\_password\_secret\_id) | ID of Secrets Manager secret for TFE encryption password. | `string` | n/a | yes |
 | <a name="input_tfe_fqdn"></a> [tfe\_fqdn](#input\_tfe\_fqdn) | Fully qualified domain name of TFE instance. This name should resolve to the load balancer IP address and will be what clients use to access TFE. | `string` | n/a | yes |
 | <a name="input_tfe_license_secret_id"></a> [tfe\_license\_secret\_id](#input\_tfe\_license\_secret\_id) | ID of Secrets Manager secret for TFE license file. | `string` | n/a | yes |
