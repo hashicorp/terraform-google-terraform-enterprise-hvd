@@ -1,0 +1,31 @@
+# --- Common --- #
+
+region               = "<gcp-region>"
+project_id           = "<gcp-project-id>"
+friendly_name_prefix = "<your-friendly-name>"
+common_labels = {
+  "App"         = "<tfe>"
+  "Environment" = "<test>"
+  "Owner"       = "<YourName>"
+}
+
+# --- Network --- #
+
+tfe_fqdn                = "<fqdn>"
+subnet              = "<subnet-name>"
+network                 = "<network-name>"
+create_cloud_dns_record = true
+cloud_dns_managed_zone  = "<dns-zone-name>"
+
+# --- Bootstrap --- #
+tfe_license_secret_id             = "tfe-license"
+tfe_encryption_password_secret_id = "tfe-encryption-password"
+tfe_tls_cert_secret_id            = "tfe-tls-cert-base64"
+tfe_tls_privkey_secret_id         = "tfe-tls-privkey-base64"
+tfe_tls_ca_bundle_secret_id       = "tfe-tls-ca-bundle-base64"
+tfe_database_password_secret_id   = "tfe_database_password"
+
+# --- Compute --- #
+tfe_operational_mode = "active-active"
+tfe_iact_subnets     = ["0.0.0.0/0"]
+instance_count       = 3
