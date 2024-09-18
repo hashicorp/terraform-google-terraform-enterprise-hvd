@@ -4,9 +4,9 @@ region               = "<gcp-region>"
 project_id           = "<gcp-project-id>"
 friendly_name_prefix = "<your-friendly-name>"
 common_labels = {
-  "App"         = "<tfe>"
-  "Environment" = "<test>"
-  "Owner"       = "<YourName>"
+  "app"         = "<tfe>"
+  "environment" = "<test>"
+  "owner"       = "<YourName>"
 }
 
 # --- Network --- #
