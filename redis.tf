@@ -13,4 +13,5 @@ resource "google_redis_instance" "tfe" {
   authorized_network      = data.google_compute_network.vpc.self_link
   connect_mode            = var.redis_connect_mode
   labels                  = var.common_labels
+  depends_on = [google_service_networking_connection.postgres_endpoint]
 }
