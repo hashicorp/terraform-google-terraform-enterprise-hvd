@@ -42,7 +42,7 @@ GCP Secrets Manager "TFE bootstrap" secrets:
 
 ### Compute
 
-One of the following mechanisms for shell access to TFE GC instances:
+One of the following mechanisms for shell access to TFE GCE VM instances:
 
   - Ability to enable [GCP IAP](https://cloud.google.com/iap/docs/using-tcp-forwarding#console) (this module supports this via a boolean input variable).
  -  GC SSH Key Pair
@@ -79,7 +79,7 @@ One of the following logging destinations:
             └── variables.tf
     ```
 
-    >📝 Note: in this example, the user will have two separate TFE deployments; one for their `sandbox` environment, and one for their `production` environment. This is recommended, but not required.
+    >📝 Note: In this example, the user will have two separate TFE deployments; one for their `sandbox` environment, and one for their `production` environment. This is recommended, but not required.
 
 4. (Optional) Uncomment and update the  [GCS remote state backend](https://developer.hashicorp.com/terraform/language/settings/backends/gcs)  configuration provided in the `backend.tf` file with your own custom values. While this step is highly recommended, it is technically not required to use a remote backend config for your TFE deployment.
 
@@ -87,7 +87,7 @@ One of the following logging destinations:
 
 6. Navigate to the directory of your newly created Terraform configuration for your TFE deployment, and run `terraform init`, `terraform plan`, and `terraform apply`.
 
-7. After your `terraform apply` finishes successfully, you can monitor the installation progress by connecting to your TFE gcp instance shell via SSH or gcp IAP and observing the meta data script(user_data) logs:<br>
+7. After your `terraform apply` finishes successfully, you can monitor the installation progress by connecting to your TFE gcp instance shell via SSH or GCP IAP and observing the meta data script(user_data) logs:<br>
 
    Higher-level logs:
 
@@ -98,10 +98,10 @@ One of the following logging destinations:
    Lower-level logs:
 
    ```sh
-   sudo journalctl -u google-startup-scripts.service -f
+   journalctl -xu google-startup-scripts -f
    ```
 
-   >📝 Note: the `-f` argument is to follow the logs as they append in real-time, and is optional. You may remove the `-f` for a static view.
+   >📝 Note: The `-f` argument is to follow the logs as they append in real-time, and is optional. You may remove the `-f` for a static view.
 
    The log files should display the following message after the cloud-init (user_data) script finishes successfully:
 
