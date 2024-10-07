@@ -58,7 +58,7 @@ One of the following logging destinations:
 
 1. Create/configure/validate the applicable [prerequisites](#prerequisites).
 
-2. Nested within the [examples](./examples/) directory are subdirectories containing ready-made Terraform configurations for example scenarios on how to call and deploy this module. To get started, choose the example scenario that most closely matches your requirements. You can customize your deployment later by adding additional module [inputs](#inputs) as you see fit (see the [Deployment-Customizations](./docs/deployment-customizations.md) doc for more details).
+2. Nested within the [examples](https://raw.githubusercontent.com/hashicorp/terraform-google-terraform-enterprise-hvd/main/examples/) directory are subdirectories containing ready-made Terraform configurations for example scenarios on how to call and deploy this module. To get started, choose the example scenario that most closely matches your requirements. You can customize your deployment later by adding additional module [inputs](#inputs) as you see fit (see the [Deployment-Customizations](https://raw.githubusercontent.com/hashicorp/terraform-google-terraform-enterprise-hvd/main/docs/deployment-customizations.md) doc for more details).
 
 3. Copy all of the Terraform files from your example scenario of choice into a new destination directory to create your Terraform configuration that will manage your TFE deployment. This is a common directory structure for managing multiple TFE deployments:
 
@@ -126,12 +126,12 @@ One of the following logging destinations:
 
 Below are links to docs pages related to deployment customizations as well as managing day 2 operations of your TFE instance.
 
-- [deployment-customizations.md](./docs/deployment-customizations.md)
-- [operations.md](./docs/operations.md)
-- [tfe-tls-cert-rotation.md](./docs/tfe-tls-cert-rotation.md)
-- [tfe-config-settings.md](./docs/tfe-config-settings.md)
-- [tfe-version-upgrades.md](./docs/tfe-version-upgrades.md)
-- [troubleshooting.md](./docs/troubleshooting.md)
+- [deployment-customizations.md](https://raw.githubusercontent.com/hashicorp/terraform-google-terraform-enterprise-hvd/main/docs/deployment-customizations.md)
+- [operations.md](https://raw.githubusercontent.com/hashicorp/terraform-google-terraform-enterprise-hvd/main/docs/operations.md)
+- [tfe-tls-cert-rotation.md](https://raw.githubusercontent.com/hashicorp/terraform-google-terraform-enterprise-hvd/main/docs/tfe-tls-cert-rotation.md)
+- [tfe-config-settings.md](https://raw.githubusercontent.com/hashicorp/terraform-google-terraform-enterprise-hvd/main/docs/tfe-config-settings.md)
+- [tfe-version-upgrades.md](https://raw.githubusercontent.com/hashicorp/terraform-google-terraform-enterprise-hvd/main/docs/tfe-version-upgrades.md)
+- [troubleshooting.md](https://raw.githubusercontent.com/hashicorp/terraform-google-terraform-enterprise-hvd/main/docs/troubleshooting.md)
 
 ---
 
