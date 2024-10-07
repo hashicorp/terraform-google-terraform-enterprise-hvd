@@ -58,7 +58,7 @@ One of the following logging destinations:
 
 1. Create/configure/validate the applicable [prerequisites](#prerequisites).
 
-2. Nested within the [examples](https://raw.githubusercontent.com/hashicorp/terraform-google-terraform-enterprise-hvd/main/examples/) directory are subdirectories containing ready-made Terraform configurations for example scenarios on how to call and deploy this module. To get started, choose the example scenario that most closely matches your requirements. You can customize your deployment later by adding additional module [inputs](#inputs) as you see fit (see the [Deployment-Customizations](https://raw.githubusercontent.com/hashicorp/terraform-google-terraform-enterprise-hvd/main/docs/deployment-customizations.md) doc for more details).
+2. Nested within the [examples](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/tree/main/examples/) directory are subdirectories containing ready-made Terraform configurations for example scenarios on how to call and deploy this module. To get started, choose the example scenario that most closely matches your requirements. You can customize your deployment later by adding additional module [inputs](#inputs) as you see fit (see the [Deployment-Customizations](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/tree/main/docs/deployment-customizations.md) doc for more details).
 
 3. Copy all of the Terraform files from your example scenario of choice into a new destination directory to create your Terraform configuration that will manage your TFE deployment. This is a common directory structure for managing multiple TFE deployments:
 
