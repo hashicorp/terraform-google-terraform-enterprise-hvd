@@ -126,12 +126,12 @@ One of the following logging destinations:
 
 Below are links to docs pages related to deployment customizations as well as managing day 2 operations of your TFE instance.
 
-- [deployment-customizations.md](https://raw.githubusercontent.com/hashicorp/terraform-google-terraform-enterprise-hvd/main/docs/deployment-customizations.md)
-- [operations.md](https://raw.githubusercontent.com/hashicorp/terraform-google-terraform-enterprise-hvd/main/docs/operations.md)
-- [tfe-tls-cert-rotation.md](https://raw.githubusercontent.com/hashicorp/terraform-google-terraform-enterprise-hvd/main/docs/tfe-tls-cert-rotation.md)
-- [tfe-config-settings.md](https://raw.githubusercontent.com/hashicorp/terraform-google-terraform-enterprise-hvd/main/docs/tfe-config-settings.md)
-- [tfe-version-upgrades.md](https://raw.githubusercontent.com/hashicorp/terraform-google-terraform-enterprise-hvd/main/docs/tfe-version-upgrades.md)
-- [troubleshooting.md](https://raw.githubusercontent.com/hashicorp/terraform-google-terraform-enterprise-hvd/main/docs/troubleshooting.md)
+- [deployment-customizations.md](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/tree/main/docs/deployment-customizations.md)
+- [operations.md](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/tree/main/docs/operations.md)
+- [tfe-tls-cert-rotation.md](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/tree/main/docs/tfe-tls-cert-rotation.md)
+- [tfe-config-settings.md](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/tree/main/docs/tfe-config-settings.md)
+- [tfe-version-upgrades.md](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/tree/main/docs/tfe-version-upgrades.md)
+- [troubleshooting.md](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/tree/main/docs/troubleshooting.md)
 
 ---
 
