@@ -1,23 +1,42 @@
 # TFE Version Upgrades
 
-TFE follows a monthly release cadence. See the [Terraform Enterprise Releases](https://developer.hashicorp.com/terraform/enterprise/releases) page for full details on the releases. Since we have bootstrapped and automated the TFE deployment and the TFE application data is decoupled from the compute (GCE) layer, the GCE instance(s) are stateless, ephemeral, and are treated as immutable. Therefore, the process of upgrading your TFE instance to a new version involves updating your Terraform code managing your TFE deployment to reflect the new version, applying the change via Terraform to update the TFE GCE Instance Template, and then replacing running GCE instance(s) within the Autoscaling Group.
+TFE follows a monthly release cadence. See the [Terraform Enterprise Releases](https://developer.hashicorp.com/terraform/enterprise/releases) page for full details on the releases. Since we have fully automated the deployment/installation of TFE, and the TFE application data is decoupled from the compute (GCE) layer; the GCE VM instance(s) are stateless, ephemeral, and are treated as immutable. Therefore, upgrading your TFE instance to a new version involves updating the Terraform configuration managing your TFE deployment to reflect the new (target) version. Once the change is applied via Terraform, this will update the TFE GCE instance template and managed instance group (MIG), triggering the replacement of the existing running TFE GCE VM instances with new ones, where the target version of TFE will be installed on the newly created instances.
 
 This module includes an input variable named `tfe_image_tag` that dictates which version of TFE is deployed.
 
 ## Procedure
 
- Here are the steps to follow:
+1. Determine your desired version of TFE from the [Terraform Enterprise Releases](https://developer.hashicorp.com/terraform/enterprise/releases) documentation page. The value that you need will be in the **Version** column of the table that is displayed. Ensure you are on the correct tab of the table based on the container runtime you have chosen for your deployment (Docker or Podman). When determing your target TFE version to upgrade to, be sure to check if there are any required releases to upgrade to first in between your current and target version (denoted by a `*` character in the table).
 
-1. Determine your desired version of TFE from the [Terraform Enterprise Releases](https://developer.hashicorp.com/terraform/enterprise/releases) page. The value that you need will be in the **Version** column of the table that is displayed. review the documentation found at <https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/admin/upgrade>.
+2. During a maintenance window, connect to one of your existing TFE GCE VM instances and gracefully drain the node(s) from being able to execute any new Terraform runs.
+   
+   Access the TFE command line (`tfectl`) with Docker:
 
-2. Out of precaution, generate a backup of your RDS/PostgreSQL database.
+   ```shell-session
+   sudo docker exec -it <tfe-container-name> bash
+   ```
 
-3. Update the value of the `tfe_image_tag` input variable within your `terraform.tfvars` file.
+   Access the TFE command line (`tfectl`) with Podman:
 
-```hcl
-  tfe_image_tag = "v202405-1"
-```
+   ```shell-session
+   sudo podman exec -it <tfe-container-name> bash
+   ```
 
-4. From within the directory managing your TFE deployment, run `terraform apply` to update the TFE GCE Instance Template.
+   Gracefully stop work on all nodes:
 
-5. During a maintenance window, terminate the running TFE GCE instance(s) which will trigger the Autoscaling Group to spawn new instance(s) from the latest version of the TFE GCE Instance Template. This process will effectively re-install TFE on the new instance(s), including the updated `tfe_image_tag` value.
+   ```shell-session
+   tfectl node drain --all
+   ```
+
+   For more details on the above commands, see the following documentation:
+
+    - [Access the TFE Command Line](https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/admin/admin-cli/cli-access)
+    - [Gracefully Stop Work on a Node](https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/admin/admin-cli/admin-cli#gracefully-stop-work-on-a-node)
+
+3. Update the value of the `tfe_image_tag` input variable within your `terraform.tfvars` file to your target TFE version.
+
+   ```hcl
+   tfe_image_tag = "v202410-1"
+   ```
+
+4. From the directory managing your TFE deployment, run `terraform apply` to update the TFE GCE instance template with the new target `tfe_image_tag` version. This will trigger the managed instance group to replace the existing running TFE GCE VM instance(s) with new ones, on which the target version of TFE will be installed.

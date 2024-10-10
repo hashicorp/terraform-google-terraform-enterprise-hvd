@@ -23,5 +23,11 @@ data "google_compute_network" "vpc" {
 }
 
 data "google_compute_subnetwork" "vm_subnet" {
-  name   = var.vm_subnet_name
+  name = var.vm_subnet_name
+}
+
+data "google_compute_subnetwork" "lb_subnet" {
+  count = var.lb_subnet_name != null ? 1 : 0
+  
+  name = var.lb_subnet_name
 }

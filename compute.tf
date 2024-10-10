@@ -17,15 +17,14 @@ locals {
 }
 
 #-----------------------------------------------------------------------------------
-# User-Data (cloud-init)
+# Metadata startup script
 #-----------------------------------------------------------------------------------
 locals {
+  tfe_startup_script_tpl = var.custom_tfe_startup_script_template != null ? "${path.cwd}/templates/${var.custom_tfe_startup_script_template}" : "${path.module}/templates/tfe_startup_script.sh.tpl"
   redis_port = var.redis_transit_encryption_mode == "SERVER_AUTHENTICATION" ? "6378" : "6379"
-  tfe_user_data_template = fileexists("${path.module}/templates/${var.tfe_user_data_template}") ? "${path.module}/templates/${var.tfe_user_data_template}" : "${path.cwd}/templates/${var.tfe_user_data_template}"
 
-  user_data_args = {
+  startup_script_args = {
     # Bootstrap
-    #gcp_region                        = var.region
     tfe_license_secret_id             = var.tfe_license_secret_id
     tfe_encryption_password_secret_id = var.tfe_encryption_password_secret_id
     tfe_tls_cert_secret_id            = var.tfe_tls_cert_secret_id
@@ -137,7 +136,11 @@ resource "google_compute_instance_template" "tfe" {
     subnetwork = data.google_compute_subnetwork.vm_subnet.self_link
   }
 
-  metadata_startup_script = templatefile("${local.tfe_user_data_template}", local.user_data_args)
+  metadata_startup_script = templatefile("${local.tfe_startup_script_tpl}", local.startup_script_args)
+
+  metadata = {
+    ssh-keys = var.gce_ssh_public_key
+  }
 
   service_account {
     scopes = ["cloud-platform"]
@@ -190,8 +193,8 @@ resource "google_compute_health_check" "tfe_auto_healing" {
   name                = "${var.friendly_name_prefix}-tfe-autohealing-health-check"
   check_interval_sec  = 30
   healthy_threshold   = 2
-  unhealthy_threshold = 7
-  timeout_sec         = 10
+  unhealthy_threshold = 5
+  timeout_sec         = 5
 
   https_health_check {
     port         = 443
@@ -206,7 +209,7 @@ resource "google_compute_firewall" "vm_allow_ingress_ssh_from_cidr" {
   count = var.cidr_allow_ingress_vm_ssh != null ? 1 : 0
 
   name        = "${var.friendly_name_prefix}-tfe-allow-ssh-from-cidr"
-  description = "Allow TCP/22 ingress to TFE GCE instances from specified CIDR ranges."
+  description = "Allow TCP/22 ingress to TFE GCE VM instances from specified CIDR ranges."
   network     = data.google_compute_network.vpc.self_link
   direction   = "INGRESS"
 
@@ -227,7 +230,7 @@ resource "google_compute_firewall" "vm_allow_ingress_ssh_from_iap" {
   count = var.allow_ingress_vm_ssh_from_iap ? 1 : 0
   
   name        = "${var.friendly_name_prefix}-tfe-allow-ssh-from-iap"
-  description = "Allow TCP/22 ingress to TFE GCE instances from IAP."
+  description = "Allow TCP/22 ingress to TFE GCE VM instances from IAP."
   network     = data.google_compute_network.vpc.self_link
   direction   = "INGRESS"
 
@@ -248,7 +251,7 @@ resource "google_compute_firewall" "vm_allow_tfe_443" {
   count = var.cidr_allow_ingress_tfe_443 != null ? 1 : 0
   
   name        = "${var.friendly_name_prefix}-tfe-allow-443"
-  description = "Allow TCP/443 (HTTPS) ingress to TFE GCE instances from specified CIDR ranges."
+  description = "Allow TCP/443 (HTTPS) ingress to TFE GCE VM instances from specified CIDR ranges."
   network     = data.google_compute_network.vpc.self_link
   direction   = "INGRESS"
 
@@ -272,7 +275,7 @@ locals {
 
 resource "google_compute_firewall" "vm_allow_lb_health_checks_443" {
   name        = "${var.friendly_name_prefix}-tfe-allow-lb-health-checks-443"
-  description = "Allow TCP/443 (HTTPS) inbound to TFE GCE instances from GCP load balancer health probe source CIDR blocks."
+  description = "Allow TCP/443 (HTTPS) inbound to TFE GCE VM instances from GCP load balancer health probe source CIDR blocks."
   network     = data.google_compute_network.vpc.self_link
   direction   = "INGRESS"
 
@@ -293,13 +296,13 @@ resource "google_compute_firewall" "vm_tfe_self_allow" {
   count = var.tfe_operational_mode == "active-active" ? 1 : 0
   
   name        = "${var.friendly_name_prefix}-tfe-self-allow"
-  description = "Allow TFE GCE instances to communicate with each other over TCP/8201 (Vault cluster) when TFE operational mode is active-active."
+  description = "Allow TFE GCE VM instances to communicate with each other over TCP/8201 (Vault cluster) when TFE operational mode is active-active."
   network     = data.google_compute_network.vpc.self_link
   direction   = "INGRESS"
 
   allow {
     protocol = "tcp"
-    ports    = [443, 8201]
+    ports    = [8201]
   }
 
   source_tags = ["tfe-vm"]
@@ -314,7 +317,7 @@ resource "google_compute_firewall" "vm_allow_tfe_metrics_from_cidr" {
   count = var.tfe_metrics_enable && var.cidr_allow_ingress_tfe_metrics != null ? 1 : 0
 
   name        = "${var.friendly_name_prefix}-tfe-allow-metrics"
-  description = "Allow TCP/9090 (HTTP) and 9091 (HTTPS) or specified ports ingress to TFE metrics endpoints on TFE GCE instances from specified CIDR ranges."
+  description = "Allow TCP/9090 (HTTP) and 9091 (HTTPS) or specified ports ingress to TFE metrics endpoints on TFE GCE VM instances from specified CIDR ranges."
   network     = data.google_compute_network.vpc.self_link
   direction   = "INGRESS"
 
@@ -334,8 +337,8 @@ resource "google_compute_firewall" "vm_allow_tfe_metrics_from_cidr" {
 # resource "google_compute_firewall" "vm_allow_tfe_metrics_from_tags" {
 #   count = var.tfe_metrics_enable ? 1 : 0
 
-#   name        = "${var.friendly_name_prefix}-tfe-firewall-prometheus-allow"
-#   description = "Allow prometheus traffic ingress to TFE instances in ${data.google_compute_network.vpc.name} from specified tag."
+#   name        = "${var.friendly_name_prefix}-tfe-allow-metrics"
+#   description = "Allow TCP/9090 (HTTP) and 9091 (HTTPS) or specified ports ingress to TFE metrics endpoints on TFE GCE VM instances from specified network tags."
 #   network     = data.google_compute_network.vpc.self_link
 #   direction   = "INGRESS"
 
@@ -344,7 +347,7 @@ resource "google_compute_firewall" "vm_allow_tfe_metrics_from_cidr" {
 #     ports    = [9090, 9091]
 #   }
 
-#   source_tags = ["tfe-monitoring"]
+#   source_tags = var.tfe_monitoring_source_network_tags
 #   target_tags = ["tfe-vm"]
 
 #   log_config {

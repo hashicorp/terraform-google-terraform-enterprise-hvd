@@ -27,7 +27,7 @@ cidr_allow_ingress_tfe_443    = ["0.0.0.0/0"] # CIDR ranges of TFE users/clients
 allow_ingress_vm_ssh_from_iap = true
 
 # --- DNS (optional) --- #
-create_cloud_dns_record     = <true>
+create_tfe_cloud_dns_record = <true>
 cloud_dns_managed_zone_name = "<google-cloud-dns-zone-name>"
 
 # --- Compute --- #

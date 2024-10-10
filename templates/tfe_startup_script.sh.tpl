@@ -549,16 +549,16 @@ function pull_tfe_image {
 
 function exit_script {
   if [[ "$1" == 0 ]]; then
-    log "INFO" "tfe_user_data script finished successfully!"
+    log "INFO" "tfe_startup_script finished successfully!"
   else
-    log "ERROR" "tfe_user_data script finished with error code $1."
+    log "ERROR" "tfe_startup_script finished with error code $1."
   fi
 
   exit "$1"
 }
 
 function main {
-  log "INFO" "Beginning TFE user_data script."
+  log "INFO" "Beginning TFE metadata_startup_script."
   log "INFO" "Determining Linux operating system distro..."
   OS_DISTRO=$(detect_os_distro)
   log "INFO" "Detected Linux OS distro is '$OS_DISTRO'."
@@ -579,13 +579,6 @@ function main {
   else
     install_docker "$OS_DISTRO" "$OS_MAJOR_VERSION"
   fi
-
-  # check if still needed
-  # if [[ "$OS_DISTRO" == "rhel" ]]; then
-  #   log "INFO" "Resizing '/' and '/var' partitions for RHEL."
-  #   lvresize -r -L +8G /dev/mapper/rootvg-rootlv
-  #   lvresize -r -L +32G /dev/mapper/rootvg-varlv
-  # fi
 
   log "INFO" "Retrieving TFE_LICENSE..."
   TFE_LICENSE=$(retrieve_secret_from_gcp_sm "${tfe_license_secret_id}")

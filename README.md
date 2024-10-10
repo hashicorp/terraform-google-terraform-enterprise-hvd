@@ -1,6 +1,6 @@
 # Terraform Enterprise HVD on GCP GCE
 
-Terraform module aligned with HashiCorp Validated Designs (HVD) to deploy Terraform Enterprise (TFE) on Google Cloud Platform (GCP) using Compute Engine instances with a container runtime. This module defaults to deploying TFE in the `active-active` [operational mode](https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/operation-modes), but `external` is also supported. Docker is currently the only supported container runtime, but Podman support is being added.
+Terraform module aligned with HashiCorp Validated Designs (HVD) to deploy Terraform Enterprise (TFE) on Google Cloud Platform (GCP) using Compute Engine instances with a container runtime. This module defaults to deploying TFE in the `active-active` [operational mode](https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/operation-modes), but `external` is also supported. Docker and Podman are the supported container runtimes.
 
 ![TFE on Google](https://raw.githubusercontent.com/hashicorp/terraform-google-terraform-enterprise-hvd/main/docs/images/architecture-logical-active-active.png)
 
@@ -14,46 +14,55 @@ Terraform module aligned with HashiCorp Validated Designs (HVD) to deploy Terraf
 - General understanding of how to use GCP
 - `git` CLI and Visual Studio Code editor installed on workstations are strongly recommended
 - GCP projeect that TFE will be deployed in with permissions to provision these [resources](#resources) via Terraform CLI
-- (Optional) GCP GCS bucket for [GCS remote state backend](https://developer.hashicorp.com/terraform/language/settings/backends/gcs) that will be used to manage the Terraform state of this TFE deployment (out-of-band from the TFE application) via Terraform CLI (Community Edition)
+- (Optional) GCP GCS bucket for [GCS remote state backend](https://developer.hashicorp.com/terraform/language/settings/backends/gcs) that will be used to manage the Terraform state file for this TFE deployment (out-of-band from the TFE application) via Terraform CLI (Community Edition)
 
 ### Networking
 
-- GCP network VPC and the following subnets:
-  - Load balancer subnetwork IDS (can be the same as Compute Engine (CE) subnets if desirable).
-- (Optional) GCS VPC Endpoint configured within VPC.
-- (Optional) GCS Hosted Zone for TFE DNS record creation.
-- Security groups. This module will create the:
-  - necessary security groups and attach them to the applicable resources.
-  - service accounts and assign them access to the provided secrets
-  - firewall entries.
-  - Ensure the [TFE ingress requirements](https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/requirements/network#ingress) are met.
-  - Ensure the [TFE egress requirements](https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/requirements/network#egress) are met.
+- GCP VPC network with the following:
+  - VM subnet for TFE GCE instances to reside with Private Google Access enabled (refer to the [prereqs reference](./docs/prereqs.md#vm-subnet-with-private-google-access) for more details)
+  - (Optional) Load balancer subnet (can be the same as VM subnet if desired; only used when `lb_is_internal` is `true`)
+  - Private Service Access (PSA) configured in VPC network for service `servicenetworking.googleapis.com` (refer to the [prereqs reference](./docs/prereqs.md#private-service-access-psa) for more details)
+- Chosen fully qualified domain name (FQDN) for your TFE instance (_e.g._ `tfe.gcp.example.com`)
+- (Optional) Google Cloud DNS zone for optional TFE DNS record creation
 
-### Secrets Manager
+#### Firewall rules
 
-GCP Secrets Manager "TFE bootstrap" secrets:
-  - **TFE license file** - raw contents of file stored as a plaintext secret.
-  - **TFE encryption password** - random characters stored as plaintext secret.
-  - **RDS (PostgreSQL) database password** - random characters stored as plaintext secret.
-  - (Optional) **Redis password** - random characters stored as a plaintext secret.
-  - **TFE TLS certificate** - file in PEM format, base64-encoded into a string, and stored as a plaintext secret.
-  - **TFE TLS certificate private key** - file in PEM format, base64-encoded into a string, and stored as a plaintext secret.
-  - **TLS CA bundle** - file in PEM format, base64-encoded into a string, and stored as a plaintext secret.
+This module will automatically create the necessary firewall rules within the existing VPC network that you provide.
+
+- Identify CIDR range(s) that will need to access the TFE application (managed via [cidr_allow_ingress_tfe_443](#input_cidr_allow_ingress_tfe_443) input variable)
+- (Optional) Identity CIDR range(s) of monitoring tools that will need to access TFE metrics endpoint (managed via [cidr_allow_ingress_tfe_metrics](#input_cidr_allow_ingress_tfe_metrics) input variable)
+- Be familiar with the [TFE ingress requirements](https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/requirements/network#ingress)
+- Be familiar with the [TFE egress requirements](https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/requirements/network#egress)
+
+### Secrets management
+
+The following _bootstrap_ secrets stored in Google Secret Manager in order to boostrap the TFE deployment and installation:
+
+- **TFE license file** - raw contents of license file (_e.g._ `cat terraform.hclic`)
+- **TFE encryption password** - random characters (used to protect TFE's internally-managed Vault unseal key and root token)
+- **TFE (PostgreSQL) database password** - random characters between 8 and 99 characters in length; must contain at least one uppercase letter, one lowercase letter, and one digit or special character
+- **TFE TLS certificate** - certificate file in PEM format, base64-encoded into a string, and stored as a secret
+- **TFE TLS certificate private key** - private key file in PEM format, base64-encoded into a string, and stored as a secret
+- **TFE TLS CA bundle** - Ca bundle file in PEM format, base64-encoded into a string, and stored as a secret
+
+Refer to the [prereqs reference](./docs/prereqs.md#tfe-bootstrap-secrets) for more details on how the secrets should be created and stored.
 
 ### Compute
 
 One of the following mechanisms for shell access to TFE GCE VM instances:
 
-  - Ability to enable [GCP IAP](https://cloud.google.com/iap/docs/using-tcp-forwarding#console) (this module supports this via a boolean input variable).
- -  GC SSH Key Pair
+- Ability to enable [IAP TCP forwarding](https://cloud.google.com/iap/docs/using-tcp-forwarding#console) (enabled by default - managed via [allow_ingress_vm_ssh_from_iap](#input_allow_ingress_vm_ssh_from_iap))
+-  GCE SSH key pair (use this if you do not want to SSH via IAP TCP forwarding)
 
-### Log Forwarding (optional)
+### Log forwarding (optional)
 
 One of the following logging destinations:
-  - Stackdriver
-  - A custom fluent bit configuration that will forward logs to custom destination.
+
+- Stackdriver (no action needed)
+- A custom Fluent Bit configuration that will forward logs to your custom log destination
 
 ---
+
 ## Usage
 
 1. Create/configure/validate the applicable [prerequisites](#prerequisites).
@@ -81,9 +90,9 @@ One of the following logging destinations:
 
     >📝 Note: In this example, the user will have two separate TFE deployments; one for their `sandbox` environment, and one for their `production` environment. This is recommended, but not required.
 
-4. (Optional) Uncomment and update the  [GCS remote state backend](https://developer.hashicorp.com/terraform/language/settings/backends/gcs)  configuration provided in the `backend.tf` file with your own custom values. While this step is highly recommended, it is technically not required to use a remote backend config for your TFE deployment.
+4. (Optional) Uncomment and update the  [GCS remote state backend](https://developer.hashicorp.com/terraform/language/settings/backends/gcs) configuration provided in the `backend.tf` file with your own custom values. While this step is highly recommended, it is technically not required to use a remote backend config for your TFE deployment.
 
-5. Populate your own custom values into the `terraform.tfvars.example` file that was provided, and remove the `.example` file extension such that the file is now named `terraform.tfvars`.
+5. Populate your own custom values into the `terraform.tfvars.example` file that was provided (in particular, values enclosed in the `<>` characters). Then, remove the `.example` file extension such that the file is now named `terraform.tfvars`.
 
 6. Navigate to the directory of your newly created Terraform configuration for your TFE deployment, and run `terraform init`, `terraform plan`, and `terraform apply`.
 
@@ -91,47 +100,44 @@ One of the following logging destinations:
 
    Higher-level logs:
 
-   ```sh
+   ```shell-session
    tail -f /var/log/tfe-cloud-init.log
    ```
 
    Lower-level logs:
 
-   ```sh
+   ```shell-session
    journalctl -xu google-startup-scripts -f
    ```
 
    >📝 Note: The `-f` argument is to follow the logs as they append in real-time, and is optional. You may remove the `-f` for a static view.
 
-   The log files should display the following message after the cloud-init (user_data) script finishes successfully:
+   The log files should display the following message after the startup script (_tfe_startup_script.sh_) finishes successfully:
 
-   ```sh
-   [INFO] tfe_user_data script finished successfully!
+   ```shell-session
+   [INFO] - tfe_startup_script finished successfully!
    ```
 
-8. After the cloud-init (user_data) script finishes successfully, while still connected to the TFE CE instance shell, you can check the health status of TFE:
+8. After the startup script (_tfe_startup_script.sh_) finishes successfully, while still connected to the TFE GCE instance shell, you can check the health status of TFE:
 
-   ```sh
+   ```shell-session
    cd /etc/tfe
-   sudo docker compose exec terraform-enterprise tfe-health-check-status
+   sudo docker compose exec tfe tfe-health-check-status
    ```
 
-9. Follow the steps to [here](https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/initial-admin-user) to create the TFE initial admin user.
-
-- the module includes outputs for the initial admin user token retrieval.
+9. Follow the steps [here](https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/initial-admin-user) to create the TFE initial admin user.
 
 ---
 
 ## Docs
 
-Below are links to docs pages related to deployment customizations as well as managing day 2 operations of your TFE instance.
+Below are links to various docs related to the customization and management of your TFE deployment:
 
-- [deployment-customizations.md](./docs/deployment-customizations.md)
-- [operations.md](./docs/operations.md)
-- [tfe-tls-cert-rotation.md](./docs/tfe-tls-cert-rotation.md)
-- [tfe-config-settings.md](./docs/tfe-config-settings.md)
-- [tfe-version-upgrades.md](./docs/tfe-version-upgrades.md)
-- [troubleshooting.md](./docs/troubleshooting.md)
+- [Deployment Customizations](./docs/deployment-customizations.md)
+- [Prereqs Reference](./docs/prereqs.md)
+- [TFE TLS Certificate Rotation](./docs/tfe-cert-rotation.md)
+- [TFE Configuration Settings](./docs/tfe-config-settings.md)
+- [TFE Version Upgrades](./docs/tfe-version-upgrades.md)
 
 ---
 

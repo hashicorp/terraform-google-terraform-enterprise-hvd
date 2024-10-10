@@ -16,8 +16,8 @@ resource "google_compute_address" "tfe_frontend_lb" {
   description  = "Static IP to associate with TFE load balancer forwarding rule (front end)."
   address_type = var.lb_is_internal ? "INTERNAL" : "EXTERNAL"
   network_tier = var.lb_is_internal ? null : "PREMIUM"
-  subnetwork   = var.lb_is_internal ? data.google_compute_subnetwork.vm_subnet.self_link : null
-  address      = var.lb_is_internal ? var.lb_static_ip_address : null 
+  subnetwork   = var.lb_is_internal ? data.google_compute_subnetwork.lb_subnet[0].self_link : null
+  address      = var.lb_is_internal ? var.lb_static_ip_address : null
 }
 
 resource "google_compute_forwarding_rule" "tfe_frontend_lb" {
@@ -27,7 +27,7 @@ resource "google_compute_forwarding_rule" "tfe_frontend_lb" {
   load_balancing_scheme = var.lb_is_internal ? "INTERNAL" : "EXTERNAL"
   ports                 = [443]
   network               = var.lb_is_internal ? data.google_compute_network.vpc.self_link : null
-  subnetwork            = var.lb_is_internal ? data.google_compute_subnetwork.vm_subnet.self_link : null
+  subnetwork            = var.lb_is_internal ? data.google_compute_subnetwork.lb_subnet[0].self_link : null
   ip_address            = google_compute_address.tfe_frontend_lb.address
 }
 
@@ -43,7 +43,7 @@ resource "google_compute_region_backend_service" "tfe_backend_lb" {
     description    = "TFE ${local.lb_name_suffix} regional backend service."
     group          = google_compute_region_instance_group_manager.tfe.instance_group
     balancing_mode = "CONNECTION"
-    failover       = false 
+    failover       = false
   }
 
   health_checks = [google_compute_region_health_check.tfe_backend_lb.self_link]

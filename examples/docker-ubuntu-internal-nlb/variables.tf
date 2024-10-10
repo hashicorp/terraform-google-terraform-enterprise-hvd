@@ -26,7 +26,7 @@ variable "friendly_name_prefix" {
 
 variable "common_labels" {
   type        = map(string)
-  description = "Common labels to apply to all GCP resources."
+  description = "Map of common labels to apply to all GCP resources."
   default     = {}
 }
 
@@ -66,20 +66,20 @@ variable "tfe_encryption_password_secret_id" {
 
 variable "tfe_image_repository_url" {
   type        = string
-  description = "Repository of the TFE container image. Only set this if you are hosting the TFE container image in your own custom repository."
+  description = "URL of container registry where the TFE container image is hosted. Only set this away from the default if you are hosting the TFE container image in your own custom registry."
   default     = "images.releases.hashicorp.com"
 }
 
 variable "tfe_image_name" {
   type        = string
-  description = "Name of the TFE container image. Only set this if you are hosting the TFE container image in your own custom repository."
+  description = "Name of the TFE container image. Only set this away from the default if you are hosting the TFE container image in your own custom registry."
   default     = "hashicorp/terraform-enterprise"
 }
 
 variable "tfe_image_tag" {
   type        = string
-  description = "Tag for the TFE container image. This represents the version of TFE to deploy."
-  default     = "v202409-2"
+  description = "Tag (release) for the TFE container image. This represents which version (release) of TFE to deploy."
+  default     = "v202409-3"
 }
 
 variable "tfe_image_repository_username" {
@@ -90,7 +90,7 @@ variable "tfe_image_repository_username" {
 
 variable "tfe_image_repository_password" {
   type        = string
-  description = "Pasword for container registry where TFE container image is hosted. Leave as `null` if using the default TFE registry as the default password is your TFE license file."
+  description = "Pasword for container registry where TFE container image is hosted. Leave as `null` if using the default TFE registry, as the default password is your TFE license file."
   default     = null
 
   validation {
@@ -104,7 +104,7 @@ variable "tfe_image_repository_password" {
 #------------------------------------------------------------------------------
 variable "tfe_fqdn" {
   type        = string
-  description = "Fully qualified domain name (FQDN) of TFE instance. This name should resolve to the load balancer IP address and will be what users/clients use to access TFE."
+  description = "Fully qualified domain name (FQDN) of TFE instance. This name should resolve to the TFE load balancer IP address and will be what users/clients use to access TFE."
 }
 
 variable "tfe_operational_mode" {
@@ -172,7 +172,7 @@ variable "tfe_usage_reporting_opt_out" {
 
 variable "tfe_run_pipeline_image" {
   type        = string
-  description = "Name of container image used to execute Terraform runs on a TFE node. Leave as `null` to use the default that ships with TFE."
+  description = "Name of container image used to execute Terraform runs on a TFE node. Leave as `null` to use the default agent that ships with TFE."
   default     = null
 }
 
@@ -208,18 +208,13 @@ variable "tfe_vault_disable_mlock" {
 
 variable "tfe_hairpin_addressing" {
   type        = bool
-  description = "Boolean to enable hairpin addressing witin TFE for loopback prevention with a layer 4 load balancer. Must be `true` when `lb_is_internal` is `true`."
+  description = "Boolean to enable hairpin addressing within TFE container networking for loopback prevention with a layer 4 internal load balancer."
   default     = true
-
-  validation {
-    condition     = var.lb_is_internal ? var.tfe_hairpin_addressing : true
-    error_message = "Value must be `true` when `lb_is_internal` is `true`."
-  }
 }
 
 variable "tfe_run_pipeline_docker_network" {
   type        = string
-  description = "Docker network where the containers that execute Terraform runs will be created. The network must already exist, it will not be created automatically. Leave as `null` to use the default network created during the TFE installation."
+  description = "Name of Docker network where the containers that execute Terraform runs (agents) will be created. The network must already exist, it will not be created automatically. Leave as `null` to use the default network created during the TFE installation."
   default     = null
 }
 
@@ -231,7 +226,7 @@ variable "tfe_iact_subnets" {
 
 variable "tfe_iact_time_limit" {
   type        = number
-  description = "Number of minutes that the TFE initial admin creation token can be retrieved via the API after the application starts. Defaults to `60`."
+  description = "Number of minutes that the TFE initial admin creation token can be retrieved via the API after the application starts."
   default     = 60
 }
 
@@ -255,27 +250,37 @@ variable "vpc_network_project_id" {
   default     = null
 }
 
+variable "lb_subnet_name" {
+  type        = string
+  description = "Name of VPC subnet to deploy TFE load balancer in. This can be the same subnet as the VM subnet if you do not wish to provide a separate subnet for the load balancer. Only applicable when `lb_is_internal` is `true`. Must be `null` when `lb_is_internal` is `false`."
+  default     = null
+
+  validation {
+    condition     = !var.lb_is_internal ? var.lb_subnet_name == null : true
+    error_message = "Value must be `null` when `lb_is_internal` is `false`."
+  }
+}
+
 variable "vm_subnet_name" {
   type        = string
-  description = "Name of VPC subnet to deploy TFE managed instance group (GCE instances) in."
-}
-
-variable "http_proxy" {
-  type        = string
-  description = "Proxy address to configure for TFE to use for outbound connections."
-  default     = null
-}
-
-variable "extra_no_proxy" {
-  type        = string
-  description = "A comma-separated string of hostnames or IP addresses to append to TFE no_proxy list."
-  default     = null
+  description = "Name of VPC subnet to deploy TFE GCE VM instances in."
 }
 
 variable "lb_is_internal" {
   type        = bool
   description = "Boolean to create an internal GCP load balancer for TFE."
   default     = true
+}
+
+variable "lb_static_ip_address" {
+  type        = string
+  description = "Static IP address to assign to TFE load balancer forwarding rule (front end) when `lb_is_internal` is `true`. Must be a valid IP address within `vm_subnet_name`. If not set, an available IP address will automatically be selected."
+  default     = null
+
+  validation {
+    condition     = !var.lb_is_internal ? var.lb_static_ip_address == null : true
+    error_message = "Value must be `null` when `lb_is_internal` is `false`. This setting is for internal load balancers only."
+  }
 }
 
 variable "cidr_allow_ingress_tfe_443" {
@@ -323,33 +328,6 @@ variable "cloud_dns_managed_zone_name" {
 }
 
 #------------------------------------------------------------------------------
-# KMS customer managed encryption keys (CMEK)
-#------------------------------------------------------------------------------
-variable "postgres_kms_keyring_name" {
-  type        = string
-  description = "Name of Cloud KMS Key Ring that contains KMS key to use for Cloud SQL for PostgreSQL. Geographic location (region) of key ring must match the location of the TFE Cloud SQL for PostgreSQL database instance."
-  default     = null
-}
-
-variable "postgres_kms_cmek_name" {
-  type        = string
-  description = "Name of Cloud KMS customer managed encryption key (CMEK) to use for Cloud SQL for PostgreSQL database instance."
-  default     = null
-}
-
-variable "gcs_kms_keyring_name" {
-  type        = string
-  description = "Name of Cloud KMS key ring that contains KMS customer managed encryption key (CMEK) to use for TFE GCS bucket encryption. Geographic location (region) of the key ring must match the location of the TFE GCS bucket."
-  default     = null
-}
-
-variable "gcs_kms_cmek_name" {
-  type        = string
-  description = "Name of Cloud KMS customer managed encryption key (CMEK) to use for TFE GCS bucket encryption."
-  default     = null
-}
-
-#------------------------------------------------------------------------------
 # Compute
 #------------------------------------------------------------------------------
 variable "container_runtime" {
@@ -371,27 +349,32 @@ variable "docker_version" {
 
 variable "gce_image_project" {
   type        = string
-  description = "ID of project in which the GCE VM image belongs."
+  description = "ID of project in which the TFE GCE VM image belongs."
   default     = "ubuntu-os-cloud"
 }
 
 variable "gce_image_name" {
   type        = string
   description = "VM image for TFE GCE instances."
-  default     = "ubuntu-2404-noble-amd64-v20240607"
+  default     = "ubuntu-pro-2404-noble-amd64-v20241004"
 }
 
 variable "gce_machine_type" {
   type        = string
-  description = "Type (size) of TFE GCE instances. Default `n2-standard-4` from https://cloud.google.com/compute/docs/machine-resource."
+  description = "Machine type (size) of TFE GCE VM instances."
   default     = "n2-standard-4"
-  # regional dependancy https://gcloud-compute.com/n2-standard-4.html
 }
 
 variable "gce_disk_size_gb" {
   type        = number
-  description = "Size in Gigabytes of root disk of TFE GCE instances."
+  description = "Size in gigabytes of root disk of TFE GCE VM instances."
   default     = 50
+}
+
+variable "gce_ssh_public_key" {
+  type        = string
+  description = "SSH public key to add to TFE GCE VM instances for SSH access. Generally not needed if using Google IAP for SSH."
+  default     = null
 }
 
 variable "mig_instance_count" {
@@ -411,14 +394,14 @@ variable "mig_initial_delay_sec" {
   default     = 900
 }
 
-variable "tfe_user_data_template" {
+variable "custom_tfe_startup_script_template" {
   type        = string
-  description = "File name for user_data_template.sh.tpl file in `./templates folder` no path required"
-  default     = "tfe_user_data.sh.tpl"
-  
+  description = "Name of custom TFE startup script template file. File must exist within a directory named `./templates` within your current working directory."
+  default     = null
+
   validation {
-    condition     = can(fileexists("../../templates/${var.tfe_user_data_template}") || fileexists("./templates/${var.tfe_user_data_template}"))
-    error_message = "File `./templates/${var.tfe_user_data_template}` not found or not readable"
+    condition     = var.custom_tfe_startup_script_template != null ? fileexists("${path.cwd}/templates/${var.custom_tfe_startup_script_template}") : true
+    error_message = "File not found. Ensure the file exists within a directory named `./templates` within your current working directory."
   }
 }
 
@@ -543,18 +526,6 @@ variable "postgres_insights_config" {
   }
 }
 
-# variable "postgres_kms_keyring_name" {
-#   type        = string
-#   description = "Name of Cloud KMS Key Ring that contains KMS key to use for Cloud SQL for PostgreSQL. Geographic location (region) of key ring must match the location of the TFE Cloud SQL for PostgreSQL database instance."
-#   default     = null
-# }
-
-# variable "postgres_kms_cmek_name" {
-#   type        = string
-#   description = "Name of Cloud KMS customer managed encryption key (CMEK) to use for Cloud SQL for PostgreSQL database instance."
-#   default     = null
-# }
-
 #------------------------------------------------------------------------------
 # Google Cloud Storage (GCS) bucket
 #------------------------------------------------------------------------------
@@ -565,7 +536,7 @@ variable "gcs_location" {
 
   validation { 
     condition     = var.gcs_storage_class == "MULTI_REGIONAL" ? contains(["US", "EU", "ASIA"], var.gcs_location) : true
-    error_message = "Value must be one of `US`, `EU`, `ASIA` when `gcs_storage_class` is `MULTI_REGIONAL`."
+    error_message = "Supported values are 'US', 'EU', and 'ASIA' when `gcs_storage_class` is `MULTI_REGIONAL`."
  }
 }
 
@@ -596,12 +567,6 @@ variable "gcs_versioning_enabled" {
 #------------------------------------------------------------------------------
 # Redis
 #------------------------------------------------------------------------------
-variable "enable_active_active" {
-  type        = bool
-  description = "Boolean indicating whether to deploy TFE in the Active:Active architecture using external Redis."
-  default     = false
-}
-
 variable "redis_tier" {
   type        = string
   description = "The service tier of the Redis instance. Set to `STANDARD_HA` for high availability."
@@ -611,7 +576,7 @@ variable "redis_tier" {
 variable "redis_version" {
   type        = string
   description = "The version of Redis software."
-  default     = "REDIS_6_X"
+  default     = "REDIS_7_2"
 }
 
 variable "redis_memory_size_gb" {
@@ -628,8 +593,13 @@ variable "redis_auth_enabled" {
 
 variable "redis_transit_encryption_mode" {
   type        = string
-  description = "Boolean to enable TLS for Redis instance."
+  description = "Determines transit encryption (TLS) mode for Redis instance."
   default     = "DISABLED"
+
+  validation {
+    condition     = var.redis_transit_encryption_mode == "SERVER_AUTHENTICATION" || var.redis_transit_encryption_mode == "DISABLED"
+    error_message = "Value must either be 'SERVER_AUTHENTICATION' or 'DISABLED'."
+  }
 }
 
 variable "redis_connect_mode" {
@@ -638,10 +608,48 @@ variable "redis_connect_mode" {
   default     = "PRIVATE_SERVICE_ACCESS"
 
   validation {
-    condition = contains(["PRIVATE_SERVICE_ACCESS", "DIRECT_PEERING"], var.redis_connect_mode)
-    #condition     = var.redis_connect_mode == "PRIVATE_SERVICE_ACCESS" || var.redis_connect_mode == "DIRECT_PEERING"
-    error_message = "Invalid value for redis_connect_mode. Allowed values are 'PRIVATE_SERVICE_ACCESS' or 'DIRECT_PEERING'."
+    condition     = var.redis_connect_mode == "PRIVATE_SERVICE_ACCESS" || var.redis_connect_mode == "DIRECT_PEERING"
+    error_message = "Invalid value. Valid values are 'PRIVATE_SERVICE_ACCESS' or 'DIRECT_PEERING'."
   }
+}
+
+#------------------------------------------------------------------------------
+# KMS customer managed encryption keys (CMEK)
+#------------------------------------------------------------------------------
+variable "postgres_kms_keyring_name" {
+  type        = string
+  description = "Name of Cloud KMS Key Ring that contains KMS key to use for Cloud SQL for PostgreSQL. Geographic location (region) of key ring must match the location of the TFE Cloud SQL for PostgreSQL database instance."
+  default     = null
+}
+
+variable "postgres_kms_cmek_name" {
+  type        = string
+  description = "Name of Cloud KMS customer managed encryption key (CMEK) to use for Cloud SQL for PostgreSQL database instance."
+  default     = null
+}
+
+variable "gcs_kms_keyring_name" {
+  type        = string
+  description = "Name of Cloud KMS key ring that contains KMS customer managed encryption key (CMEK) to use for TFE GCS bucket encryption. Geographic location (region) of the key ring must match the location of the TFE GCS bucket."
+  default     = null
+}
+
+variable "gcs_kms_cmek_name" {
+  type        = string
+  description = "Name of Cloud KMS customer managed encryption key (CMEK) to use for TFE GCS bucket encryption."
+  default     = null
+}
+
+variable "redis_kms_keyring_name" {
+  type        = string
+  description = "Name of Cloud KMS key ring that contains KMS customer managed encryption key (CMEK) to use for TFE Redis instance. Geographic location (region) of key ring must match the location of the TFE Redis instance."
+  default     = null
+}
+
+variable "redis_kms_cmek_name" {
+  type        = string
+  description = "Name of Cloud KMS customer managed encryption key (CMEK) to use for TFE Redis instance."
+  default     = null
 }
 
 #------------------------------------------------------------------------------
@@ -668,13 +676,4 @@ variable "custom_fluent_bit_config" {
   type        = string
   description = "Custom Fluent Bit configuration for log forwarding. Only valid when `tfe_log_forwarding_enabled` is `true` and `log_fwd_destination_type` is `custom`."
   default     = null
-}
-
-#------------------------------------------------------------------------------
-# Verbose
-#------------------------------------------------------------------------------
-variable "verbose_template" {
-  type        = bool
-  description = "Enables the user_data template to be output in full for debug and review purposes."
-  default     = false
 }
