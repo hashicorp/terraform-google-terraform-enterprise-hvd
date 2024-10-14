@@ -46,8 +46,9 @@ module "tfe" {
 
   # --- Networking --- #
   vpc_network_name              = var.vpc_network_name
+  lb_is_internal                = var.lb_is_internal
+  lb_subnet_name                = var.lb_subnet_name
   vm_subnet_name                = var.vm_subnet_name
-  lb_is_internal                = var.lb_is_internal 
   cidr_allow_ingress_tfe_443    = var.cidr_allow_ingress_tfe_443
   allow_ingress_vm_ssh_from_iap = var.allow_ingress_vm_ssh_from_iap
 

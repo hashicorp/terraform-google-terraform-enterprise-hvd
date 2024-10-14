@@ -16,7 +16,7 @@ resource "random_id" "postgres_instance_suffix" {
 }
 
 resource "google_sql_database_instance" "tfe" {
-  name                = "${var.friendly_name_prefix}-tfe-pg-${random_id.postgres_instance_suffix.hex}"
+  name                = "${var.friendly_name_prefix}-tfe-postgres-${random_id.postgres_instance_suffix.hex}"
   database_version    = var.postgres_version
   encryption_key_name = var.postgres_kms_cmek_name != null ? data.google_kms_crypto_key.postgres_cmek[0].id: null 
   deletion_protection = var.postgres_deletetion_protection

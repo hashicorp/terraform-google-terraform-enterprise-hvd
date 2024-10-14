@@ -20,10 +20,11 @@ tfe_fqdn      = "<tfe.gcp.example.com>"
 tfe_image_tag = "<v202409-3>"
 
 # --- Networking --- #
-vpc_network_name              = "<vpc-network-name>"
-vm_subnet_name                = "<vm-subnet-name>"
+vpc_network_name              = "<tfe-vpc-network-name>"
 lb_is_internal                = true
-cidr_allow_ingress_tfe_443    = ["0.0.0.0/0"] # CIDR ranges of TFE users/clients, VCS, and other tooling that will access TFE
+lb_subnet_name                = "<tfe-lb-subnet-name>" # can be the same as VM subnet if desired
+vm_subnet_name                = "<tfe-vm-subnet-name>"
+cidr_allow_ingress_tfe_443    = ["<0.0.0.0/0>"] # CIDR ranges of TFE users/clients, VCS, and other tooling that will access TFE
 allow_ingress_vm_ssh_from_iap = true
 
 # --- DNS (optional) --- #
@@ -37,7 +38,7 @@ gce_image_project  = "rhel-cloud"
 container_runtime  = "podman"
 
 # --- Database --- #
-tfe_database_password_secret_id = "<tfe-database-password>"
+tfe_database_password_secret_id = "<tfe-database-password-secret-name>"
 
 # --- Log forwarding (optional) --- #
 tfe_log_forwarding_enabled = <true>

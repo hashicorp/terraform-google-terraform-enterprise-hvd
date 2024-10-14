@@ -146,168 +146,186 @@ Below are links to various docs related to the customization and management of y
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.9 |
-| <a name="requirement_google"></a> [google](#requirement\_google) | ~> 5.39 |
-| <a name="requirement_google-beta"></a> [google-beta](#requirement\_google-beta) | ~> 5.39 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9 |
+| <a name="requirement_google"></a> [google](#requirement\_google) | ~> 6.6 |
+| <a name="requirement_google-beta"></a> [google-beta](#requirement\_google-beta) | ~> 6.6 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.6 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_google"></a> [google](#provider\_google) | ~> 5.39 |
-| <a name="provider_google-beta"></a> [google-beta](#provider\_google-beta) | ~> 5.39 |
+| <a name="provider_google"></a> [google](#provider\_google) | ~> 6.6 |
+| <a name="provider_google-beta"></a> [google-beta](#provider\_google-beta) | ~> 6.6 |
 | <a name="provider_random"></a> [random](#provider\_random) | ~> 3.6 |
 
 ## Resources
 
 | Name | Type |
 |------|------|
-| [google-beta_google_project_service_identity.gcp_sa_cloud_sql](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/google_project_service_identity) | resource |
-| [google-beta_google_sql_database_instance.tfe](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/google_sql_database_instance) | resource |
+| [google-beta_google_project_service_identity.gcp_project_cloud_sql_sa](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/google_project_service_identity) | resource |
 | [google_compute_address.tfe_frontend_lb](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address) | resource |
-| [google_compute_firewall.allow_https](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
-| [google_compute_firewall.allow_iap](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
-| [google_compute_firewall.allow_prometheus](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
-| [google_compute_firewall.allow_ssh](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
-| [google_compute_firewall.health_checks](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
-| [google_compute_firewall.tfe_self](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
+| [google_compute_firewall.vm_allow_ingress_ssh_from_cidr](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
+| [google_compute_firewall.vm_allow_ingress_ssh_from_iap](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
+| [google_compute_firewall.vm_allow_lb_health_checks_443](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
+| [google_compute_firewall.vm_allow_tfe_443](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
+| [google_compute_firewall.vm_allow_tfe_metrics_from_cidr](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
+| [google_compute_firewall.vm_tfe_self_allow](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
 | [google_compute_forwarding_rule.tfe_frontend_lb](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_forwarding_rule) | resource |
-| [google_compute_global_address.postgres_private_ip](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_global_address) | resource |
 | [google_compute_health_check.tfe_auto_healing](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_health_check) | resource |
 | [google_compute_instance_template.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template) | resource |
 | [google_compute_region_backend_service.tfe_backend_lb](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_backend_service) | resource |
 | [google_compute_region_health_check.tfe_backend_lb](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_health_check) | resource |
 | [google_compute_region_instance_group_manager.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_instance_group_manager) | resource |
 | [google_dns_record_set.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/dns_record_set) | resource |
-| [google_kms_crypto_key_iam_member.gcs_account](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member) | resource |
-| [google_kms_crypto_key_iam_member.gcs_bucket](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member) | resource |
-| [google_kms_crypto_key_iam_member.postgres](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member) | resource |
-| [google_kms_crypto_key_iam_member.postgres_account](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member) | resource |
-| [google_kms_crypto_key_iam_member.postgres_project](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member) | resource |
-| [google_project_iam_member.stackdriver](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_iam_member) | resource |
+| [google_kms_crypto_key_iam_member.gcp_project_gcs_sa_cmek](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member) | resource |
+| [google_kms_crypto_key_iam_member.postgres_cmek](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member) | resource |
+| [google_project_iam_member.tfe_logging_stackdriver](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_iam_member) | resource |
 | [google_redis_instance.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/redis_instance) | resource |
-| [google_secret_manager_secret_iam_member.ca_bundle](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_iam_member) | resource |
+| [google_secret_manager_secret_iam_member.tfe_ca_bundle](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_iam_member) | resource |
 | [google_secret_manager_secret_iam_member.tfe_cert](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_iam_member) | resource |
 | [google_secret_manager_secret_iam_member.tfe_encryption_password](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_iam_member) | resource |
 | [google_secret_manager_secret_iam_member.tfe_license](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_iam_member) | resource |
 | [google_secret_manager_secret_iam_member.tfe_privkey](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_iam_member) | resource |
 | [google_service_account.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account) | resource |
 | [google_service_account_key.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account_key) | resource |
-| [google_service_networking_connection.postgres_endpoint](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_networking_connection) | resource |
 | [google_sql_database.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database) | resource |
+| [google_sql_database_instance.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance) | resource |
 | [google_sql_user.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_user) | resource |
 | [google_storage_bucket.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket) | resource |
 | [google_storage_bucket_iam_member.tfe_bucket_object_admin](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket_iam_member) | resource |
 | [google_storage_bucket_iam_member.tfe_bucket_reader](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket_iam_member) | resource |
 | [random_id.gcs_bucket_suffix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) | resource |
-| [random_id.postgres_suffix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) | resource |
-| [google_client_config.default](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/client_config) | data source |
+| [random_id.postgres_instance_suffix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) | resource |
+| [google_client_config.current](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/client_config) | data source |
 | [google_compute_image.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_image) | data source |
 | [google_compute_network.vpc](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_network) | data source |
-| [google_compute_subnetwork.subnet](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork) | data source |
+| [google_compute_subnetwork.lb_subnet](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork) | data source |
+| [google_compute_subnetwork.vm_subnet](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork) | data source |
 | [google_compute_zones.up](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_zones) | data source |
 | [google_dns_managed_zone.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/dns_managed_zone) | data source |
-| [google_kms_crypto_key.gcs_bucket](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_crypto_key) | data source |
-| [google_kms_crypto_key.postgres](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_crypto_key) | data source |
-| [google_kms_key_ring.gcs_bucket](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_key_ring) | data source |
-| [google_kms_key_ring.postgres](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_key_ring) | data source |
-| [google_secret_manager_secret_version.tfe_database_password_secret_id](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/secret_manager_secret_version) | data source |
-| [google_storage_project_service_account.project](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/storage_project_service_account) | data source |
+| [google_kms_crypto_key.gcs_cmek](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_crypto_key) | data source |
+| [google_kms_crypto_key.postgres_cmek](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_crypto_key) | data source |
+| [google_kms_key_ring.gcs_cmek](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_key_ring) | data source |
+| [google_kms_key_ring.postgres_cmek](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_key_ring) | data source |
+| [google_secret_manager_secret_version.tfe_database_password](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/secret_manager_secret_version) | data source |
+| [google_storage_project_service_account.gcp_project_gcs_sa](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/storage_project_service_account) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_friendly_name_prefix"></a> [friendly\_name\_prefix](#input\_friendly\_name\_prefix) | Friendly name prefix used for uniquely naming resources. | `string` | n/a | yes |
-| <a name="input_network"></a> [network](#input\_network) | The VPC network to host the cluster in | `string` | n/a | yes |
-| <a name="input_project_id"></a> [project\_id](#input\_project\_id) | ID of GCP Project to create resources in. | `string` | n/a | yes |
-| <a name="input_region"></a> [region](#input\_region) | Region of GCP Project to create resources in. | `string` | n/a | yes |
-| <a name="input_subnet"></a> [subnet](#input\_subnet) | Existing VPC subnet for TFE instance(s) and optionally TFE frontend load balancer. | `string` | n/a | yes |
-| <a name="input_tfe_encryption_password_secret_id"></a> [tfe\_encryption\_password\_secret\_id](#input\_tfe\_encryption\_password\_secret\_id) | ID of Secrets Manager secret for TFE encryption password. | `string` | n/a | yes |
-| <a name="input_tfe_fqdn"></a> [tfe\_fqdn](#input\_tfe\_fqdn) | Fully qualified domain name of TFE instance. This name should resolve to the load balancer IP address and will be what clients use to access TFE. | `string` | n/a | yes |
-| <a name="input_tfe_license_secret_id"></a> [tfe\_license\_secret\_id](#input\_tfe\_license\_secret\_id) | ID of Secrets Manager secret for TFE license file. | `string` | n/a | yes |
-| <a name="input_tfe_tls_ca_bundle_secret_id"></a> [tfe\_tls\_ca\_bundle\_secret\_id](#input\_tfe\_tls\_ca\_bundle\_secret\_id) | ID of Secrets Manager secret for private/custom TLS Certificate Authority (CA) bundle in PEM format. Secret must be stored as a base64-encoded string. | `string` | n/a | yes |
-| <a name="input_tfe_tls_cert_secret_id"></a> [tfe\_tls\_cert\_secret\_id](#input\_tfe\_tls\_cert\_secret\_id) | ID of Secrets Manager secret for TFE TLS certificate in PEM format. Secret must be stored as a base64-encoded string. | `string` | n/a | yes |
-| <a name="input_tfe_tls_privkey_secret_id"></a> [tfe\_tls\_privkey\_secret\_id](#input\_tfe\_tls\_privkey\_secret\_id) | ID of Secrets Manager secret for TFE TLS private key in PEM format. Secret must be stored as a base64-encoded string. | `string` | n/a | yes |
-| <a name="input_cidr_ingress_https_allow"></a> [cidr\_ingress\_https\_allow](#input\_cidr\_ingress\_https\_allow) | CIDR ranges to allow HTTPS traffic inbound to TFE instance(s). | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
-| <a name="input_cidr_ingress_ssh_allow"></a> [cidr\_ingress\_ssh\_allow](#input\_cidr\_ingress\_ssh\_allow) | CIDR ranges to allow SSH traffic inbound to TFE instance(s) via IAP tunnel. | `list(string)` | <pre>[<br>  "10.0.0.0/16"<br>]</pre> | no |
-| <a name="input_cloud_dns_managed_zone"></a> [cloud\_dns\_managed\_zone](#input\_cloud\_dns\_managed\_zone) | Zone name to create TFE Cloud DNS record in if `create_cloud_dns_record` is set to `true`. | `string` | `null` | no |
-| <a name="input_common_labels"></a> [common\_labels](#input\_common\_labels) | Common labels to apply to GCP resources. | `map(string)` | `{}` | no |
-| <a name="input_create_cloud_dns_record"></a> [create\_cloud\_dns\_record](#input\_create\_cloud\_dns\_record) | Boolean to create Google Cloud DNS record for `tfe_fqdn` resolving to load balancer IP. `cloud_dns_managed_zone` is required when `true`. | `bool` | `false` | no |
+| <a name="input_friendly_name_prefix"></a> [friendly\_name\_prefix](#input\_friendly\_name\_prefix) | Friendly name prefix used for uniquely naming all GCP resources for this deployment. Most commonly set to either an environment (e.g. 'sandbox', 'prod'), a team name, or a project name. | `string` | n/a | yes |
+| <a name="input_project_id"></a> [project\_id](#input\_project\_id) | ID of GCP project to deploy TFE in. | `string` | n/a | yes |
+| <a name="input_region"></a> [region](#input\_region) | GCP region (location) to deploy TFE in. | `string` | n/a | yes |
+| <a name="input_tfe_database_password_secret_id"></a> [tfe\_database\_password\_secret\_id](#input\_tfe\_database\_password\_secret\_id) | Name of PostgreSQL database password secret to retrieve from Google Secret Manager. | `string` | n/a | yes |
+| <a name="input_tfe_encryption_password_secret_id"></a> [tfe\_encryption\_password\_secret\_id](#input\_tfe\_encryption\_password\_secret\_id) | Name of Google Secret Manager secret for TFE encryption password. | `string` | n/a | yes |
+| <a name="input_tfe_fqdn"></a> [tfe\_fqdn](#input\_tfe\_fqdn) | Fully qualified domain name (FQDN) of TFE instance. This name should resolve to the TFE load balancer IP address and will be what users/clients use to access TFE. | `string` | n/a | yes |
+| <a name="input_tfe_license_secret_id"></a> [tfe\_license\_secret\_id](#input\_tfe\_license\_secret\_id) | Name of Google Secret Manager secret for TFE license file. | `string` | n/a | yes |
+| <a name="input_tfe_tls_ca_bundle_secret_id"></a> [tfe\_tls\_ca\_bundle\_secret\_id](#input\_tfe\_tls\_ca\_bundle\_secret\_id) | Name of Google Secret Manager secret for private/custom TLS Certificate Authority (CA) bundle in PEM format. Secret must be stored as a base64-encoded string. | `string` | n/a | yes |
+| <a name="input_tfe_tls_cert_secret_id"></a> [tfe\_tls\_cert\_secret\_id](#input\_tfe\_tls\_cert\_secret\_id) | Name of Google Secret Manager secret for TFE TLS certificate in PEM format. Secret must be stored as a base64-encoded string. | `string` | n/a | yes |
+| <a name="input_tfe_tls_privkey_secret_id"></a> [tfe\_tls\_privkey\_secret\_id](#input\_tfe\_tls\_privkey\_secret\_id) | Name of Google Secret Manager secret for TFE TLS private key in PEM format. Secret must be stored as a base64-encoded string. | `string` | n/a | yes |
+| <a name="input_vm_subnet_name"></a> [vm\_subnet\_name](#input\_vm\_subnet\_name) | Name of VPC subnet to deploy TFE GCE VM instances in. | `string` | n/a | yes |
+| <a name="input_vpc_network_name"></a> [vpc\_network\_name](#input\_vpc\_network\_name) | Name of VPC network to deploy TFE in. | `string` | n/a | yes |
+| <a name="input_allow_ingress_vm_ssh_from_iap"></a> [allow\_ingress\_vm\_ssh\_from\_iap](#input\_allow\_ingress\_vm\_ssh\_from\_iap) | Boolean to create firewall rule to allow TCP/22 (SSH) inbound to TFE GCE instances from Google Cloud IAP CIDR block. | `bool` | `true` | no |
+| <a name="input_cidr_allow_ingress_tfe_443"></a> [cidr\_allow\_ingress\_tfe\_443](#input\_cidr\_allow\_ingress\_tfe\_443) | List of CIDR ranges to allow TCP/443 (HTTPS) inbound to TFE load balancer. | `list(string)` | `null` | no |
+| <a name="input_cidr_allow_ingress_tfe_metrics"></a> [cidr\_allow\_ingress\_tfe\_metrics](#input\_cidr\_allow\_ingress\_tfe\_metrics) | List of CIDR ranges to allow TCP/9090 (HTTP) and TCP/9091 (HTTPS) inbound to TFE metrics collection endpoint. | `list(string)` | `null` | no |
+| <a name="input_cidr_allow_ingress_vm_ssh"></a> [cidr\_allow\_ingress\_vm\_ssh](#input\_cidr\_allow\_ingress\_vm\_ssh) | List of CIDR ranges to allow TCP/22 (SSH) inbound to TFE GCE instances. | `list(string)` | `null` | no |
+| <a name="input_cloud_dns_managed_zone_name"></a> [cloud\_dns\_managed\_zone\_name](#input\_cloud\_dns\_managed\_zone\_name) | Name of Google Cloud DNS managed zone to create TFE DNS record in. Required when `create_tfe_cloud_dns_record` is `true`. | `string` | `null` | no |
+| <a name="input_common_labels"></a> [common\_labels](#input\_common\_labels) | Map of common labels to apply to all GCP resources. | `map(string)` | `{}` | no |
+| <a name="input_container_runtime"></a> [container\_runtime](#input\_container\_runtime) | Container runtime to use for TFE deployment. Supported values are `docker` or `podman`. | `string` | `"docker"` | no |
+| <a name="input_create_tfe_cloud_dns_record"></a> [create\_tfe\_cloud\_dns\_record](#input\_create\_tfe\_cloud\_dns\_record) | Boolean to create Google Cloud DNS record for TFE using the value of `tfe_fqdn` as the record name, resolving to the load balancer IP. `cloud_dns_managed_zone_name` is required when `true`. | `bool` | `false` | no |
 | <a name="input_custom_fluent_bit_config"></a> [custom\_fluent\_bit\_config](#input\_custom\_fluent\_bit\_config) | Custom Fluent Bit configuration for log forwarding. Only valid when `tfe_log_forwarding_enabled` is `true` and `log_fwd_destination_type` is `custom`. | `string` | `null` | no |
-| <a name="input_disk_size_gb"></a> [disk\_size\_gb](#input\_disk\_size\_gb) | Size in Gigabytes of root disk of TFE instance(s). | `number` | `50` | no |
-| <a name="input_docker_version"></a> [docker\_version](#input\_docker\_version) | Full Version version string for OS choice while installing Docker to install on TFE GCP instances. | `string` | `"26.1.4-1"` | no |
-| <a name="input_enable_active_active"></a> [enable\_active\_active](#input\_enable\_active\_active) | Boolean indicating whether to deploy TFE in the Active:Active architecture using external Redis. | `bool` | `false` | no |
-| <a name="input_enable_iap"></a> [enable\_iap](#input\_enable\_iap) | (Optional bool) Enable https://cloud.google.com/iap/docs/using-tcp-forwarding#console, defaults to `true`. | `bool` | `true` | no |
-| <a name="input_extra_no_proxy"></a> [extra\_no\_proxy](#input\_extra\_no\_proxy) | A comma-separated string of hostnames or IP addresses to configure for TFE no\_proxy list. | `string` | `""` | no |
-| <a name="input_gcs_bucket_key_name"></a> [gcs\_bucket\_key\_name](#input\_gcs\_bucket\_key\_name) | Name of KMS Key to use for gcs bucket encryption. | `string` | `null` | no |
-| <a name="input_gcs_bucket_keyring_name"></a> [gcs\_bucket\_keyring\_name](#input\_gcs\_bucket\_keyring\_name) | Name of KMS Key Ring that contains KMS key to use for gcs bucket encryption. Geographic location of key ring must match `gcs_bucket_location`. | `string` | `null` | no |
-| <a name="input_gcs_bucket_location"></a> [gcs\_bucket\_location](#input\_gcs\_bucket\_location) | [Optional one of `ca`,`us`, `europe`, `asia`,`au`,`nam-eur-asia1`] Location for GCS bucket.  All regions are multi-region https://cloud.google.com/kms/docs/locations | `string` | `"us"` | no |
-| <a name="input_gcs_force_destroy"></a> [gcs\_force\_destroy](#input\_gcs\_force\_destroy) | Boolean indicating whether to allow force destroying the gcs bucket. If set to `true` the gcs bucket can be destroyed if it is not empty. | `bool` | `false` | no |
-| <a name="input_http_proxy"></a> [http\_proxy](#input\_http\_proxy) | Proxy address to configure for TFE to use for outbound connections. | `string` | `""` | no |
-| <a name="input_image_name"></a> [image\_name](#input\_image\_name) | VM image for TFE instance(s). | `string` | `"ubuntu-2404-noble-amd64-v20240607"` | no |
-| <a name="input_image_project"></a> [image\_project](#input\_image\_project) | ID of project in which the resource belongs. | `string` | `"ubuntu-os-cloud"` | no |
-| <a name="input_initial_delay_sec"></a> [initial\_delay\_sec](#input\_initial\_delay\_sec) | The number of seconds that the managed instance group waits before it applies autohealing policies to new instances or recently recreated instances | `number` | `1200` | no |
-| <a name="input_instance_count"></a> [instance\_count](#input\_instance\_count) | Target size of Managed Instance Group for number of TFE instances to run. Only specify a value greater than 1 if `enable_active_active` is set to `true`. | `number` | `1` | no |
-| <a name="input_is_secondary_region"></a> [is\_secondary\_region](#input\_is\_secondary\_region) | Boolean indicating whether this TFE deployment is in the 'primary' region or 'secondary' region. | `bool` | `false` | no |
-| <a name="input_load_balancing_scheme"></a> [load\_balancing\_scheme](#input\_load\_balancing\_scheme) | Determines whether load balancer is internal-facing or external-facing. | `string` | `"external"` | no |
-| <a name="input_log_fwd_destination_type"></a> [log\_fwd\_destination\_type](#input\_log\_fwd\_destination\_type) | Type of log forwarding destination. Valid values are `stackdriver` or `custom`. | `string` | `"stackdriver"` | no |
-| <a name="input_machine_type"></a> [machine\_type](#input\_machine\_type) | (Optional string) Size of machine to create. Default `n2-standard-4` from https://cloud.google.com/compute/docs/machine-resource. | `string` | `"n2-standard-4"` | no |
-| <a name="input_network_project_id"></a> [network\_project\_id](#input\_network\_project\_id) | ID of GCP Project where the existing VPC resides if it is different than the default project. | `string` | `null` | no |
-| <a name="input_postgres_availability_type"></a> [postgres\_availability\_type](#input\_postgres\_availability\_type) | Availability type of Cloud SQL PostgreSQL instance. | `string` | `"REGIONAL"` | no |
-| <a name="input_postgres_backup_start_time"></a> [postgres\_backup\_start\_time](#input\_postgres\_backup\_start\_time) | HH:MM time format indicating when daily automatic backups should run. | `string` | `"00:00"` | no |
+| <a name="input_custom_tfe_startup_script_template"></a> [custom\_tfe\_startup\_script\_template](#input\_custom\_tfe\_startup\_script\_template) | Name of custom TFE startup script template file. File must exist within a directory named `./templates` within your current working directory. | `string` | `null` | no |
+| <a name="input_docker_version"></a> [docker\_version](#input\_docker\_version) | Version of Docker to install on TFE GCE VM instances. | `string` | `"26.1.4-1"` | no |
+| <a name="input_gce_disk_size_gb"></a> [gce\_disk\_size\_gb](#input\_gce\_disk\_size\_gb) | Size in gigabytes of root disk of TFE GCE VM instances. | `number` | `50` | no |
+| <a name="input_gce_image_name"></a> [gce\_image\_name](#input\_gce\_image\_name) | VM image for TFE GCE instances. | `string` | `"ubuntu-pro-2404-noble-amd64-v20241004"` | no |
+| <a name="input_gce_image_project"></a> [gce\_image\_project](#input\_gce\_image\_project) | ID of project in which the TFE GCE VM image belongs. | `string` | `"ubuntu-os-cloud"` | no |
+| <a name="input_gce_machine_type"></a> [gce\_machine\_type](#input\_gce\_machine\_type) | Machine type (size) of TFE GCE VM instances. | `string` | `"n2-standard-4"` | no |
+| <a name="input_gce_ssh_public_key"></a> [gce\_ssh\_public\_key](#input\_gce\_ssh\_public\_key) | SSH public key to add to TFE GCE VM instances for SSH access. Generally not needed if using Google IAP for SSH. | `string` | `null` | no |
+| <a name="input_gcs_force_destroy"></a> [gcs\_force\_destroy](#input\_gcs\_force\_destroy) | Boolean indicating whether to allow force destroying the TFE GCS bucket. GCS bucket can be destroyed if it is not empty when `true`. | `bool` | `false` | no |
+| <a name="input_gcs_kms_cmek_name"></a> [gcs\_kms\_cmek\_name](#input\_gcs\_kms\_cmek\_name) | Name of Cloud KMS customer managed encryption key (CMEK) to use for TFE GCS bucket encryption. | `string` | `null` | no |
+| <a name="input_gcs_kms_keyring_name"></a> [gcs\_kms\_keyring\_name](#input\_gcs\_kms\_keyring\_name) | Name of Cloud KMS key ring that contains KMS customer managed encryption key (CMEK) to use for TFE GCS bucket encryption. Geographic location (region) of the key ring must match the location of the TFE GCS bucket. | `string` | `null` | no |
+| <a name="input_gcs_location"></a> [gcs\_location](#input\_gcs\_location) | Location of TFE GCS bucket to create. | `string` | `"US"` | no |
+| <a name="input_gcs_storage_class"></a> [gcs\_storage\_class](#input\_gcs\_storage\_class) | Storage class of TFE GCS bucket. | `string` | `"MULTI_REGIONAL"` | no |
+| <a name="input_gcs_uniform_bucket_level_access"></a> [gcs\_uniform\_bucket\_level\_access](#input\_gcs\_uniform\_bucket\_level\_access) | Boolean to enable uniform bucket level access on TFE GCS bucket. | `bool` | `true` | no |
+| <a name="input_gcs_versioning_enabled"></a> [gcs\_versioning\_enabled](#input\_gcs\_versioning\_enabled) | Boolean to enable versioning on TFE GCS bucket. | `bool` | `true` | no |
+| <a name="input_is_secondary_region"></a> [is\_secondary\_region](#input\_is\_secondary\_region) | Boolean indicating whether this TFE deployment is in your primary region or secondary (disaster recovery) region. | `bool` | `false` | no |
+| <a name="input_lb_is_internal"></a> [lb\_is\_internal](#input\_lb\_is\_internal) | Boolean to create an internal GCP load balancer for TFE. | `bool` | `true` | no |
+| <a name="input_lb_static_ip_address"></a> [lb\_static\_ip\_address](#input\_lb\_static\_ip\_address) | Static IP address to assign to TFE load balancer forwarding rule (front end) when `lb_is_internal` is `true`. Must be a valid IP address within `vm_subnet_name`. If not set, an available IP address will automatically be selected. | `string` | `null` | no |
+| <a name="input_lb_subnet_name"></a> [lb\_subnet\_name](#input\_lb\_subnet\_name) | Name of VPC subnet to deploy TFE load balancer in. This can be the same subnet as the VM subnet if you do not wish to provide a separate subnet for the load balancer. Only applicable when `lb_is_internal` is `true`. Must be `null` when `lb_is_internal` is `false`. | `string` | `null` | no |
+| <a name="input_log_fwd_destination_type"></a> [log\_fwd\_destination\_type](#input\_log\_fwd\_destination\_type) | Type of log forwarding destination for Fluent Bit. Valid values are `stackdriver` or `custom`. | `string` | `"stackdriver"` | no |
+| <a name="input_mig_initial_delay_sec"></a> [mig\_initial\_delay\_sec](#input\_mig\_initial\_delay\_sec) | Number of seconds for managed instance group to wait before applying autohealing policies to new GCE instances in managed instance group. | `number` | `900` | no |
+| <a name="input_mig_instance_count"></a> [mig\_instance\_count](#input\_mig\_instance\_count) | Desired number of TFE GCE instances to run in managed instance group. Must be `1` when `tfe_operational_mode` is `external`. | `number` | `1` | no |
+| <a name="input_postgres_availability_type"></a> [postgres\_availability\_type](#input\_postgres\_availability\_type) | Availability type of Cloud SQL for PostgreSQL instance. | `string` | `"REGIONAL"` | no |
+| <a name="input_postgres_backup_start_time"></a> [postgres\_backup\_start\_time](#input\_postgres\_backup\_start\_time) | HH:MM time format indicating when daily automatic backups of Cloud SQL for PostgreSQL should run. Defaults to 12 AM (midnight) UTC. | `string` | `"00:00"` | no |
+| <a name="input_postgres_deletetion_protection"></a> [postgres\_deletetion\_protection](#input\_postgres\_deletetion\_protection) | Boolean to enable deletion protection for Cloud SQL for PostgreSQL instance. | `bool` | `false` | no |
 | <a name="input_postgres_disk_size"></a> [postgres\_disk\_size](#input\_postgres\_disk\_size) | Size in GB of PostgreSQL disk. | `number` | `50` | no |
-| <a name="input_postgres_extra_params"></a> [postgres\_extra\_params](#input\_postgres\_extra\_params) | Parameter keyword/value pairs to support additional PostgreSQL parameters that may be necessary. | `string` | `"sslmode=require"` | no |
-| <a name="input_postgres_key_name"></a> [postgres\_key\_name](#input\_postgres\_key\_name) | Name of KMS Key to use for Cloud SQL for PostgreSQL encryption. | `string` | `null` | no |
-| <a name="input_postgres_keyring_name"></a> [postgres\_keyring\_name](#input\_postgres\_keyring\_name) | Name of KMS Key Ring that contains KMS key to use for Cloud SQL for PostgreSQL database encryption. Geographic location of key ring must match location of database instance. | `string` | `null` | no |
-| <a name="input_postgres_machine_type"></a> [postgres\_machine\_type](#input\_postgres\_machine\_type) | Machine size of Cloud SQL PostgreSQL instance. | `string` | `"db-custom-4-16384"` | no |
-| <a name="input_postgres_version"></a> [postgres\_version](#input\_postgres\_version) | PostgreSQL version to use. | `string` | `"POSTGRES_15"` | no |
+| <a name="input_postgres_insights_config"></a> [postgres\_insights\_config](#input\_postgres\_insights\_config) | Configuration settings for Cloud SQL for PostgreSQL insights. | <pre>object({<br>    query_insights_enabled  = bool<br>    query_plans_per_minute  = number<br>    query_string_length     = number<br>    record_application_tags = bool<br>    record_client_address   = bool<br>  })</pre> | <pre>{<br>  "query_insights_enabled": false,<br>  "query_plans_per_minute": 5,<br>  "query_string_length": 1024,<br>  "record_application_tags": false,<br>  "record_client_address": false<br>}</pre> | no |
+| <a name="input_postgres_kms_cmek_name"></a> [postgres\_kms\_cmek\_name](#input\_postgres\_kms\_cmek\_name) | Name of Cloud KMS customer managed encryption key (CMEK) to use for Cloud SQL for PostgreSQL database instance. | `string` | `null` | no |
+| <a name="input_postgres_kms_keyring_name"></a> [postgres\_kms\_keyring\_name](#input\_postgres\_kms\_keyring\_name) | Name of Cloud KMS Key Ring that contains KMS key to use for Cloud SQL for PostgreSQL. Geographic location (region) of key ring must match the location of the TFE Cloud SQL for PostgreSQL database instance. | `string` | `null` | no |
+| <a name="input_postgres_machine_type"></a> [postgres\_machine\_type](#input\_postgres\_machine\_type) | Machine size of Cloud SQL for PostgreSQL instance. | `string` | `"db-custom-4-16384"` | no |
+| <a name="input_postgres_maintenance_window"></a> [postgres\_maintenance\_window](#input\_postgres\_maintenance\_window) | Optional maintenance window settings for the Cloud SQL for PostgreSQL instance. | <pre>object({<br>    day          = number<br>    hour         = number<br>    update_track = string<br>  })</pre> | <pre>{<br>  "day": 7,<br>  "hour": 0,<br>  "update_track": "stable"<br>}</pre> | no |
+| <a name="input_postgres_ssl_mode"></a> [postgres\_ssl\_mode](#input\_postgres\_ssl\_mode) | Indicates whether to enforce TLS/SSL connections to the Cloud SQL for PostgreSQL instance. | `string` | `"ENCRYPTED_ONLY"` | no |
+| <a name="input_postgres_version"></a> [postgres\_version](#input\_postgres\_version) | PostgreSQL version to use. | `string` | `"POSTGRES_16"` | no |
 | <a name="input_redis_auth_enabled"></a> [redis\_auth\_enabled](#input\_redis\_auth\_enabled) | Boolean to enable authentication on Redis instance. | `bool` | `true` | no |
 | <a name="input_redis_connect_mode"></a> [redis\_connect\_mode](#input\_redis\_connect\_mode) | Network connection mode for Redis instance. | `string` | `"PRIVATE_SERVICE_ACCESS"` | no |
+| <a name="input_redis_kms_cmek_name"></a> [redis\_kms\_cmek\_name](#input\_redis\_kms\_cmek\_name) | Name of Cloud KMS customer managed encryption key (CMEK) to use for TFE Redis instance. | `string` | `null` | no |
+| <a name="input_redis_kms_keyring_name"></a> [redis\_kms\_keyring\_name](#input\_redis\_kms\_keyring\_name) | Name of Cloud KMS key ring that contains KMS customer managed encryption key (CMEK) to use for TFE Redis instance. Geographic location (region) of key ring must match the location of the TFE Redis instance. | `string` | `null` | no |
 | <a name="input_redis_memory_size_gb"></a> [redis\_memory\_size\_gb](#input\_redis\_memory\_size\_gb) | The size of the Redis instance in GiB. | `number` | `6` | no |
 | <a name="input_redis_tier"></a> [redis\_tier](#input\_redis\_tier) | The service tier of the Redis instance. Set to `STANDARD_HA` for high availability. | `string` | `"STANDARD_HA"` | no |
-| <a name="input_redis_transit_encryption_mode"></a> [redis\_transit\_encryption\_mode](#input\_redis\_transit\_encryption\_mode) | Boolean to enable TLS for Redis instance. | `string` | `"DISABLED"` | no |
-| <a name="input_redis_version"></a> [redis\_version](#input\_redis\_version) | The version of Redis software. | `string` | `"REDIS_6_X"` | no |
+| <a name="input_redis_transit_encryption_mode"></a> [redis\_transit\_encryption\_mode](#input\_redis\_transit\_encryption\_mode) | Determines transit encryption (TLS) mode for Redis instance. | `string` | `"DISABLED"` | no |
+| <a name="input_redis_version"></a> [redis\_version](#input\_redis\_version) | The version of Redis software. | `string` | `"REDIS_7_2"` | no |
 | <a name="input_tfe_capacity_concurrency"></a> [tfe\_capacity\_concurrency](#input\_tfe\_capacity\_concurrency) | Maximum number of concurrent Terraform runs to allow on a TFE node. | `number` | `10` | no |
-| <a name="input_tfe_capacity_cpu"></a> [tfe\_capacity\_cpu](#input\_tfe\_capacity\_cpu) | Maxium number of CPU cores that a Terraform run is allowed to consume in TFE. Set to `0` for no limit. | `number` | `0` | no |
-| <a name="input_tfe_capacity_memory"></a> [tfe\_capacity\_memory](#input\_tfe\_capacity\_memory) | Maximum amount of memory (in MiB) that a Terraform run is allowed to consume in TFE. | `number` | `2048` | no |
-| <a name="input_tfe_database_password_secret_id"></a> [tfe\_database\_password\_secret\_id](#input\_tfe\_database\_password\_secret\_id) | ID of secret stored in GCP Secrets Manager containing TFE install secrets. | `string` | `null` | no |
-| <a name="input_tfe_hairpin_addressing"></a> [tfe\_hairpin\_addressing](#input\_tfe\_hairpin\_addressing) | Boolean to enable hairpin addressing for Layer 4 load balancer with loopback prevention. Only valid when `lb_is_internal` is `false`, as hairpin addressing will automatically be enabled when `lb_is_internal` is `true`, regardless of this setting. | `bool` | `true` | no |
-| <a name="input_tfe_iact_subnets"></a> [tfe\_iact\_subnets](#input\_tfe\_iact\_subnets) | Comma-separated list of subnets in CIDR notation that are allowed to retrieve the initial admin creation token via the API, or GUI | `string` | `""` | no |
-| <a name="input_tfe_iact_time_limit"></a> [tfe\_iact\_time\_limit](#input\_tfe\_iact\_time\_limit) | Number of minutes that the initial admin creation token can be retrieved via the API after the application starts. Defaults to 60 | `string` | `"60"` | no |
-| <a name="input_tfe_iact_trusted_proxies"></a> [tfe\_iact\_trusted\_proxies](#input\_tfe\_iact\_trusted\_proxies) | Comma-separated list of subnets in CIDR notation that are allowed to retrieve the initial admin creation token via the API, or GUI | `string` | `""` | no |
-| <a name="input_tfe_image_name"></a> [tfe\_image\_name](#input\_tfe\_image\_name) | Name of the TFE container image. Only set this if you are hosting the TFE container image in your own custom repository. | `string` | `"hashicorp/terraform-enterprise"` | no |
-| <a name="input_tfe_image_repository_password"></a> [tfe\_image\_repository\_password](#input\_tfe\_image\_repository\_password) | Pasword for container registry where TFE container image is hosted. Leave null if using the default TFE registry as the default password is the TFE license file. | `string` | `null` | no |
-| <a name="input_tfe_image_repository_url"></a> [tfe\_image\_repository\_url](#input\_tfe\_image\_repository\_url) | Repository for the TFE image. Only set this if you are hosting the TFE container image in your own custom repository. | `string` | `"images.releases.hashicorp.com"` | no |
+| <a name="input_tfe_capacity_cpu"></a> [tfe\_capacity\_cpu](#input\_tfe\_capacity\_cpu) | Maxium number of CPU cores that a Terraform run is allowed to consume on a TFE node. Defaults to `0` which is no limit. | `number` | `0` | no |
+| <a name="input_tfe_capacity_memory"></a> [tfe\_capacity\_memory](#input\_tfe\_capacity\_memory) | Maximum amount of memory (in MiB) that a Terraform run is allowed to consume on a TFE node. | `number` | `2048` | no |
+| <a name="input_tfe_database_name"></a> [tfe\_database\_name](#input\_tfe\_database\_name) | Name of TFE PostgreSQL database to create. | `string` | `"tfe"` | no |
+| <a name="input_tfe_database_parameters"></a> [tfe\_database\_parameters](#input\_tfe\_database\_parameters) | Additional parameters to pass into the TFE database settings for the PostgreSQL connection URI. | `string` | `"sslmode=require"` | no |
+| <a name="input_tfe_database_reconnect_enabled"></a> [tfe\_database\_reconnect\_enabled](#input\_tfe\_database\_reconnect\_enabled) | Boolean to enable database reconnection in the event of a TFE PostgreSQL database cluster failover. | `bool` | `true` | no |
+| <a name="input_tfe_database_user"></a> [tfe\_database\_user](#input\_tfe\_database\_user) | Name of TFE PostgreSQL database user to create. | `string` | `"tfe"` | no |
+| <a name="input_tfe_hairpin_addressing"></a> [tfe\_hairpin\_addressing](#input\_tfe\_hairpin\_addressing) | Boolean to enable hairpin addressing within TFE container networking for loopback prevention with a layer 4 internal load balancer. | `bool` | `true` | no |
+| <a name="input_tfe_http_port"></a> [tfe\_http\_port](#input\_tfe\_http\_port) | HTTP port for TFE application containers to listen on. | `number` | `8080` | no |
+| <a name="input_tfe_https_port"></a> [tfe\_https\_port](#input\_tfe\_https\_port) | HTTPS port for TFE application containers to listen on. | `number` | `8443` | no |
+| <a name="input_tfe_iact_subnets"></a> [tfe\_iact\_subnets](#input\_tfe\_iact\_subnets) | Comma-separated list of subnets in CIDR notation that are allowed to retrieve the TFE initial admin creation token via the API or web browser. | `string` | `null` | no |
+| <a name="input_tfe_iact_time_limit"></a> [tfe\_iact\_time\_limit](#input\_tfe\_iact\_time\_limit) | Number of minutes that the TFE initial admin creation token can be retrieved via the API after the application starts. | `number` | `60` | no |
+| <a name="input_tfe_iact_trusted_proxies"></a> [tfe\_iact\_trusted\_proxies](#input\_tfe\_iact\_trusted\_proxies) | Comma-separated list of proxy IP addresses that are allowed to retrieve the TFE initial admin creation token via the API or web browser. | `string` | `null` | no |
+| <a name="input_tfe_image_name"></a> [tfe\_image\_name](#input\_tfe\_image\_name) | Name of the TFE container image. Only set this away from the default if you are hosting the TFE container image in your own custom registry. | `string` | `"hashicorp/terraform-enterprise"` | no |
+| <a name="input_tfe_image_repository_password"></a> [tfe\_image\_repository\_password](#input\_tfe\_image\_repository\_password) | Pasword for container registry where TFE container image is hosted. Leave as `null` if using the default TFE registry, as the default password is your TFE license file. | `string` | `null` | no |
+| <a name="input_tfe_image_repository_url"></a> [tfe\_image\_repository\_url](#input\_tfe\_image\_repository\_url) | URL of container registry where the TFE container image is hosted. Only set this away from the default if you are hosting the TFE container image in your own custom registry. | `string` | `"images.releases.hashicorp.com"` | no |
 | <a name="input_tfe_image_repository_username"></a> [tfe\_image\_repository\_username](#input\_tfe\_image\_repository\_username) | Username for container registry where TFE container image is hosted. | `string` | `"terraform"` | no |
-| <a name="input_tfe_image_tag"></a> [tfe\_image\_tag](#input\_tfe\_image\_tag) | Tag for the TFE image. This represents the version of TFE to deploy. | `string` | `"v202402-2"` | no |
-| <a name="input_tfe_license_reporting_opt_out"></a> [tfe\_license\_reporting\_opt\_out](#input\_tfe\_license\_reporting\_opt\_out) | Boolean to opt out of license reporting. | `bool` | `false` | no |
-| <a name="input_tfe_log_forwarding_enabled"></a> [tfe\_log\_forwarding\_enabled](#input\_tfe\_log\_forwarding\_enabled) | Boolean to enable TFE log forwarding feature. | `bool` | `false` | no |
-| <a name="input_tfe_metrics_enable"></a> [tfe\_metrics\_enable](#input\_tfe\_metrics\_enable) | Boolean to enable metrics. | `bool` | `false` | no |
-| <a name="input_tfe_metrics_http_port"></a> [tfe\_metrics\_http\_port](#input\_tfe\_metrics\_http\_port) | HTTP port for TFE metrics scrape. | `number` | `9090` | no |
-| <a name="input_tfe_metrics_https_port"></a> [tfe\_metrics\_https\_port](#input\_tfe\_metrics\_https\_port) | HTTPS port for TFE metrics scrape. | `number` | `9091` | no |
-| <a name="input_tfe_mounted_disk_path"></a> [tfe\_mounted\_disk\_path](#input\_tfe\_mounted\_disk\_path) | (Optional) Path for mounted disk source, defaults to /opt/hashicorp/terraform-enterprise | `string` | `"/opt/hashicorp/terraform-enterprise/data"` | no |
-| <a name="input_tfe_operational_mode"></a> [tfe\_operational\_mode](#input\_tfe\_operational\_mode) | Operational mode for TFE. | `string` | `"active-active"` | no |
-| <a name="input_tfe_run_pipeline_docker_network"></a> [tfe\_run\_pipeline\_docker\_network](#input\_tfe\_run\_pipeline\_docker\_network) | Docker network where the containers that execute Terraform runs will be created. The network must already exist, it will not be created automatically. Leave null to use the default network. | `string` | `null` | no |
-| <a name="input_tfe_run_pipeline_image"></a> [tfe\_run\_pipeline\_image](#input\_tfe\_run\_pipeline\_image) | Name of the Docker image to use for the run pipeline driver. | `string` | `null` | no |
-| <a name="input_tfe_run_pipeline_image_ecr_repo_name"></a> [tfe\_run\_pipeline\_image\_ecr\_repo\_name](#input\_tfe\_run\_pipeline\_image\_ecr\_repo\_name) | Name of the ECR repository containing your custom TFE run pipeline image. | `string` | `null` | no |
-| <a name="input_tfe_tls_enforce"></a> [tfe\_tls\_enforce](#input\_tfe\_tls\_enforce) | Boolean to enforce TLS. | `bool` | `false` | no |
-| <a name="input_tfe_user_data_template"></a> [tfe\_user\_data\_template](#input\_tfe\_user\_data\_template) | (optional) File name for user\_data\_template.sh.tpl file in `./templates folder` no path required | `string` | `"tfe_user_data.sh.tpl"` | no |
-| <a name="input_tfe_vault_disable_mlock"></a> [tfe\_vault\_disable\_mlock](#input\_tfe\_vault\_disable\_mlock) | Boolean to disable mlock for internal Vault. | `bool` | `false` | no |
-| <a name="input_verbose_template"></a> [verbose\_template](#input\_verbose\_template) | [Optional bool] Enables the user\_data template to be output in full for debug and review purposes. | `bool` | `false` | no |
+| <a name="input_tfe_image_tag"></a> [tfe\_image\_tag](#input\_tfe\_image\_tag) | Tag (release) for the TFE container image. This represents which version (release) of TFE to deploy. | `string` | `"v202409-3"` | no |
+| <a name="input_tfe_license_reporting_opt_out"></a> [tfe\_license\_reporting\_opt\_out](#input\_tfe\_license\_reporting\_opt\_out) | Boolean to opt out of TFE license reporting. | `bool` | `false` | no |
+| <a name="input_tfe_log_forwarding_enabled"></a> [tfe\_log\_forwarding\_enabled](#input\_tfe\_log\_forwarding\_enabled) | Boolean to enable TFE log forwarding configuration via Fluent Bit. | `bool` | `false` | no |
+| <a name="input_tfe_metrics_enable"></a> [tfe\_metrics\_enable](#input\_tfe\_metrics\_enable) | Boolean to enable TFE metrics collection endpoints. | `bool` | `false` | no |
+| <a name="input_tfe_metrics_http_port"></a> [tfe\_metrics\_http\_port](#input\_tfe\_metrics\_http\_port) | HTTP port for TFE metrics collection endpoint to listen on. | `number` | `9090` | no |
+| <a name="input_tfe_metrics_https_port"></a> [tfe\_metrics\_https\_port](#input\_tfe\_metrics\_https\_port) | HTTPS port for TFE metrics collection endpoint to listen on. | `number` | `9091` | no |
+| <a name="input_tfe_operational_mode"></a> [tfe\_operational\_mode](#input\_tfe\_operational\_mode) | [Operational mode](https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/operation-modes) for TFE. Valid values are `active-active` or `external`. | `string` | `"active-active"` | no |
+| <a name="input_tfe_run_pipeline_docker_network"></a> [tfe\_run\_pipeline\_docker\_network](#input\_tfe\_run\_pipeline\_docker\_network) | Name of Docker network where the containers that execute Terraform runs (agents) will be created. The network must already exist, it will not be created automatically. Leave as `null` to use the default network created during the TFE installation. | `string` | `null` | no |
+| <a name="input_tfe_run_pipeline_image"></a> [tfe\_run\_pipeline\_image](#input\_tfe\_run\_pipeline\_image) | Name of container image used to execute Terraform runs on a TFE node. Leave as `null` to use the default agent that ships with TFE. | `string` | `null` | no |
+| <a name="input_tfe_tls_enforce"></a> [tfe\_tls\_enforce](#input\_tfe\_tls\_enforce) | Boolean to enforce TLS, Strict-Transport-Security headers, and secure cookies within TFE. | `bool` | `false` | no |
+| <a name="input_tfe_usage_reporting_opt_out"></a> [tfe\_usage\_reporting\_opt\_out](#input\_tfe\_usage\_reporting\_opt\_out) | Boolean to opt out of TFE usage reporting. | `bool` | `false` | no |
+| <a name="input_tfe_vault_disable_mlock"></a> [tfe\_vault\_disable\_mlock](#input\_tfe\_vault\_disable\_mlock) | Boolean to disable mlock for internal (embedded) Vault within TFE. | `bool` | `false` | no |
+| <a name="input_vpc_network_project_id"></a> [vpc\_network\_project\_id](#input\_vpc\_network\_project\_id) | ID of GCP project where the existing VPC network resides, if it is different than the `project_id` where TFE will be deployed. | `string` | `null` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_gcp_db_instance_ip"></a> [gcp\_db\_instance\_ip](#output\_gcp\_db\_instance\_ip) | Cloud SQL DB instance IP. |
-| <a name="output_gcs_bucket_name"></a> [gcs\_bucket\_name](#output\_gcs\_bucket\_name) | Name of TFE gcs bucket. |
-| <a name="output_google_sql_database_instance_id"></a> [google\_sql\_database\_instance\_id](#output\_google\_sql\_database\_instance\_id) | ID of Cloud SQL DB instance. |
-| <a name="output_lb_ip_address"></a> [lb\_ip\_address](#output\_lb\_ip\_address) | IP Address of the Load Balancer. |
-| <a name="output_tfe_fqdn"></a> [tfe\_fqdn](#output\_tfe\_fqdn) | `tfe_fqdn` input. |
-| <a name="output_tfe_initial_user_url"></a> [tfe\_initial\_user\_url](#output\_tfe\_initial\_user\_url) | Terraform-Enterprise URL create initial admin user based on the `tfe_fqdn` input, and `tfe_iact_subnets` is set |
-| <a name="output_tfe_retrieve_iact"></a> [tfe\_retrieve\_iact](#output\_tfe\_retrieve\_iact) | Terraform-Enterprise URL to retrieve initial user token based on `tfe_fqdn` input, and `tfe_iact_subnets` is set |
-| <a name="output_url"></a> [url](#output\_url) | URL of TFE application based on `tfe_fqdn` input. |
-| <a name="output_user_data_template"></a> [user\_data\_template](#output\_user\_data\_template) | n/a |
+| <a name="output_tfe_create_initial_admin_user_url"></a> [tfe\_create\_initial\_admin\_user\_url](#output\_tfe\_create\_initial\_admin\_user\_url) | URL to create TFE initial admin user. |
+| <a name="output_tfe_database_host"></a> [tfe\_database\_host](#output\_tfe\_database\_host) | Private IP address and port of TFE Cloud SQL for PostgreSQL database instance. |
+| <a name="output_tfe_database_instance_id"></a> [tfe\_database\_instance\_id](#output\_tfe\_database\_instance\_id) | ID of TFE Cloud SQL for PostgreSQL database instance. |
+| <a name="output_tfe_database_name"></a> [tfe\_database\_name](#output\_tfe\_database\_name) | Name of TFE database. |
+| <a name="output_tfe_database_password"></a> [tfe\_database\_password](#output\_tfe\_database\_password) | Password of TFE database user. |
+| <a name="output_tfe_database_user"></a> [tfe\_database\_user](#output\_tfe\_database\_user) | Username of TFE database. |
+| <a name="output_tfe_gcs_bucket_location"></a> [tfe\_gcs\_bucket\_location](#output\_tfe\_gcs\_bucket\_location) | Location of TFE GCS bucket. |
+| <a name="output_tfe_lb_ip_address"></a> [tfe\_lb\_ip\_address](#output\_tfe\_lb\_ip\_address) | IP Address of TFE front end load balancer (forwarding rule). |
+| <a name="output_tfe_load_balancing_scheme"></a> [tfe\_load\_balancing\_scheme](#output\_tfe\_load\_balancing\_scheme) | Load balancing scheme of TFE front end load balancer (forwarding rule). |
+| <a name="output_tfe_object_storage_google_bucket"></a> [tfe\_object\_storage\_google\_bucket](#output\_tfe\_object\_storage\_google\_bucket) | Name of TFE GCS bucket. |
+| <a name="output_tfe_redis_host"></a> [tfe\_redis\_host](#output\_tfe\_redis\_host) | Hostname/IP address (and port if non-default) of TFE Redis instance. |
+| <a name="output_tfe_redis_password"></a> [tfe\_redis\_password](#output\_tfe\_redis\_password) | Password of TFE Redis instance. |
+| <a name="output_tfe_redis_use_auth"></a> [tfe\_redis\_use\_auth](#output\_tfe\_redis\_use\_auth) | Whether TFE Redis instance uses authentication. |
+| <a name="output_tfe_redis_use_tls"></a> [tfe\_redis\_use\_tls](#output\_tfe\_redis\_use\_tls) | Whether |
+| <a name="output_tfe_redis_user"></a> [tfe\_redis\_user](#output\_tfe\_redis\_user) | Username of TFE Redis instance. |
+| <a name="output_tfe_retrieve_iact_url"></a> [tfe\_retrieve\_iact\_url](#output\_tfe\_retrieve\_iact\_url) | URL to retrieve TFE initial admin creation token. |
+| <a name="output_tfe_url"></a> [tfe\_url](#output\_tfe\_url) | URL of TFE application based on `tfe_fqdn` input value. |
 <!-- END_TF_DOCS -->

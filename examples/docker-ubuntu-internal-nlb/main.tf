@@ -46,10 +46,9 @@ module "tfe" {
 
   # --- Networking --- #
   vpc_network_name              = var.vpc_network_name
+  lb_is_internal                = var.lb_is_internal
   lb_subnet_name                = var.lb_subnet_name
   vm_subnet_name                = var.vm_subnet_name
-  lb_is_internal                = var.lb_is_internal
-  lb_static_ip_address          = var.lb_static_ip_address 
   cidr_allow_ingress_tfe_443    = var.cidr_allow_ingress_tfe_443
   allow_ingress_vm_ssh_from_iap = var.allow_ingress_vm_ssh_from_iap
 
@@ -62,8 +61,6 @@ module "tfe" {
   gce_image_name     = var.gce_image_name
   gce_image_project  = var.gce_image_project
   container_runtime  = var.container_runtime
-  
-  #custom_tfe_startup_script_template = "custom_user_data.sh.tpl"
 
   # --- Database --- #
   tfe_database_password_secret_id = var.tfe_database_password_secret_id

@@ -75,39 +75,17 @@ resource "google_project_iam_member" "tfe_logging_stackdriver" {
 }
 
 #------------------------------------------------------------------------------
-# Cloud SQL Encryption
+# Cloud SQL - KMS
 #------------------------------------------------------------------------------
-# resource "google_kms_crypto_key_iam_member" "postgres" {
-#   count = var.postgres_kms_keyring_name == null ? 0 : 1
-
-#   crypto_key_id = data.google_kms_crypto_key.postgres_cmek[0].id
-#   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-#   member        = "serviceAccount:${data.google_storage_project_service_account.project.email_address}"
-# }
-
-# resource "google_kms_crypto_key_iam_member" "postgres_account" {
-#   count = var.postgres_kms_keyring_name == null ? 0 : 1
-
-#   crypto_key_id = data.google_kms_crypto_key.postgres[0].id
-#   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-#   member        = "serviceAccount:${google_service_account.tfe.email}"
-# }
-
+// There is no Google-managed service account (service agent) for Cloud SQL,
+// so one must be created to allow the Cloud SQL instance to use the CMEK.
+// https://cloud.google.com/sql/docs/postgres/configure-cmek
 resource "google_project_service_identity" "gcp_project_cloud_sql_sa" {
   count    = var.postgres_kms_keyring_name != null ? 1 : 0
   provider = google-beta
 
   service  = "sqladmin.googleapis.com"
 }
-
-# resource "google_kms_crypto_key_iam_member" "gcp_project_sql_sa_cmek" {
-#   count = var.postgres_kms_keyring_name != null ? 1 : 0
-
-#   crypto_key_id = data.google_kms_crypto_key.postgres_cmek[0].id
-#   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  
-#   member = "serviceAccount:${data.google_sql_database_instance.my_instance.service_account_email_address}"
-# }
 
 resource "google_kms_crypto_key_iam_member" "postgres_cmek" {
   count = var.postgres_kms_keyring_name != null ? 1 : 0
@@ -118,25 +96,31 @@ resource "google_kms_crypto_key_iam_member" "postgres_cmek" {
 }
 
 #------------------------------------------------------------------------------
-# GCS bucket - KMS customer managed encryption key (CMEK)
+# GCS bucket - KMS
 #------------------------------------------------------------------------------
-# resource "google_kms_crypto_key_iam_member" "gcs_bucket" {
-#   count = var.gcs_kms_cmek_name == null ? 0 : 1
-
-#   crypto_key_id = data.google_kms_crypto_key.gcs_cmek[0].id
-#   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-#   member        = "serviceAccount:${google_service_account.tfe.email}"
-# }
-
-data "google_storage_project_service_account" "gcp_project_gcs_sa" {}
+data "google_storage_project_service_account" "gcp_project_gcs_sa" {
+  count = var.gcs_kms_cmek_name != null ? 1 : 0
+}
 
 resource "google_kms_crypto_key_iam_member" "gcp_project_gcs_sa_cmek" {
   count = var.gcs_kms_cmek_name != null ? 1 : 0
 
   crypto_key_id = data.google_kms_crypto_key.gcs_cmek[0].id
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-  member = "serviceAccount:${data.google_storage_project_service_account.gcp_project_gcs_sa.email_address}"
+  member        = "serviceAccount:${data.google_storage_project_service_account.gcp_project_gcs_sa[0].email_address}"
 }
 
+#------------------------------------------------------------------------------
+# Cloud Memorystore (Redis) - KMS
+#------------------------------------------------------------------------------
+locals {
+  redis_service_account_email = "service-${data.google_project.current.number}@cloud-redis.iam.gserviceaccount.com"
+}
 
+resource "google_kms_crypto_key_iam_member" "gcp_project_redis_sa_cmek" {
+  count = var.redis_kms_cmek_name != null ? 1 : 0
+
+  crypto_key_id = data.google_kms_crypto_key.redis_cmek[0].id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${local.redis_service_account_email}"
+}

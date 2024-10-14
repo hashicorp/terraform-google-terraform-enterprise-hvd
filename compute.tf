@@ -333,24 +333,3 @@ resource "google_compute_firewall" "vm_allow_tfe_metrics_from_cidr" {
     metadata = "INCLUDE_ALL_METADATA"
   }
 }
-
-# resource "google_compute_firewall" "vm_allow_tfe_metrics_from_tags" {
-#   count = var.tfe_metrics_enable ? 1 : 0
-
-#   name        = "${var.friendly_name_prefix}-tfe-allow-metrics"
-#   description = "Allow TCP/9090 (HTTP) and 9091 (HTTPS) or specified ports ingress to TFE metrics endpoints on TFE GCE VM instances from specified network tags."
-#   network     = data.google_compute_network.vpc.self_link
-#   direction   = "INGRESS"
-
-#   allow {
-#     protocol = "tcp"
-#     ports    = [9090, 9091]
-#   }
-
-#   source_tags = var.tfe_monitoring_source_network_tags
-#   target_tags = ["tfe-vm"]
-
-#   log_config {
-#     metadata = "INCLUDE_ALL_METADATA"
-#   }
-# }
