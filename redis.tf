@@ -22,14 +22,14 @@ resource "google_redis_instance" "tfe" {
 #------------------------------------------------------------------------------
 # KMS customer managed encryption key (CMEK)
 #------------------------------------------------------------------------------
-data "google_kms_key_ring" "redis" {
+data "google_kms_key_ring" "redis_cmek" {
   count = var.redis_kms_keyring_name != null ? 1 : 0
 
   name     = var.redis_kms_keyring_name
   location = data.google_client_config.current.region
 }
 
-data "google_kms_crypto_key" "redis" {
+data "google_kms_crypto_key" "redis_cmek" {
   count = var.redis_kms_cmek_name != null ? 1 : 0
 
   name     = var.redis_kms_cmek_name
