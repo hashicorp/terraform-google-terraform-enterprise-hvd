@@ -33,7 +33,7 @@ cloud_dns_managed_zone_name = "<google-cloud-dns-zone-name>"
 
 # --- Compute --- #
 mig_instance_count = 1
-gce_image_name     = "rhel-9-v20240910"
+gce_image_name     = "rhel-9-v20241009"
 gce_image_project  = "rhel-cloud"
 container_runtime  = "podman"
 

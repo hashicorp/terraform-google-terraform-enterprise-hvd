@@ -33,7 +33,7 @@ cloud_dns_managed_zone_name = "<google-cloud-dns-zone-name>"
 
 # --- Compute --- #
 mig_instance_count = 1
-gce_image_name     = "ubuntu-pro-2404-noble-amd64-v20240904"
+gce_image_name     = "ubuntu-pro-2404-noble-amd64-v20241004"
 gce_image_project  = "ubuntu-os-pro-cloud"
 container_runtime  = "docker"
 
