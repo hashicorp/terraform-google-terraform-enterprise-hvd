@@ -16,6 +16,7 @@ resource "google_redis_instance" "tfe" {
   transit_encryption_mode = var.redis_transit_encryption_mode
   authorized_network      = data.google_compute_network.vpc.self_link
   connect_mode            = var.redis_connect_mode
+  customer_managed_key    = var.redis_kms_cmek_name != null ? data.google_kms_crypto_key.redis_cmek[0].id : null
   labels                  = var.common_labels
 }
 
