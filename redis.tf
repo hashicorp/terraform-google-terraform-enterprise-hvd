@@ -33,5 +33,5 @@ data "google_kms_crypto_key" "redis_cmek" {
   count = var.redis_kms_cmek_name != null ? 1 : 0
 
   name     = var.redis_kms_cmek_name
-  key_ring = data.google_kms_key_ring.redis[0].id
+  key_ring = data.google_kms_key_ring.redis_cmek[0].id
 }
