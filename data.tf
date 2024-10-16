@@ -2,42 +2,37 @@
 # SPDX-License-Identifier: MPL-2.0
 
 #------------------------------------------------------------------------------
-# Client Config
+# Google client config
 #------------------------------------------------------------------------------
-data "google_client_config" "default" {}
+data "google_client_config" "current" {}
 
 #------------------------------------------------------------------------------
-# VPC Network
+# Google project
 #------------------------------------------------------------------------------
-data "google_compute_network" "vpc" {
-  name    = var.network
-  project = var.network_project_id != null ? var.network_project_id : var.project_id
-}
+data "google_project" "current" {}
 
 #------------------------------------------------------------------------------
-# Availability Zones
+# Availability zones
 #------------------------------------------------------------------------------
 data "google_compute_zones" "up" {
-  project = var.network_project_id != null ? var.network_project_id : var.project_id
+  project = var.vpc_network_project_id != null ? var.vpc_network_project_id : var.project_id
   status  = "UP"
 }
 
 #------------------------------------------------------------------------------
-# Secret Manager
+# Networking
 #------------------------------------------------------------------------------
-data "google_secret_manager_secret_version" "tfe_database_password_secret_id" {
-  count  = var.tfe_database_password_secret_id != null ? 1 : 0
-  secret = var.tfe_database_password_secret_id
+data "google_compute_network" "vpc" {
+  name    = var.vpc_network_name
+  project = var.vpc_network_project_id != null ? var.vpc_network_project_id : var.project_id
 }
-#-----------------------------------------------------------------------------------
-# Image
-#-----------------------------------------------------------------------------------
-data "google_compute_image" "tfe" {
-  name    = var.image_name
-  project = var.image_project
-}
-#-----------------------------------------------------------------------------------
-# service account
-#-----------------------------------------------------------------------------------
 
-data "google_storage_project_service_account" "project" {}
+data "google_compute_subnetwork" "vm_subnet" {
+  name = var.vm_subnet_name
+}
+
+data "google_compute_subnetwork" "lb_subnet" {
+  count = var.lb_subnet_name != null ? 1 : 0
+  
+  name = var.lb_subnet_name
+}

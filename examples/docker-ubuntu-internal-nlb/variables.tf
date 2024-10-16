@@ -1,82 +1,85 @@
 # Copyright (c) HashiCorp, Inc.
 # SPDX-License-Identifier: MPL-2.0
 
-#---------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Common
 #------------------------------------------------------------------------------
 variable "project_id" {
   type        = string
-  description = "ID of GCP Project to create resources in."
+  description = "ID of GCP project to deploy TFE in."
 }
+
 variable "region" {
   type        = string
-  description = "Region of GCP Project to create resources in."
+  description = "GCP region (location) to deploy TFE in."
 }
+
 variable "friendly_name_prefix" {
   type        = string
-  description = "Friendly name prefix used for uniquely naming resources."
+  description = "Friendly name prefix used for uniquely naming all GCP resources for this deployment. Most commonly set to either an environment (e.g. 'sandbox', 'prod'), a team name, or a project name."
+  
   validation {
     condition     = !strcontains(var.friendly_name_prefix, "tfe")
-    error_message = "The prefix should not contain 'tfe'."
+    error_message = "Value must not contain the substring 'tfe' to avoid redundancy in resource naming."
   }
 }
 
 variable "common_labels" {
   type        = map(string)
-  description = "Common labels to apply to GCP resources."
+  description = "Map of common labels to apply to all GCP resources."
   default     = {}
 }
 
 variable "is_secondary_region" {
   type        = bool
-  description = "Boolean indicating whether this TFE deployment is in the 'primary' region or 'secondary' region."
+  description = "Boolean indicating whether this TFE deployment is in your primary region or secondary (disaster recovery) region."
   default     = false
 }
 
 #------------------------------------------------------------------------------
-# TFE bootstrap settings
+# Bootstrap
 #------------------------------------------------------------------------------
 variable "tfe_license_secret_id" {
   type        = string
-  description = "ID of Secrets Manager secret for TFE license file."
+  description = "Name of Google Secret Manager secret for TFE license file."
 }
 
 variable "tfe_tls_cert_secret_id" {
   type        = string
-  description = "ID of Secrets Manager secret for TFE TLS certificate in PEM format. Secret must be stored as a base64-encoded string."
+  description = "Name of Google Secret Manager secret for TFE TLS certificate in PEM format. Secret must be stored as a base64-encoded string."
 }
 
 variable "tfe_tls_privkey_secret_id" {
   type        = string
-  description = "ID of Secrets Manager secret for TFE TLS private key in PEM format. Secret must be stored as a base64-encoded string."
+  description = "Name of Google Secret Manager secret for TFE TLS private key in PEM format. Secret must be stored as a base64-encoded string."
 }
 
 variable "tfe_tls_ca_bundle_secret_id" {
   type        = string
-  description = "ID of Secrets Manager secret for private/custom TLS Certificate Authority (CA) bundle in PEM format. Secret must be stored as a base64-encoded string."
+  description = "Name of Google Secret Manager secret for private/custom TLS Certificate Authority (CA) bundle in PEM format. Secret must be stored as a base64-encoded string."
 }
 
 variable "tfe_encryption_password_secret_id" {
   type        = string
-  description = "ID of Secrets Manager secret for TFE encryption password."
+  description = "Name of Google Secret Manager secret for TFE encryption password."
 }
 
 variable "tfe_image_repository_url" {
   type        = string
-  description = "Repository for the TFE image. Only set this if you are hosting the TFE container image in your own custom repository."
+  description = "URL of container registry where the TFE container image is hosted. Only set this away from the default if you are hosting the TFE container image in your own custom registry."
   default     = "images.releases.hashicorp.com"
 }
 
 variable "tfe_image_name" {
   type        = string
-  description = "Name of the TFE container image. Only set this if you are hosting the TFE container image in your own custom repository."
+  description = "Name of the TFE container image. Only set this away from the default if you are hosting the TFE container image in your own custom registry."
   default     = "hashicorp/terraform-enterprise"
 }
 
 variable "tfe_image_tag" {
   type        = string
-  description = "Tag for the TFE image. This represents the version of TFE to deploy."
-  default     = "v202402-2"
+  description = "Tag (release) for the TFE container image. This represents which version (release) of TFE to deploy."
+  default     = "v202409-3"
 }
 
 variable "tfe_image_repository_username" {
@@ -87,28 +90,54 @@ variable "tfe_image_repository_username" {
 
 variable "tfe_image_repository_password" {
   type        = string
-  description = "Pasword for container registry where TFE container image is hosted. Leave null if using the default TFE registry as the default password is the TFE license file."
+  description = "Pasword for container registry where TFE container image is hosted. Leave as `null` if using the default TFE registry, as the default password is your TFE license file."
   default     = null
-}
 
-variable "docker_version" {
-  type        = string
-  description = "Full Version version string for OS choice while installing Docker to install on TFE GCP instances."
-  default     = "26.1.4-1"
-}
-
-variable "tfe_run_pipeline_image_ecr_repo_name" {
-  type        = string
-  description = "Name of the ECR repository containing your custom TFE run pipeline image."
-  default     = null
+  validation {
+    condition     = var.tfe_image_repository_url != "images.releases.hashicorp.com" ? var.tfe_image_repository_password != null : true
+    error_message = "Value must be set when `tfe_image_repository_url` is not the default TFE registry (`images.releases.hashicorp.com`)."
+  }
 }
 
 #------------------------------------------------------------------------------
-# TFE Configuration Settings
+# TFE configuration settings
 #------------------------------------------------------------------------------
 variable "tfe_fqdn" {
   type        = string
-  description = "Fully qualified domain name of TFE instance. This name should resolve to the load balancer IP address and will be what clients use to access TFE."
+  description = "Fully qualified domain name (FQDN) of TFE instance. This name should resolve to the TFE load balancer IP address and will be what users/clients use to access TFE."
+}
+
+variable "tfe_operational_mode" {
+  type        = string
+  description = "[Operational mode](https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/operation-modes) for TFE. Valid values are `active-active` or `external`."
+  default     = "active-active"
+
+  validation {
+    condition     = var.tfe_operational_mode == "active-active" || var.tfe_operational_mode == "external"
+    error_message = "Value must be `active-active` or `external`."
+  }
+}
+
+variable "tfe_http_port" {
+  type        = number
+  description = "HTTP port for TFE application containers to listen on."
+  default     = 8080
+
+  validation {
+    condition     = var.container_runtime == "podman" ? var.tfe_http_port != 80 : true
+    error_message = "Value must not be `80` when `container_runtime` is `podman` to avoid conflicts."
+  }
+}
+
+variable "tfe_https_port" {
+  type        = number
+  description = "HTTPS port for TFE application containers to listen on."
+  default     = 8443
+
+  validation {
+    condition     = var.container_runtime == "podman" ? var.tfe_https_port != 443 : true
+    error_message = "Value must not be `80` when `container_runtime` is `podman` to avoid conflicts."
+  }
 }
 
 variable "tfe_capacity_concurrency" {
@@ -119,317 +148,316 @@ variable "tfe_capacity_concurrency" {
 
 variable "tfe_capacity_cpu" {
   type        = number
-  description = "Maxium number of CPU cores that a Terraform run is allowed to consume in TFE. Set to `0` for no limit."
+  description = "Maxium number of CPU cores that a Terraform run is allowed to consume on a TFE node. Defaults to `0` which is no limit."
   default     = 0
 }
 
 variable "tfe_capacity_memory" {
   type        = number
-  description = "Maximum amount of memory (in MiB) that a Terraform run is allowed to consume in TFE."
+  description = "Maximum amount of memory (in MiB) that a Terraform run is allowed to consume on a TFE node."
   default     = 2048
 }
 
 variable "tfe_license_reporting_opt_out" {
   type        = bool
-  description = "Boolean to opt out of license reporting."
+  description = "Boolean to opt out of TFE license reporting."
   default     = false
 }
 
-variable "tfe_operational_mode" {
-  type        = string
-  description = "Operational mode for TFE."
-  default     = "active-active"
-
-  validation {
-    condition     = contains(["active-active", "disk", "external"], var.tfe_operational_mode)
-    error_message = "Value must be `disk`, `external` or `active-active`."
-  }
+variable "tfe_usage_reporting_opt_out" {
+  type        = bool
+  description = "Boolean to opt out of TFE usage reporting."
+  default     = false
 }
 
 variable "tfe_run_pipeline_image" {
   type        = string
-  description = "Name of the Docker image to use for the run pipeline driver."
+  description = "Name of container image used to execute Terraform runs on a TFE node. Leave as `null` to use the default agent that ships with TFE."
   default     = null
 }
 
 variable "tfe_metrics_enable" {
   type        = bool
-  description = "Boolean to enable metrics."
+  description = "Boolean to enable TFE metrics collection endpoints."
   default     = false
 }
 
 variable "tfe_metrics_http_port" {
   type        = number
-  description = "HTTP port for TFE metrics scrape."
+  description = "HTTP port for TFE metrics collection endpoint to listen on."
   default     = 9090
 }
 
 variable "tfe_metrics_https_port" {
   type        = number
-  description = "HTTPS port for TFE metrics scrape."
+  description = "HTTPS port for TFE metrics collection endpoint to listen on."
   default     = 9091
 }
 
 variable "tfe_tls_enforce" {
   type        = bool
-  description = "Boolean to enforce TLS."
+  description = "Boolean to enforce TLS, Strict-Transport-Security headers, and secure cookies within TFE."
   default     = false
 }
 
 variable "tfe_vault_disable_mlock" {
   type        = bool
-  description = "Boolean to disable mlock for internal Vault."
+  description = "Boolean to disable mlock for internal (embedded) Vault within TFE."
   default     = false
 }
 
 variable "tfe_hairpin_addressing" {
   type        = bool
-  description = "Boolean to enable hairpin addressing for Layer 4 load balancer with loopback prevention. Only valid when `lb_is_internal` is `false`, as hairpin addressing will automatically be enabled when `lb_is_internal` is `true`, regardless of this setting."
+  description = "Boolean to enable hairpin addressing within TFE container networking for loopback prevention with a layer 4 internal load balancer."
   default     = true
 }
 
 variable "tfe_run_pipeline_docker_network" {
   type        = string
-  description = "Docker network where the containers that execute Terraform runs will be created. The network must already exist, it will not be created automatically. Leave null to use the default network."
+  description = "Name of Docker network where the containers that execute Terraform runs (agents) will be created. The network must already exist, it will not be created automatically. Leave as `null` to use the default network created during the TFE installation."
   default     = null
 }
-variable "tfe_mounted_disk_path" {
-  type        = string
-  description = "(Optional) Path for mounted disk source, defaults to /opt/hashicorp/terraform-enterprise"
-  default     = "/opt/hashicorp/terraform-enterprise/data"
-}
-#------------------------------------------------------------------------------
-#  IAC bootstrap settings
-#------------------------------------------------------------------------------
 
 variable "tfe_iact_subnets" {
-  #	https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/configuration#tfe_iact_subnets
   type        = string
-  description = "Comma-separated list of subnets in CIDR notation that are allowed to retrieve the initial admin creation token via the API, or GUI"
-  default     = ""
+  description = "Comma-separated list of subnets in CIDR notation that are allowed to retrieve the TFE initial admin creation token via the API or web browser."
+  default     = null
 }
+
 variable "tfe_iact_time_limit" {
-  # https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/configuration#tfe_iact_time_limit
-  type        = string
-  description = "Number of minutes that the initial admin creation token can be retrieved via the API after the application starts. Defaults to 60"
-  default     = "60"
-
+  type        = number
+  description = "Number of minutes that the TFE initial admin creation token can be retrieved via the API after the application starts."
+  default     = 60
 }
+
 variable "tfe_iact_trusted_proxies" {
-  #https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/configuration#tfe_iact_trusted_proxies
   type        = string
-  description = "Comma-separated list of subnets in CIDR notation that are allowed to retrieve the initial admin creation token via the API, or GUI"
-  default     = ""
-}
-
-#------------------------------------------------------------------------------
-# Log Forwarding
-#------------------------------------------------------------------------------
-variable "tfe_log_forwarding_enabled" {
-  type        = bool
-  description = "Boolean to enable TFE log forwarding feature."
-  default     = false
-}
-variable "log_fwd_destination_type" {
-  type        = string
-  description = "Type of log forwarding destination. Valid values are `stackdriver` or `custom`."
-  default     = "stackdriver"
-
-  validation {
-    condition     = contains(["stackdriver", "custom"], var.log_fwd_destination_type)
-    error_message = "Supported values are `stackdriver` or `custom`."
-  }
-}
-
-variable "custom_fluent_bit_config" {
-  type        = string
-  description = "Custom Fluent Bit configuration for log forwarding. Only valid when `tfe_log_forwarding_enabled` is `true` and `log_fwd_destination_type` is `custom`."
+  description = "Comma-separated list of proxy IP addresses that are allowed to retrieve the TFE initial admin creation token via the API or web browser."
   default     = null
 }
 
-#-----------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Networking
-#-----------------------------------------------------------------------------------
-variable "network" {
+#------------------------------------------------------------------------------
+variable "vpc_network_name" {
   type        = string
-  description = "The VPC network to host the cluster in"
+  description = "Name of VPC network to deploy TFE in."
 }
 
-variable "network_project_id" {
+variable "vpc_network_project_id" {
   type        = string
-  description = "ID of GCP Project where the existing VPC resides if it is different than the default project."
+  description = "ID of GCP project where the existing VPC network resides, if it is different than the `project_id` where TFE will be deployed."
   default     = null
 }
-variable "subnet" {
-  type        = string
-  description = "Existing VPC subnet for TFE instance(s) and optionally TFE frontend load balancer."
-}
 
-variable "http_proxy" {
+variable "lb_subnet_name" {
   type        = string
-  description = "Proxy address to configure for TFE to use for outbound connections."
-  default     = ""
-}
-
-variable "extra_no_proxy" {
-  type        = string
-  description = "A comma-separated string of hostnames or IP addresses to configure for TFE no_proxy list."
-  default     = ""
-}
-
-variable "load_balancing_scheme" {
-  type        = string
-  description = "Determines whether load balancer is internal-facing or external-facing."
-  default     = "external"
+  description = "Name of VPC subnet to deploy TFE load balancer in. This can be the same subnet as the VM subnet if you do not wish to provide a separate subnet for the load balancer. Only applicable when `lb_is_internal` is `true`. Must be `null` when `lb_is_internal` is `false`."
+  default     = null
 
   validation {
-    condition     = contains(["external", "internal"], var.load_balancing_scheme)
-    error_message = "Supported values are `external`, `internal`."
+    condition     = !var.lb_is_internal ? var.lb_subnet_name == null : true
+    error_message = "Value must be `null` when `lb_is_internal` is `false`."
   }
 }
 
-variable "create_cloud_dns_record" {
+variable "vm_subnet_name" {
+  type        = string
+  description = "Name of VPC subnet to deploy TFE GCE VM instances in."
+}
+
+variable "lb_is_internal" {
   type        = bool
-  description = "Boolean to create Google Cloud DNS record for `tfe_fqdn` resolving to load balancer IP. `cloud_dns_managed_zone` is required when `true`."
+  description = "Boolean to create an internal GCP load balancer for TFE."
+  default     = true
+}
+
+variable "lb_static_ip_address" {
+  type        = string
+  description = "Static IP address to assign to TFE load balancer forwarding rule (front end) when `lb_is_internal` is `true`. Must be a valid IP address within `vm_subnet_name`. If not set, an available IP address will automatically be selected."
+  default     = null
+
+  validation {
+    condition     = !var.lb_is_internal ? var.lb_static_ip_address == null : true
+    error_message = "Value must be `null` when `lb_is_internal` is `false`. This setting is for internal load balancers only."
+  }
+}
+
+variable "cidr_allow_ingress_tfe_443" {
+  type        = list(string)
+  description = "List of CIDR ranges to allow TCP/443 (HTTPS) inbound to TFE load balancer."
+  default     = null
+}
+
+variable "cidr_allow_ingress_vm_ssh" {
+  type        = list(string)
+  description = "List of CIDR ranges to allow TCP/22 (SSH) inbound to TFE GCE instances."
+  default     = null
+}
+
+variable "allow_ingress_vm_ssh_from_iap" {
+  type        = bool
+  description = "Boolean to create firewall rule to allow TCP/22 (SSH) inbound to TFE GCE instances from Google Cloud IAP CIDR block."
+  default     = true
+}
+
+variable "cidr_allow_ingress_tfe_metrics" {
+  type        = list(string)
+  description = "List of CIDR ranges to allow TCP/9090 (HTTP) and TCP/9091 (HTTPS) inbound to TFE metrics collection endpoint."
+  default     = null
+}
+
+#------------------------------------------------------------------------------
+# DNS
+#------------------------------------------------------------------------------
+variable "create_tfe_cloud_dns_record" {
+  type        = bool
+  description = "Boolean to create Google Cloud DNS record for TFE using the value of `tfe_fqdn` as the record name, resolving to the load balancer IP. `cloud_dns_managed_zone_name` is required when `true`."
   default     = false
 }
 
-variable "cloud_dns_managed_zone" {
+variable "cloud_dns_managed_zone_name" {
   type        = string
-  description = "Zone name to create TFE Cloud DNS record in if `create_cloud_dns_record` is set to `true`."
+  description = "Name of Google Cloud DNS managed zone to create TFE DNS record in. Required when `create_tfe_cloud_dns_record` is `true`."
   default     = null
+
+  validation {
+    condition     = var.create_tfe_cloud_dns_record ? var.cloud_dns_managed_zone_name != null : true
+    error_message = "Value must be set when `create_tfe_cloud_dns_record` is `true`."
+  }
 }
 
-#-----------------------------------------------------------------------------------
-# Firewall
-#-----------------------------------------------------------------------------------
-variable "cidr_ingress_ssh_allow" {
-  type        = list(string)
-  description = "CIDR ranges to allow SSH traffic inbound to TFE instance(s) via IAP tunnel."
-  default     = ["10.0.0.0/16"]
-
-}
-
-variable "cidr_ingress_https_allow" {
-  type        = list(string)
-  description = "CIDR ranges to allow HTTPS traffic inbound to TFE instance(s)."
-  default     = ["0.0.0.0/0"]
-}
-
-#-----------------------------------------------------------------------------------
-# Encryption Keys (KMS)
-#-----------------------------------------------------------------------------------
-variable "gcs_bucket_keyring_name" {
-  type        = string
-  description = "Name of KMS Key Ring that contains KMS key to use for gcs bucket encryption. Geographic location of key ring must match `gcs_bucket_location`."
-  default     = null
-}
-
-variable "gcs_bucket_key_name" {
-  type        = string
-  description = "Name of KMS Key to use for gcs bucket encryption."
-  default     = null
-}
-
-variable "postgres_keyring_name" {
-  type        = string
-  description = "Name of KMS Key Ring that contains KMS key to use for Cloud SQL for PostgreSQL database encryption. Geographic location of key ring must match location of database instance."
-  default     = null
-}
-
-variable "postgres_key_name" {
-  type        = string
-  description = "Name of KMS Key to use for Cloud SQL for PostgreSQL encryption."
-  default     = null
-}
-
-#-----------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Compute
-#-----------------------------------------------------------------------------------
-variable "image_project" {
+#------------------------------------------------------------------------------
+variable "container_runtime" {
   type        = string
-  description = "ID of project in which the resource belongs."
+  description = "Container runtime to use for TFE deployment. Supported values are `docker` or `podman`."
+  default     = "docker"
+
+  validation {
+    condition     = var.container_runtime == "docker" || var.container_runtime == "podman"
+    error_message = "Valid values are `docker` or `podman`."
+  }
+}
+
+variable "docker_version" {
+  type        = string
+  description = "Version of Docker to install on TFE GCE VM instances."
+  default     = "26.1.4-1"
+}
+
+variable "gce_image_project" {
+  type        = string
+  description = "ID of project in which the TFE GCE VM image belongs."
   default     = "ubuntu-os-cloud"
 }
 
-variable "image_name" {
+variable "gce_image_name" {
   type        = string
-  description = "VM image for TFE instance(s)."
-  default     = "ubuntu-2404-noble-amd64-v20240607"
+  description = "VM image for TFE GCE instances."
+  default     = "ubuntu-pro-2404-noble-amd64-v20241004"
 }
 
-variable "machine_type" {
+variable "gce_machine_type" {
   type        = string
-  description = "(Optional string) Size of machine to create. Default `n2-standard-4` from https://cloud.google.com/compute/docs/machine-resource."
+  description = "Machine type (size) of TFE GCE VM instances."
   default     = "n2-standard-4"
-  # regional dependancy https://gcloud-compute.com/n2-standard-4.html
 }
 
-variable "disk_size_gb" {
+variable "gce_disk_size_gb" {
   type        = number
-  description = "Size in Gigabytes of root disk of TFE instance(s)."
+  description = "Size in gigabytes of root disk of TFE GCE VM instances."
   default     = 50
 }
 
-variable "instance_count" {
-  type        = number
-  description = "Target size of Managed Instance Group for number of TFE instances to run. Only specify a value greater than 1 if `enable_active_active` is set to `true`."
-  default     = 1
+variable "gce_ssh_public_key" {
+  type        = string
+  description = "SSH public key to add to TFE GCE VM instances for SSH access. Generally not needed if using Google IAP for SSH."
+  default     = null
 }
 
-variable "initial_delay_sec" {
+variable "mig_instance_count" {
   type        = number
-  description = "The number of seconds that the managed instance group waits before it applies autohealing policies to new instances or recently recreated instances"
-  default     = 1200
-}
-variable "tfe_user_data_template" {
-  type        = string
-  description = "(optional) File name for user_data_template.sh.tpl file in `./templates folder` no path required"
-  default     = "tfe_user_data.sh.tpl"
+  description = "Desired number of TFE GCE instances to run in managed instance group. Must be `1` when `tfe_operational_mode` is `external`."
+  default     = 1
+
   validation {
-    condition     = can(fileexists("../../templates/${var.tfe_user_data_template}") || fileexists("./templates/${var.tfe_user_data_template}"))
-    error_message = "File `./templates/${var.tfe_user_data_template}` not found or not readable"
+    condition     = var.tfe_operational_mode == "external" ? var.mig_instance_count == 1 : true
+    error_message = "Value must be `1` when `tfe_operational_mode` is `external`."
   }
 }
-variable "enable_iap" {
-  type        = bool
-  default     = true
-  description = "(Optional bool) Enable https://cloud.google.com/iap/docs/using-tcp-forwarding#console, defaults to `true`. "
+
+variable "mig_initial_delay_sec" {
+  type        = number
+  description = "Number of seconds for managed instance group to wait before applying autohealing policies to new GCE instances in managed instance group."
+  default     = 900
 }
-#-----------------------------------------------------------------------------------
+
+variable "custom_tfe_startup_script_template" {
+  type        = string
+  description = "Name of custom TFE startup script template file. File must exist within a directory named `./templates` within your current working directory."
+  default     = null
+
+  validation {
+    condition     = var.custom_tfe_startup_script_template != null ? fileexists("${path.cwd}/templates/${var.custom_tfe_startup_script_template}") : true
+    error_message = "File not found. Ensure the file exists within a directory named `./templates` within your current working directory."
+  }
+}
+
+#------------------------------------------------------------------------------
 # Cloud SQL for PostgreSQL
-#-----------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 variable "tfe_database_password_secret_id" {
   type        = string
-  description = "ID of secret stored in GCP Secrets Manager containing TFE install secrets."
-  default     = null
-  validation {
-    condition     = contains(["active-active", "external"], var.tfe_operational_mode) ? var.tfe_database_password_secret_id != null : true
-    error_message = "`tfe_database_password_secret_id` must be provided when var.tfe_operational_mode is set to one of `active-active` or `external` "
-  }
+  description = "Name of PostgreSQL database password secret to retrieve from Google Secret Manager."
 }
 
-variable "postgres_extra_params" {
+variable "tfe_database_name" {
   type        = string
-  description = "Parameter keyword/value pairs to support additional PostgreSQL parameters that may be necessary."
+  description = "Name of TFE PostgreSQL database to create."
+  default     = "tfe"
+}
+
+variable "tfe_database_user" {
+  type        = string
+  description = "Name of TFE PostgreSQL database user to create."
+  default     = "tfe"
+}
+
+variable "tfe_database_parameters" {
+  type        = string
+  description = "Additional parameters to pass into the TFE database settings for the PostgreSQL connection URI."
   default     = "sslmode=require"
+}
+
+variable "tfe_database_reconnect_enabled" {
+  type        = bool
+  description = "Boolean to enable database reconnection in the event of a TFE PostgreSQL database cluster failover."
+  default     = true
 }
 
 variable "postgres_version" {
   type        = string
   description = "PostgreSQL version to use."
-  default     = "POSTGRES_15"
+  default     = "POSTGRES_16"
+}
+
+variable "postgres_deletetion_protection" {
+  type        = bool
+  description = "Boolean to enable deletion protection for Cloud SQL for PostgreSQL instance."
+  default     = false
 }
 
 variable "postgres_availability_type" {
   type        = string
-  description = "Availability type of Cloud SQL PostgreSQL instance."
+  description = "Availability type of Cloud SQL for PostgreSQL instance."
   default     = "REGIONAL"
 }
 
 variable "postgres_machine_type" {
   type        = string
-  description = "Machine size of Cloud SQL PostgreSQL instance."
+  description = "Machine size of Cloud SQL for PostgreSQL instance."
   default     = "db-custom-4-16384"
 }
 
@@ -441,35 +469,99 @@ variable "postgres_disk_size" {
 
 variable "postgres_backup_start_time" {
   type        = string
-  description = "HH:MM time format indicating when daily automatic backups should run."
+  description = "HH:MM time format indicating when daily automatic backups of Cloud SQL for PostgreSQL should run. Defaults to 12 AM (midnight) UTC."
   default     = "00:00"
 }
 
-#-----------------------------------------------------------------------------------
-# Cloud Storage Bucket
-#-----------------------------------------------------------------------------------
-variable "gcs_bucket_location" {
+variable "postgres_ssl_mode" {
   type        = string
-  description = "[Optional one of `ca`,`us`, `europe`, `asia`,`au`,`nam-eur-asia1`] Location for GCS bucket.  All regions are multi-region https://cloud.google.com/kms/docs/locations"
-  default     = "us"
+  description = "Indicates whether to enforce TLS/SSL connections to the Cloud SQL for PostgreSQL instance."
+  default     = "ENCRYPTED_ONLY"
+}
+
+variable "postgres_maintenance_window" {
+  type = object({
+    day          = number
+    hour         = number
+    update_track = string
+  })
+  description = "Optional maintenance window settings for the Cloud SQL for PostgreSQL instance."
+  default = {
+    day          = 7 # default to Sunday
+    hour         = 0 # default to midnight
+    update_track = "stable"
+  }
+
   validation {
-    condition     = can(anytrue([contains(["ca", "us", "europe", "asia", "au", "nam-eur-asia1"], var.gcs_bucket_location), var.gcs_bucket_location == null]))
-    error_message = "Supported values are `ca`,`us`, `europe`, `asia`,`au`,`nam-eur-asia1`; all regions are multi-region https://cloud.google.com/kms/docs/locations"
+    condition     = var.postgres_maintenance_window.day >= 0 && var.postgres_maintenance_window.day <= 7
+    error_message = "`day` must be an integer between 0 and 7 (inclusive)."
+  }
+
+  validation {
+    condition     = var.postgres_maintenance_window.hour >= 0 && var.postgres_maintenance_window.hour <= 23
+    error_message = "`hour` must be an integer between 0 and 23 (inclusive)."
+  }
+
+  validation {
+    condition     = contains(["stable", "canary", "week5"], var.postgres_maintenance_window.update_track)
+    error_message = "`update_track` must be either 'canary', 'stable', or 'week5'."
   }
 }
+
+variable "postgres_insights_config" {
+  type = object({
+    query_insights_enabled  = bool
+    query_plans_per_minute  = number
+    query_string_length     = number
+    record_application_tags = bool
+    record_client_address   = bool
+  })
+  description = "Configuration settings for Cloud SQL for PostgreSQL insights."
+  default = {
+    query_insights_enabled  = false
+    query_plans_per_minute  = 5
+    query_string_length     = 1024
+    record_application_tags = false
+    record_client_address   = false
+  }
+}
+
+#------------------------------------------------------------------------------
+# Google Cloud Storage (GCS) bucket
+#------------------------------------------------------------------------------
+variable "gcs_location" {
+  type        = string
+  description = "Location of TFE GCS bucket to create."
+  default     = "US"
+
+  validation { 
+    condition     = var.gcs_storage_class == "MULTI_REGIONAL" ? contains(["US", "EU", "ASIA"], var.gcs_location) : true
+    error_message = "Supported values are 'US', 'EU', and 'ASIA' when `gcs_storage_class` is `MULTI_REGIONAL`."
+ }
+}
+
+variable "gcs_storage_class" {
+  type        = string
+  description = "Storage class of TFE GCS bucket."
+  default     = "MULTI_REGIONAL"
+}
+
+variable "gcs_uniform_bucket_level_access" {
+  type        = bool
+  description = "Boolean to enable uniform bucket level access on TFE GCS bucket."
+  default     = true
+}
+
 variable "gcs_force_destroy" {
   type        = bool
-  description = "Boolean indicating whether to allow force destroying the gcs bucket. If set to `true` the gcs bucket can be destroyed if it is not empty."
+  description = "Boolean indicating whether to allow force destroying the TFE GCS bucket. GCS bucket can be destroyed if it is not empty when `true`."
   default     = false
 }
 
-#-----------------------------------------------------------------------------------
-# Redis
-#-----------------------------------------------------------------------------------
-variable "enable_active_active" {
+variable "gcs_versioning_enabled" {
   type        = bool
-  description = "Boolean indicating whether to deploy TFE in the Active:Active architecture using external Redis."
-  default     = false
+  description = "Boolean to enable versioning on TFE GCS bucket."
+  default     = true
 }
 
 #------------------------------------------------------------------------------
@@ -484,7 +576,7 @@ variable "redis_tier" {
 variable "redis_version" {
   type        = string
   description = "The version of Redis software."
-  default     = "REDIS_6_X"
+  default     = "REDIS_7_2"
 }
 
 variable "redis_memory_size_gb" {
@@ -501,8 +593,13 @@ variable "redis_auth_enabled" {
 
 variable "redis_transit_encryption_mode" {
   type        = string
-  description = "Boolean to enable TLS for Redis instance."
+  description = "Determines transit encryption (TLS) mode for Redis instance."
   default     = "DISABLED"
+
+  validation {
+    condition     = var.redis_transit_encryption_mode == "SERVER_AUTHENTICATION" || var.redis_transit_encryption_mode == "DISABLED"
+    error_message = "Value must either be 'SERVER_AUTHENTICATION' or 'DISABLED'."
+  }
 }
 
 variable "redis_connect_mode" {
@@ -511,19 +608,72 @@ variable "redis_connect_mode" {
   default     = "PRIVATE_SERVICE_ACCESS"
 
   validation {
-    condition = contains(["PRIVATE_SERVICE_ACCESS", "DIRECT_PEERING"], var.redis_connect_mode)
-    #condition     = var.redis_connect_mode == "PRIVATE_SERVICE_ACCESS" || var.redis_connect_mode == "DIRECT_PEERING"
-    error_message = "Invalid value for redis_connect_mode. Allowed values are 'PRIVATE_SERVICE_ACCESS' or 'DIRECT_PEERING'."
+    condition     = var.redis_connect_mode == "PRIVATE_SERVICE_ACCESS" || var.redis_connect_mode == "DIRECT_PEERING"
+    error_message = "Invalid value. Valid values are 'PRIVATE_SERVICE_ACCESS' or 'DIRECT_PEERING'."
   }
 }
 
-#-----------------------------------------------------------------------------------
-# Verbose
-#-----------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+# KMS customer managed encryption keys (CMEK)
+#------------------------------------------------------------------------------
+variable "postgres_kms_keyring_name" {
+  type        = string
+  description = "Name of Cloud KMS Key Ring that contains KMS key to use for Cloud SQL for PostgreSQL. Geographic location (region) of key ring must match the location of the TFE Cloud SQL for PostgreSQL database instance."
+  default     = null
+}
 
-variable "verbose_template" {
+variable "postgres_kms_cmek_name" {
+  type        = string
+  description = "Name of Cloud KMS customer managed encryption key (CMEK) to use for Cloud SQL for PostgreSQL database instance."
+  default     = null
+}
+
+variable "gcs_kms_keyring_name" {
+  type        = string
+  description = "Name of Cloud KMS key ring that contains KMS customer managed encryption key (CMEK) to use for TFE GCS bucket encryption. Geographic location (region) of the key ring must match the location of the TFE GCS bucket."
+  default     = null
+}
+
+variable "gcs_kms_cmek_name" {
+  type        = string
+  description = "Name of Cloud KMS customer managed encryption key (CMEK) to use for TFE GCS bucket encryption."
+  default     = null
+}
+
+variable "redis_kms_keyring_name" {
+  type        = string
+  description = "Name of Cloud KMS key ring that contains KMS customer managed encryption key (CMEK) to use for TFE Redis instance. Geographic location (region) of key ring must match the location of the TFE Redis instance."
+  default     = null
+}
+
+variable "redis_kms_cmek_name" {
+  type        = string
+  description = "Name of Cloud KMS customer managed encryption key (CMEK) to use for TFE Redis instance."
+  default     = null
+}
+
+#------------------------------------------------------------------------------
+# Log forwarding
+#------------------------------------------------------------------------------
+variable "tfe_log_forwarding_enabled" {
   type        = bool
-  description = "[Optional bool] Enables the user_data template to be output in full for debug and review purposes."
+  description = "Boolean to enable TFE log forwarding configuration via Fluent Bit."
   default     = false
 }
 
+variable "log_fwd_destination_type" {
+  type        = string
+  description = "Type of log forwarding destination for Fluent Bit. Valid values are `stackdriver` or `custom`."
+  default     = "stackdriver"
+
+  validation {
+    condition     = contains(["stackdriver", "custom"], var.log_fwd_destination_type)
+    error_message = "Supported values are `stackdriver` or `custom`."
+  }
+}
+
+variable "custom_fluent_bit_config" {
+  type        = string
+  description = "Custom Fluent Bit configuration for log forwarding. Only valid when `tfe_log_forwarding_enabled` is `true` and `log_fwd_destination_type` is `custom`."
+  default     = null
+}
