@@ -84,7 +84,7 @@ output "tfe_redis_host" {
 
 output "tfe_redis_use_auth" {
   value       = var.tfe_operational_mode == "active-active" ? var.redis_auth_enabled : null
-  description = "Whether TFE Redis instance uses authentication."
+  description = "Whether TFE should use authentication to connect to Redis instance."
 }
 
 output "tfe_redis_user" {
@@ -100,6 +100,6 @@ output "tfe_redis_password" {
 
 output "tfe_redis_use_tls" {
   value       = var.tfe_operational_mode == "active-active" ? local.startup_script_args["tfe_redis_use_tls"] : null
-  description = "Whether"
+  description = "Whether TFE should use TLS to connect to Redis instance."
 }
 
