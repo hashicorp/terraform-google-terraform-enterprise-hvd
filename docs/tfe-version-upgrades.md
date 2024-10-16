@@ -9,7 +9,7 @@ This module includes an input variable named `tfe_image_tag` that dictates which
 1. Determine your desired version of TFE from the [Terraform Enterprise Releases](https://developer.hashicorp.com/terraform/enterprise/releases) documentation page. The value that you need will be in the **Version** column of the table that is displayed. Ensure you are on the correct tab of the table based on the container runtime you have chosen for your deployment (Docker or Podman). When determing your target TFE version to upgrade to, be sure to check if there are any required releases to upgrade to first in between your current and target version (denoted by a `*` character in the table).
 
 2. During a maintenance window, connect to one of your existing TFE GCE VM instances and gracefully drain the node(s) from being able to execute any new Terraform runs.
-   
+
    Access the TFE command line (`tfectl`) with Docker:
 
    ```shell-session

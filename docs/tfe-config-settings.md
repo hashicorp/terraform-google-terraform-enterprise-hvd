@@ -2,7 +2,7 @@
 
 There are various configuration settings that can be applied when deploying or managing your TFE instance. For a comprehensive list of available settings and their descriptions, refer to the [Terraform Enterprise configuration reference](https://developer.hashicorp.com/terraform/enterprise/deploy/reference/configuration) documentation. This will be referred to as the _configuration reference_ throughout this document.
 
-This module provides input variables that correspond to _most of_ the available, applicable settings from the configuration reference. Almost all of these input variables have default values, so they are not included as inputs within the module blocks of the Terraform configurations in the [example scenarios](../examples/).
+This module provides input variables that correspond to _most of_ the available, applicable settings from the configuration reference. Almost all of these input variables have default values, so they are not included as inputs within the module blocks of the Terraform configurations in `./examples/`.
 
 ## Manage Your TFE Settings
 
@@ -19,14 +19,15 @@ To include a setting from the configuration reference in your TFE deployment, fo
 Let's say you want to set the maximum number of Terraform runs allowed on your TFE node. Here are your steps:
 
 1. You identified this setting exists on the [Terraform Enterprise configuration reference](https://developer.hashicorp.com/terraform/enterprise/deploy/reference/configuration) under the name `TFE_CAPACITY_CONCURRENCY`.
-   
+
 2. You found the corresponding input variable exists in `variables.tf`, named `tfe_capacity_currency`.
-   
+
 3. You identified the default value of `tfe_capacity_currency` within `variables.tf` is set to `10`, but you want to increase it to `15`.
-   
+
 4. You updated your Terraform configuration managing your TFE deployment accordingly:
 
    **main.tf**:
+
    ```hcl
    module "tfe" {
      ...
@@ -36,6 +37,7 @@ Let's say you want to set the maximum number of Terraform runs allowed on your T
    ```
 
    **terraform.tfvars**:
+
    ```hcl
    ...
    tfe_capacity_currency = 15

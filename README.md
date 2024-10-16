@@ -19,9 +19,9 @@ Terraform module aligned with HashiCorp Validated Designs (HVD) to deploy Terraf
 ### Networking
 
 - GCP VPC network with the following:
-  - VM subnet for TFE GCE instances to reside with Private Google Access enabled (refer to the [prereqs reference](./docs/prereqs.md#vm-subnet-with-private-google-access) for more details)
+  - VM subnet for TFE GCE instances to reside with Private Google Access enabled (refer to `./docs/prereqs.md#vm-subnet-with-private-google-access` for more details)
   - (Optional) Load balancer subnet (can be the same as VM subnet if desired; only used when `lb_is_internal` is `true`)
-  - Private Service Access (PSA) configured in VPC network for service `servicenetworking.googleapis.com` (refer to the [prereqs reference](./docs/prereqs.md#private-service-access-psa) for more details)
+  - Private Service Access (PSA) configured in VPC network for service `servicenetworking.googleapis.com` (refer to `./docs/prereqs.md#private-service-access-psa` for more details)
 - Chosen fully qualified domain name (FQDN) for your TFE instance (_e.g._ `tfe.gcp.example.com`)
 - (Optional) Google Cloud DNS zone for optional TFE DNS record creation
 
@@ -45,14 +45,14 @@ The following _bootstrap_ secrets stored in Google Secret Manager in order to bo
 - **TFE TLS certificate private key** - private key file in PEM format, base64-encoded into a string, and stored as a secret
 - **TFE TLS CA bundle** - Ca bundle file in PEM format, base64-encoded into a string, and stored as a secret
 
-Refer to the [prereqs reference](./docs/prereqs.md#tfe-bootstrap-secrets) for more details on how the secrets should be created and stored.
+Refer to `./docs/prereqs.md#tfe-bootstrap-secrets` for more details on how the secrets should be created and stored.
 
 ### Compute
 
 One of the following mechanisms for shell access to TFE GCE VM instances:
 
 - Ability to enable [IAP TCP forwarding](https://cloud.google.com/iap/docs/using-tcp-forwarding#console) (enabled by default - managed via [allow_ingress_vm_ssh_from_iap](#input_allow_ingress_vm_ssh_from_iap))
--  GCE SSH key pair (use this if you do not want to SSH via IAP TCP forwarding)
+- GCE SSH key pair (use this if you do not want to SSH via IAP TCP forwarding)
 
 ### Log forwarding (optional)
 
@@ -61,17 +61,15 @@ One of the following logging destinations:
 - Stackdriver (no action needed)
 - A custom Fluent Bit configuration that will forward logs to your custom log destination
 
----
-
 ## Usage
 
 1. Create/configure/validate the applicable [prerequisites](#prerequisites).
 
-2. Nested within the [examples](./examples/) directory are subdirectories containing ready-made Terraform configurations for example scenarios on how to call and deploy this module. To get started, choose the example scenario that most closely matches your requirements. You can customize your deployment later by adding additional module [inputs](#inputs) as you see fit (see the [Deployment-Customizations](./docs/deployment-customizations.md) doc for more details).
+2. Nested within the `./examples/` directory are subdirectories containing ready-made Terraform configurations for example scenarios on how to call and deploy this module. To get started, choose the example scenario that most closely matches your requirements. You can customize your deployment later by adding additional module [inputs](#inputs) as you see fit (see `./docs/deployment-customizations.md` for more details).
 
 3. Copy all of the Terraform files from your example scenario of choice into a new destination directory to create your Terraform configuration that will manage your TFE deployment. This is a common directory structure for managing multiple TFE deployments:
 
-    ```
+    ```pre
     .
     └── environments
         ├── production
@@ -98,50 +96,55 @@ One of the following logging destinations:
 
 7. After your `terraform apply` finishes successfully, you can monitor the installation progress by connecting to your TFE gcp instance shell via SSH or GCP IAP and observing the meta data script(user_data) logs:<br>
 
-   Higher-level logs:
+    Higher-level logs:
 
-   ```shell-session
-   tail -f /var/log/tfe-cloud-init.log
-   ```
+    ```shell-session
+    tail -f /var/log/tfe-cloud-init.log
+    ```
 
-   Lower-level logs:
+    Lower-level logs:
 
-   ```shell-session
-   journalctl -xu google-startup-scripts -f
-   ```
+    ```shell-session
+    journalctl -xu google-startup-scripts -f
+    ```
 
-   >📝 Note: The `-f` argument is to follow the logs as they append in real-time, and is optional. You may remove the `-f` for a static view.
+    >📝 Note: The `-f` argument is to follow the logs as they append in real-time, and is optional. You may remove the `-f` for a static view.
 
-   The log files should display the following message after the startup script (_tfe_startup_script.sh_) finishes successfully:
+    The log files should display the following message after the startup script (_tfe_startup_script.sh_) finishes successfully:
 
-   ```shell-session
-   [INFO] - tfe_startup_script finished successfully!
-   ```
+    ```shell-session
+    [INFO] - tfe_startup_script finished successfully!
+    ```
 
 8. After the startup script (_tfe_startup_script.sh_) finishes successfully, while still connected to the TFE GCE instance shell, you can check the health status of TFE:
 
-   ```shell-session
-   cd /etc/tfe
-   sudo docker compose exec tfe tfe-health-check-status
-   ```
+    ```shell-session
+    cd /etc/tfe
+    sudo docker compose exec tfe tfe-health-check-status
+    ```
 
 9. Follow the steps [here](https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/initial-admin-user) to create the TFE initial admin user.
 
----
-
 ## Docs
 
-Below are links to various docs related to the customization and management of your TFE deployment:
+Within the `./docs/` folder there is additional guidance on customization and management of your TFE deployment:
 
-- [Deployment Customizations](./docs/deployment-customizations.md)
-- [Prereqs Reference](./docs/prereqs.md)
-- [TFE TLS Certificate Rotation](./docs/tfe-cert-rotation.md)
-- [TFE Configuration Settings](./docs/tfe-config-settings.md)
-- [TFE Version Upgrades](./docs/tfe-version-upgrades.md)
-
----
+- Deployment Customizations: `./docs/deployment-customizations.md`
+- Prereqs Reference: `./docs/prereqs.md`
+- TFE TLS Certificate Rotation: `./docs/tfe-cert-rotation.md`
+- TFE Configuration Settings: `./docs/tfe-config-settings.md`
+- TFE Version Upgrades: `./docs/tfe-version-upgrades.md`
 
 <!-- BEGIN_TF_DOCS -->
+## Module support
+
+This open source software is maintained by the HashiCorp Technical Field Organization, independently of our enterprise products. While our Support Engineering team provides dedicated support for our enterprise offerings, this open source software is not included.
+
+- For help using this open source software, please engage your account team.
+- To report bugs/issues with this open source software, please open them directly against this code repository using the GitHub issues feature.
+
+Please note that there is no official Service Level Agreement (SLA) for support of this software as a HashiCorp customer. This software falls under the definition of Community Software/Versions in your Agreement. We appreciate your understanding and collaboration in improving our open source projects.
+
 ## Requirements
 
 | Name | Version |
@@ -219,18 +222,6 @@ Below are links to various docs related to the customization and management of y
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_friendly_name_prefix"></a> [friendly\_name\_prefix](#input\_friendly\_name\_prefix) | Friendly name prefix used for uniquely naming all GCP resources for this deployment. Most commonly set to either an environment (e.g. 'sandbox', 'prod'), a team name, or a project name. | `string` | n/a | yes |
-| <a name="input_project_id"></a> [project\_id](#input\_project\_id) | ID of GCP project to deploy TFE in. | `string` | n/a | yes |
-| <a name="input_region"></a> [region](#input\_region) | GCP region (location) to deploy TFE in. | `string` | n/a | yes |
-| <a name="input_tfe_database_password_secret_id"></a> [tfe\_database\_password\_secret\_id](#input\_tfe\_database\_password\_secret\_id) | Name of PostgreSQL database password secret to retrieve from Google Secret Manager. | `string` | n/a | yes |
-| <a name="input_tfe_encryption_password_secret_id"></a> [tfe\_encryption\_password\_secret\_id](#input\_tfe\_encryption\_password\_secret\_id) | Name of Google Secret Manager secret for TFE encryption password. | `string` | n/a | yes |
-| <a name="input_tfe_fqdn"></a> [tfe\_fqdn](#input\_tfe\_fqdn) | Fully qualified domain name (FQDN) of TFE instance. This name should resolve to the TFE load balancer IP address and will be what users/clients use to access TFE. | `string` | n/a | yes |
-| <a name="input_tfe_license_secret_id"></a> [tfe\_license\_secret\_id](#input\_tfe\_license\_secret\_id) | Name of Google Secret Manager secret for TFE license file. | `string` | n/a | yes |
-| <a name="input_tfe_tls_ca_bundle_secret_id"></a> [tfe\_tls\_ca\_bundle\_secret\_id](#input\_tfe\_tls\_ca\_bundle\_secret\_id) | Name of Google Secret Manager secret for private/custom TLS Certificate Authority (CA) bundle in PEM format. Secret must be stored as a base64-encoded string. | `string` | n/a | yes |
-| <a name="input_tfe_tls_cert_secret_id"></a> [tfe\_tls\_cert\_secret\_id](#input\_tfe\_tls\_cert\_secret\_id) | Name of Google Secret Manager secret for TFE TLS certificate in PEM format. Secret must be stored as a base64-encoded string. | `string` | n/a | yes |
-| <a name="input_tfe_tls_privkey_secret_id"></a> [tfe\_tls\_privkey\_secret\_id](#input\_tfe\_tls\_privkey\_secret\_id) | Name of Google Secret Manager secret for TFE TLS private key in PEM format. Secret must be stored as a base64-encoded string. | `string` | n/a | yes |
-| <a name="input_vm_subnet_name"></a> [vm\_subnet\_name](#input\_vm\_subnet\_name) | Name of VPC subnet to deploy TFE GCE VM instances in. | `string` | n/a | yes |
-| <a name="input_vpc_network_name"></a> [vpc\_network\_name](#input\_vpc\_network\_name) | Name of VPC network to deploy TFE in. | `string` | n/a | yes |
 | <a name="input_allow_ingress_vm_ssh_from_iap"></a> [allow\_ingress\_vm\_ssh\_from\_iap](#input\_allow\_ingress\_vm\_ssh\_from\_iap) | Boolean to create firewall rule to allow TCP/22 (SSH) inbound to TFE GCE instances from Google Cloud IAP CIDR block. | `bool` | `true` | no |
 | <a name="input_cidr_allow_ingress_tfe_443"></a> [cidr\_allow\_ingress\_tfe\_443](#input\_cidr\_allow\_ingress\_tfe\_443) | List of CIDR ranges to allow TCP/443 (HTTPS) inbound to TFE load balancer. | `list(string)` | `null` | no |
 | <a name="input_cidr_allow_ingress_tfe_metrics"></a> [cidr\_allow\_ingress\_tfe\_metrics](#input\_cidr\_allow\_ingress\_tfe\_metrics) | List of CIDR ranges to allow TCP/9090 (HTTP) and TCP/9091 (HTTPS) inbound to TFE metrics collection endpoint. | `list(string)` | `null` | no |
@@ -242,6 +233,7 @@ Below are links to various docs related to the customization and management of y
 | <a name="input_custom_fluent_bit_config"></a> [custom\_fluent\_bit\_config](#input\_custom\_fluent\_bit\_config) | Custom Fluent Bit configuration for log forwarding. Only valid when `tfe_log_forwarding_enabled` is `true` and `log_fwd_destination_type` is `custom`. | `string` | `null` | no |
 | <a name="input_custom_tfe_startup_script_template"></a> [custom\_tfe\_startup\_script\_template](#input\_custom\_tfe\_startup\_script\_template) | Name of custom TFE startup script template file. File must exist within a directory named `./templates` within your current working directory. | `string` | `null` | no |
 | <a name="input_docker_version"></a> [docker\_version](#input\_docker\_version) | Version of Docker to install on TFE GCE VM instances. | `string` | `"26.1.4-1"` | no |
+| <a name="input_friendly_name_prefix"></a> [friendly\_name\_prefix](#input\_friendly\_name\_prefix) | Friendly name prefix used for uniquely naming all GCP resources for this deployment. Most commonly set to either an environment (e.g. 'sandbox', 'prod'), a team name, or a project name. | `string` | n/a | yes |
 | <a name="input_gce_disk_size_gb"></a> [gce\_disk\_size\_gb](#input\_gce\_disk\_size\_gb) | Size in gigabytes of root disk of TFE GCE VM instances. | `number` | `50` | no |
 | <a name="input_gce_image_name"></a> [gce\_image\_name](#input\_gce\_image\_name) | VM image for TFE GCE instances. | `string` | `"ubuntu-pro-2404-noble-amd64-v20241004"` | no |
 | <a name="input_gce_image_project"></a> [gce\_image\_project](#input\_gce\_image\_project) | ID of project in which the TFE GCE VM image belongs. | `string` | `"ubuntu-os-cloud"` | no |
@@ -265,13 +257,14 @@ Below are links to various docs related to the customization and management of y
 | <a name="input_postgres_backup_start_time"></a> [postgres\_backup\_start\_time](#input\_postgres\_backup\_start\_time) | HH:MM time format indicating when daily automatic backups of Cloud SQL for PostgreSQL should run. Defaults to 12 AM (midnight) UTC. | `string` | `"00:00"` | no |
 | <a name="input_postgres_deletetion_protection"></a> [postgres\_deletetion\_protection](#input\_postgres\_deletetion\_protection) | Boolean to enable deletion protection for Cloud SQL for PostgreSQL instance. | `bool` | `false` | no |
 | <a name="input_postgres_disk_size"></a> [postgres\_disk\_size](#input\_postgres\_disk\_size) | Size in GB of PostgreSQL disk. | `number` | `50` | no |
-| <a name="input_postgres_insights_config"></a> [postgres\_insights\_config](#input\_postgres\_insights\_config) | Configuration settings for Cloud SQL for PostgreSQL insights. | <pre>object({<br>    query_insights_enabled  = bool<br>    query_plans_per_minute  = number<br>    query_string_length     = number<br>    record_application_tags = bool<br>    record_client_address   = bool<br>  })</pre> | <pre>{<br>  "query_insights_enabled": false,<br>  "query_plans_per_minute": 5,<br>  "query_string_length": 1024,<br>  "record_application_tags": false,<br>  "record_client_address": false<br>}</pre> | no |
+| <a name="input_postgres_insights_config"></a> [postgres\_insights\_config](#input\_postgres\_insights\_config) | Configuration settings for Cloud SQL for PostgreSQL insights. | <pre>object({<br/>    query_insights_enabled  = bool<br/>    query_plans_per_minute  = number<br/>    query_string_length     = number<br/>    record_application_tags = bool<br/>    record_client_address   = bool<br/>  })</pre> | <pre>{<br/>  "query_insights_enabled": false,<br/>  "query_plans_per_minute": 5,<br/>  "query_string_length": 1024,<br/>  "record_application_tags": false,<br/>  "record_client_address": false<br/>}</pre> | no |
 | <a name="input_postgres_kms_cmek_name"></a> [postgres\_kms\_cmek\_name](#input\_postgres\_kms\_cmek\_name) | Name of Cloud KMS customer managed encryption key (CMEK) to use for Cloud SQL for PostgreSQL database instance. | `string` | `null` | no |
 | <a name="input_postgres_kms_keyring_name"></a> [postgres\_kms\_keyring\_name](#input\_postgres\_kms\_keyring\_name) | Name of Cloud KMS Key Ring that contains KMS key to use for Cloud SQL for PostgreSQL. Geographic location (region) of key ring must match the location of the TFE Cloud SQL for PostgreSQL database instance. | `string` | `null` | no |
 | <a name="input_postgres_machine_type"></a> [postgres\_machine\_type](#input\_postgres\_machine\_type) | Machine size of Cloud SQL for PostgreSQL instance. | `string` | `"db-custom-4-16384"` | no |
-| <a name="input_postgres_maintenance_window"></a> [postgres\_maintenance\_window](#input\_postgres\_maintenance\_window) | Optional maintenance window settings for the Cloud SQL for PostgreSQL instance. | <pre>object({<br>    day          = number<br>    hour         = number<br>    update_track = string<br>  })</pre> | <pre>{<br>  "day": 7,<br>  "hour": 0,<br>  "update_track": "stable"<br>}</pre> | no |
+| <a name="input_postgres_maintenance_window"></a> [postgres\_maintenance\_window](#input\_postgres\_maintenance\_window) | Optional maintenance window settings for the Cloud SQL for PostgreSQL instance. | <pre>object({<br/>    day          = number<br/>    hour         = number<br/>    update_track = string<br/>  })</pre> | <pre>{<br/>  "day": 7,<br/>  "hour": 0,<br/>  "update_track": "stable"<br/>}</pre> | no |
 | <a name="input_postgres_ssl_mode"></a> [postgres\_ssl\_mode](#input\_postgres\_ssl\_mode) | Indicates whether to enforce TLS/SSL connections to the Cloud SQL for PostgreSQL instance. | `string` | `"ENCRYPTED_ONLY"` | no |
 | <a name="input_postgres_version"></a> [postgres\_version](#input\_postgres\_version) | PostgreSQL version to use. | `string` | `"POSTGRES_16"` | no |
+| <a name="input_project_id"></a> [project\_id](#input\_project\_id) | ID of GCP project to deploy TFE in. | `string` | n/a | yes |
 | <a name="input_redis_auth_enabled"></a> [redis\_auth\_enabled](#input\_redis\_auth\_enabled) | Boolean to enable authentication on Redis instance. | `bool` | `true` | no |
 | <a name="input_redis_connect_mode"></a> [redis\_connect\_mode](#input\_redis\_connect\_mode) | Network connection mode for Redis instance. | `string` | `"PRIVATE_SERVICE_ACCESS"` | no |
 | <a name="input_redis_kms_cmek_name"></a> [redis\_kms\_cmek\_name](#input\_redis\_kms\_cmek\_name) | Name of Cloud KMS customer managed encryption key (CMEK) to use for TFE Redis instance. | `string` | `null` | no |
@@ -280,13 +273,17 @@ Below are links to various docs related to the customization and management of y
 | <a name="input_redis_tier"></a> [redis\_tier](#input\_redis\_tier) | The service tier of the Redis instance. Set to `STANDARD_HA` for high availability. | `string` | `"STANDARD_HA"` | no |
 | <a name="input_redis_transit_encryption_mode"></a> [redis\_transit\_encryption\_mode](#input\_redis\_transit\_encryption\_mode) | Determines transit encryption (TLS) mode for Redis instance. | `string` | `"DISABLED"` | no |
 | <a name="input_redis_version"></a> [redis\_version](#input\_redis\_version) | The version of Redis software. | `string` | `"REDIS_7_2"` | no |
+| <a name="input_region"></a> [region](#input\_region) | GCP region (location) to deploy TFE in. | `string` | n/a | yes |
 | <a name="input_tfe_capacity_concurrency"></a> [tfe\_capacity\_concurrency](#input\_tfe\_capacity\_concurrency) | Maximum number of concurrent Terraform runs to allow on a TFE node. | `number` | `10` | no |
 | <a name="input_tfe_capacity_cpu"></a> [tfe\_capacity\_cpu](#input\_tfe\_capacity\_cpu) | Maxium number of CPU cores that a Terraform run is allowed to consume on a TFE node. Defaults to `0` which is no limit. | `number` | `0` | no |
 | <a name="input_tfe_capacity_memory"></a> [tfe\_capacity\_memory](#input\_tfe\_capacity\_memory) | Maximum amount of memory (in MiB) that a Terraform run is allowed to consume on a TFE node. | `number` | `2048` | no |
 | <a name="input_tfe_database_name"></a> [tfe\_database\_name](#input\_tfe\_database\_name) | Name of TFE PostgreSQL database to create. | `string` | `"tfe"` | no |
 | <a name="input_tfe_database_parameters"></a> [tfe\_database\_parameters](#input\_tfe\_database\_parameters) | Additional parameters to pass into the TFE database settings for the PostgreSQL connection URI. | `string` | `"sslmode=require"` | no |
+| <a name="input_tfe_database_password_secret_id"></a> [tfe\_database\_password\_secret\_id](#input\_tfe\_database\_password\_secret\_id) | Name of PostgreSQL database password secret to retrieve from Google Secret Manager. | `string` | n/a | yes |
 | <a name="input_tfe_database_reconnect_enabled"></a> [tfe\_database\_reconnect\_enabled](#input\_tfe\_database\_reconnect\_enabled) | Boolean to enable database reconnection in the event of a TFE PostgreSQL database cluster failover. | `bool` | `true` | no |
 | <a name="input_tfe_database_user"></a> [tfe\_database\_user](#input\_tfe\_database\_user) | Name of TFE PostgreSQL database user to create. | `string` | `"tfe"` | no |
+| <a name="input_tfe_encryption_password_secret_id"></a> [tfe\_encryption\_password\_secret\_id](#input\_tfe\_encryption\_password\_secret\_id) | Name of Google Secret Manager secret for TFE encryption password. | `string` | n/a | yes |
+| <a name="input_tfe_fqdn"></a> [tfe\_fqdn](#input\_tfe\_fqdn) | Fully qualified domain name (FQDN) of TFE instance. This name should resolve to the TFE load balancer IP address and will be what users/clients use to access TFE. | `string` | n/a | yes |
 | <a name="input_tfe_hairpin_addressing"></a> [tfe\_hairpin\_addressing](#input\_tfe\_hairpin\_addressing) | Boolean to enable hairpin addressing within TFE container networking for loopback prevention with a layer 4 internal load balancer. | `bool` | `true` | no |
 | <a name="input_tfe_http_port"></a> [tfe\_http\_port](#input\_tfe\_http\_port) | HTTP port for TFE application containers to listen on. | `number` | `8080` | no |
 | <a name="input_tfe_https_port"></a> [tfe\_https\_port](#input\_tfe\_https\_port) | HTTPS port for TFE application containers to listen on. | `number` | `8443` | no |
@@ -299,6 +296,7 @@ Below are links to various docs related to the customization and management of y
 | <a name="input_tfe_image_repository_username"></a> [tfe\_image\_repository\_username](#input\_tfe\_image\_repository\_username) | Username for container registry where TFE container image is hosted. | `string` | `"terraform"` | no |
 | <a name="input_tfe_image_tag"></a> [tfe\_image\_tag](#input\_tfe\_image\_tag) | Tag (release) for the TFE container image. This represents which version (release) of TFE to deploy. | `string` | `"v202409-3"` | no |
 | <a name="input_tfe_license_reporting_opt_out"></a> [tfe\_license\_reporting\_opt\_out](#input\_tfe\_license\_reporting\_opt\_out) | Boolean to opt out of TFE license reporting. | `bool` | `false` | no |
+| <a name="input_tfe_license_secret_id"></a> [tfe\_license\_secret\_id](#input\_tfe\_license\_secret\_id) | Name of Google Secret Manager secret for TFE license file. | `string` | n/a | yes |
 | <a name="input_tfe_log_forwarding_enabled"></a> [tfe\_log\_forwarding\_enabled](#input\_tfe\_log\_forwarding\_enabled) | Boolean to enable TFE log forwarding configuration via Fluent Bit. | `bool` | `false` | no |
 | <a name="input_tfe_metrics_enable"></a> [tfe\_metrics\_enable](#input\_tfe\_metrics\_enable) | Boolean to enable TFE metrics collection endpoints. | `bool` | `false` | no |
 | <a name="input_tfe_metrics_http_port"></a> [tfe\_metrics\_http\_port](#input\_tfe\_metrics\_http\_port) | HTTP port for TFE metrics collection endpoint to listen on. | `number` | `9090` | no |
@@ -306,9 +304,14 @@ Below are links to various docs related to the customization and management of y
 | <a name="input_tfe_operational_mode"></a> [tfe\_operational\_mode](#input\_tfe\_operational\_mode) | [Operational mode](https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/operation-modes) for TFE. Valid values are `active-active` or `external`. | `string` | `"active-active"` | no |
 | <a name="input_tfe_run_pipeline_docker_network"></a> [tfe\_run\_pipeline\_docker\_network](#input\_tfe\_run\_pipeline\_docker\_network) | Name of Docker network where the containers that execute Terraform runs (agents) will be created. The network must already exist, it will not be created automatically. Leave as `null` to use the default network created during the TFE installation. | `string` | `null` | no |
 | <a name="input_tfe_run_pipeline_image"></a> [tfe\_run\_pipeline\_image](#input\_tfe\_run\_pipeline\_image) | Name of container image used to execute Terraform runs on a TFE node. Leave as `null` to use the default agent that ships with TFE. | `string` | `null` | no |
+| <a name="input_tfe_tls_ca_bundle_secret_id"></a> [tfe\_tls\_ca\_bundle\_secret\_id](#input\_tfe\_tls\_ca\_bundle\_secret\_id) | Name of Google Secret Manager secret for private/custom TLS Certificate Authority (CA) bundle in PEM format. Secret must be stored as a base64-encoded string. | `string` | n/a | yes |
+| <a name="input_tfe_tls_cert_secret_id"></a> [tfe\_tls\_cert\_secret\_id](#input\_tfe\_tls\_cert\_secret\_id) | Name of Google Secret Manager secret for TFE TLS certificate in PEM format. Secret must be stored as a base64-encoded string. | `string` | n/a | yes |
 | <a name="input_tfe_tls_enforce"></a> [tfe\_tls\_enforce](#input\_tfe\_tls\_enforce) | Boolean to enforce TLS, Strict-Transport-Security headers, and secure cookies within TFE. | `bool` | `false` | no |
+| <a name="input_tfe_tls_privkey_secret_id"></a> [tfe\_tls\_privkey\_secret\_id](#input\_tfe\_tls\_privkey\_secret\_id) | Name of Google Secret Manager secret for TFE TLS private key in PEM format. Secret must be stored as a base64-encoded string. | `string` | n/a | yes |
 | <a name="input_tfe_usage_reporting_opt_out"></a> [tfe\_usage\_reporting\_opt\_out](#input\_tfe\_usage\_reporting\_opt\_out) | Boolean to opt out of TFE usage reporting. | `bool` | `false` | no |
 | <a name="input_tfe_vault_disable_mlock"></a> [tfe\_vault\_disable\_mlock](#input\_tfe\_vault\_disable\_mlock) | Boolean to disable mlock for internal (embedded) Vault within TFE. | `bool` | `false` | no |
+| <a name="input_vm_subnet_name"></a> [vm\_subnet\_name](#input\_vm\_subnet\_name) | Name of VPC subnet to deploy TFE GCE VM instances in. | `string` | n/a | yes |
+| <a name="input_vpc_network_name"></a> [vpc\_network\_name](#input\_vpc\_network\_name) | Name of VPC network to deploy TFE in. | `string` | n/a | yes |
 | <a name="input_vpc_network_project_id"></a> [vpc\_network\_project\_id](#input\_vpc\_network\_project\_id) | ID of GCP project where the existing VPC network resides, if it is different than the `project_id` where TFE will be deployed. | `string` | `null` | no |
 
 ## Outputs

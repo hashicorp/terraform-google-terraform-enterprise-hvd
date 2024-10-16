@@ -48,7 +48,7 @@ resource "google_service_networking_connection" "psa" {
 | Secret                                           |  Module Input                       |
 |--------------------------------------------------|-------------------------------------|
 | TFE license file                                 | `tfe_license_secret_id`             |
-| TFE encryption password                          | `tfe_encryption_password_secret_id` |    
+| TFE encryption password                          | `tfe_encryption_password_secret_id` |
 | TFE database password                            | `tfe_database_password_secret_id`   |
 | TFE TLS certificate (base64-encoded)             | `tfe_tls_cert_secret_id`            |
 | TFE TLS certificate private key (base64-encoded) | `tfe_tls_privkey_secret_id`         |
