@@ -2,7 +2,7 @@
 
 There are various configuration settings that can be applied when deploying or managing your TFE instance. For a comprehensive list of available settings and their descriptions, refer to the [Terraform Enterprise configuration reference](https://developer.hashicorp.com/terraform/enterprise/deploy/reference/configuration) documentation. This will be referred to as the _configuration reference_ throughout this document.
 
-This module provides input variables that correspond to _most of_ the available, applicable settings from the configuration reference. Almost all of these input variables have default values, so they are not included as inputs within the module blocks of the Terraform configurations in the [example scenarios](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/blob/0.2.0/examples/).
+This module provides input variables that correspond to _most of_ the available, applicable settings from the configuration reference. Almost all of these input variables have default values, so they are not included as inputs within the module blocks of the Terraform configurations in the [example scenarios](../examples/).
 
 ## Manage Your TFE Settings
 
