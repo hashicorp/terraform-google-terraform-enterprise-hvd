@@ -107,5 +107,5 @@ gce_ssh_public_key        = "<tfe-gce-vm-ssh-public-key>"
 While this is not recommended, this module supports the ability to use your own custom startup script to install TFE.
 
 - The script must exist in a folder named `./templates` within your current working directory that you are running Terraform from
-- The script must contain all of the variables (denoted by `${example-variable}`) in the module-level [TFE startup script](../templates/tfe_startup_script.sh.tpl)
+- The script must contain all of the variables (denoted by `${example-variable}`) in the module-level [TFE startup script](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/blob/0.2.0/templates/tfe_startup_script.sh.tpl)
 - Use at your own peril

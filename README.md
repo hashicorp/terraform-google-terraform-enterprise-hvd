@@ -19,9 +19,9 @@ Terraform module aligned with HashiCorp Validated Designs (HVD) to deploy Terraf
 ### Networking
 
 - GCP VPC network with the following:
-  - VM subnet for TFE GCE instances to reside with Private Google Access enabled (refer to the [prereqs reference](./docs/prereqs.md#vm-subnet-with-private-google-access) for more details)
+  - VM subnet for TFE GCE instances to reside with Private Google Access enabled (refer to the [prereqs reference](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/blob/0.2.0/docs/prereqs.md#vm-subnet-with-private-google-access) for more details)
   - (Optional) Load balancer subnet (can be the same as VM subnet if desired; only used when `lb_is_internal` is `true`)
-  - Private Service Access (PSA) configured in VPC network for service `servicenetworking.googleapis.com` (refer to the [prereqs reference](./docs/prereqs.md#private-service-access-psa) for more details)
+  - Private Service Access (PSA) configured in VPC network for service `servicenetworking.googleapis.com` (refer to the [prereqs reference](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/blob/0.2.0/docs/prereqs.md#private-service-access-psa) for more details)
 - Chosen fully qualified domain name (FQDN) for your TFE instance (_e.g._ `tfe.gcp.example.com`)
 - (Optional) Google Cloud DNS zone for optional TFE DNS record creation
 
@@ -45,7 +45,7 @@ The following _bootstrap_ secrets stored in Google Secret Manager in order to bo
 - **TFE TLS certificate private key** - private key file in PEM format, base64-encoded into a string, and stored as a secret
 - **TFE TLS CA bundle** - Ca bundle file in PEM format, base64-encoded into a string, and stored as a secret
 
-Refer to the [prereqs reference](./docs/prereqs.md#tfe-bootstrap-secrets) for more details on how the secrets should be created and stored.
+Refer to the [prereqs reference](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/blob/0.2.0/docs/prereqs.md#tfe-bootstrap-secrets) for more details on how the secrets should be created and stored.
 
 ### Compute
 
@@ -65,7 +65,7 @@ One of the following logging destinations:
 
 1. Create/configure/validate the applicable [prerequisites](#prerequisites).
 
-2. Nested within the [examples](./examples/) directory are subdirectories containing ready-made Terraform configurations for example scenarios on how to call and deploy this module. To get started, choose the example scenario that most closely matches your requirements. You can customize your deployment later by adding additional module [inputs](#inputs) as you see fit (see the [Deployment-Customizations](./docs/deployment-customizations.md) doc for more details).
+2. Nested within the [examples](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/blob/0.2.0/examples/) directory are subdirectories containing ready-made Terraform configurations for example scenarios on how to call and deploy this module. To get started, choose the example scenario that most closely matches your requirements. You can customize your deployment later by adding additional module [inputs](#inputs) as you see fit (see the [Deployment-Customizations](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/blob/0.2.0/docs/deployment-customizations.md) doc for more details).
 
 3. Copy all of the Terraform files from your example scenario of choice into a new destination directory to create your Terraform configuration that will manage your TFE deployment. This is a common directory structure for managing multiple TFE deployments:
 
@@ -129,11 +129,11 @@ One of the following logging destinations:
 
 Below are links to various docs related to the customization and management of your TFE deployment:
 
-- [Deployment Customizations](./docs/deployment-customizations.md)
-- [Prereqs Reference](./docs/prereqs.md)
-- [TFE TLS Certificate Rotation](./docs/tfe-cert-rotation.md)
-- [TFE Configuration Settings](./docs/tfe-config-settings.md)
-- [TFE Version Upgrades](./docs/tfe-version-upgrades.md)
+- [Deployment Customizations](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/blob/0.2.0/docs/deployment-customizations.md)
+- [Prereqs Reference](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/blob/0.2.0/docs/prereqs.md)
+- [TFE TLS Certificate Rotation](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/blob/0.2.0/docs/tfe-cert-rotation.md)
+- [TFE Configuration Settings](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/blob/0.2.0/docs/tfe-config-settings.md)
+- [TFE Version Upgrades](https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/blob/0.2.0/docs/tfe-version-upgrades.md)
 
 ## Module support
 
