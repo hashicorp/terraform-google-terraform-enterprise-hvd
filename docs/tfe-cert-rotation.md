@@ -15,7 +15,7 @@ Follow these steps to rotate the certificates for your TFE instance.
 
 1. Obtain your new TFE TLS/SSL certificate file and private key file, both in PEM format.
 
-2. Update the values of the existing secrets in GCP Secret Manager (`tfe_tls_cert_secret_id` and `tfe_tls_privkey_secret_id`, respectively). If you need assistance base64-encoding the PEM files into strings prior to updating the secret values in GCP, see `./docs/prereqs.md#secrets-formatting`.
+2. Update the values of the existing secrets in GCP Secret Manager (`tfe_tls_cert_secret_id` and `tfe_tls_privkey_secret_id`, respectively). If you need assistance base64-encoding the PEM files into strings prior to updating the secret values in GCP, see the [prereqs reference](./prereqs.md#secrets-formatting).
 
 3. During a maintenance window, connect to one of your existing TFE GCE VM instances and gracefully drain the node(s) from being able to execute any new Terraform runs.
 

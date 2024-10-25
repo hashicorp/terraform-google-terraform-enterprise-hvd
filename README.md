@@ -19,9 +19,9 @@ Terraform module aligned with HashiCorp Validated Designs (HVD) to deploy Terraf
 ### Networking
 
 - GCP VPC network with the following:
-  - VM subnet for TFE GCE instances to reside with Private Google Access enabled (refer to `./docs/prereqs.md#vm-subnet-with-private-google-access` for more details)
+  - VM subnet for TFE GCE instances to reside with Private Google Access enabled (refer to the [prereqs reference](./docs/prereqs.md#vm-subnet-with-private-google-access) for more details)
   - (Optional) Load balancer subnet (can be the same as VM subnet if desired; only used when `lb_is_internal` is `true`)
-  - Private Service Access (PSA) configured in VPC network for service `servicenetworking.googleapis.com` (refer to `./docs/prereqs.md#private-service-access-psa` for more details)
+  - Private Service Access (PSA) configured in VPC network for service `servicenetworking.googleapis.com` (refer to the [prereqs reference](./docs/prereqs.md#private-service-access-psa) for more details)
 - Chosen fully qualified domain name (FQDN) for your TFE instance (_e.g._ `tfe.gcp.example.com`)
 - (Optional) Google Cloud DNS zone for optional TFE DNS record creation
 
@@ -45,7 +45,7 @@ The following _bootstrap_ secrets stored in Google Secret Manager in order to bo
 - **TFE TLS certificate private key** - private key file in PEM format, base64-encoded into a string, and stored as a secret
 - **TFE TLS CA bundle** - Ca bundle file in PEM format, base64-encoded into a string, and stored as a secret
 
-Refer to `./docs/prereqs.md#tfe-bootstrap-secrets` for more details on how the secrets should be created and stored.
+Refer to the [prereqs reference](./docs/prereqs.md#tfe-bootstrap-secrets) for more details on how the secrets should be created and stored.
 
 ### Compute
 
@@ -65,7 +65,7 @@ One of the following logging destinations:
 
 1. Create/configure/validate the applicable [prerequisites](#prerequisites).
 
-2. Nested within the `./examples/` directory are subdirectories containing ready-made Terraform configurations for example scenarios on how to call and deploy this module. To get started, choose the example scenario that most closely matches your requirements. You can customize your deployment later by adding additional module [inputs](#inputs) as you see fit (see `./docs/deployment-customizations.md` for more details).
+2. Nested within the [examples](./examples/) directory are subdirectories containing ready-made Terraform configurations for example scenarios on how to call and deploy this module. To get started, choose the example scenario that most closely matches your requirements. You can customize your deployment later by adding additional module [inputs](#inputs) as you see fit (see the [Deployment-Customizations](./docs/deployment-customizations.md) doc for more details).
 
 3. Copy all of the Terraform files from your example scenario of choice into a new destination directory to create your Terraform configuration that will manage your TFE deployment. This is a common directory structure for managing multiple TFE deployments:
 
@@ -127,13 +127,13 @@ One of the following logging destinations:
 
 ## Docs
 
-Within the `./docs/` folder there is additional guidance on customization and management of your TFE deployment:
+Below are links to various docs related to the customization and management of your TFE deployment:
 
-- Deployment Customizations: `./docs/deployment-customizations.md`
-- Prereqs Reference: `./docs/prereqs.md`
-- TFE TLS Certificate Rotation: `./docs/tfe-cert-rotation.md`
-- TFE Configuration Settings: `./docs/tfe-config-settings.md`
-- TFE Version Upgrades: `./docs/tfe-version-upgrades.md`
+- [Deployment Customizations](./docs/deployment-customizations.md)
+- [Prereqs Reference](./docs/prereqs.md)
+- [TFE TLS Certificate Rotation](./docs/tfe-cert-rotation.md)
+- [TFE Configuration Settings](./docs/tfe-config-settings.md)
+- [TFE Version Upgrades](./docs/tfe-version-upgrades.md)
 
 ## Module support
 
@@ -143,8 +143,6 @@ This open source software is maintained by the HashiCorp Technical Field Organiz
 - To report bugs/issues with this open source software, please open them directly against this code repository using the GitHub issues feature.
 
 Please note that there is no official Service Level Agreement (SLA) for support of this software as a HashiCorp customer. This software falls under the definition of Community Software/Versions in your Agreement. We appreciate your understanding and collaboration in improving our open source projects.
-
----
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -270,11 +268,11 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | <a name="input_postgres_backup_start_time"></a> [postgres\_backup\_start\_time](#input\_postgres\_backup\_start\_time) | HH:MM time format indicating when daily automatic backups of Cloud SQL for PostgreSQL should run. Defaults to 12 AM (midnight) UTC. | `string` | `"00:00"` | no |
 | <a name="input_postgres_deletetion_protection"></a> [postgres\_deletetion\_protection](#input\_postgres\_deletetion\_protection) | Boolean to enable deletion protection for Cloud SQL for PostgreSQL instance. | `bool` | `false` | no |
 | <a name="input_postgres_disk_size"></a> [postgres\_disk\_size](#input\_postgres\_disk\_size) | Size in GB of PostgreSQL disk. | `number` | `50` | no |
-| <a name="input_postgres_insights_config"></a> [postgres\_insights\_config](#input\_postgres\_insights\_config) | Configuration settings for Cloud SQL for PostgreSQL insights. | <pre>object({<br>    query_insights_enabled  = bool<br>    query_plans_per_minute  = number<br>    query_string_length     = number<br>    record_application_tags = bool<br>    record_client_address   = bool<br>  })</pre> | <pre>{<br>  "query_insights_enabled": false,<br>  "query_plans_per_minute": 5,<br>  "query_string_length": 1024,<br>  "record_application_tags": false,<br>  "record_client_address": false<br>}</pre> | no |
+| <a name="input_postgres_insights_config"></a> [postgres\_insights\_config](#input\_postgres\_insights\_config) | Configuration settings for Cloud SQL for PostgreSQL insights. | <pre>object({<br/>    query_insights_enabled  = bool<br/>    query_plans_per_minute  = number<br/>    query_string_length     = number<br/>    record_application_tags = bool<br/>    record_client_address   = bool<br/>  })</pre> | <pre>{<br/>  "query_insights_enabled": false,<br/>  "query_plans_per_minute": 5,<br/>  "query_string_length": 1024,<br/>  "record_application_tags": false,<br/>  "record_client_address": false<br/>}</pre> | no |
 | <a name="input_postgres_kms_cmek_name"></a> [postgres\_kms\_cmek\_name](#input\_postgres\_kms\_cmek\_name) | Name of Cloud KMS customer managed encryption key (CMEK) to use for Cloud SQL for PostgreSQL database instance. | `string` | `null` | no |
 | <a name="input_postgres_kms_keyring_name"></a> [postgres\_kms\_keyring\_name](#input\_postgres\_kms\_keyring\_name) | Name of Cloud KMS Key Ring that contains KMS key to use for Cloud SQL for PostgreSQL. Geographic location (region) of key ring must match the location of the TFE Cloud SQL for PostgreSQL database instance. | `string` | `null` | no |
 | <a name="input_postgres_machine_type"></a> [postgres\_machine\_type](#input\_postgres\_machine\_type) | Machine size of Cloud SQL for PostgreSQL instance. | `string` | `"db-custom-4-16384"` | no |
-| <a name="input_postgres_maintenance_window"></a> [postgres\_maintenance\_window](#input\_postgres\_maintenance\_window) | Optional maintenance window settings for the Cloud SQL for PostgreSQL instance. | <pre>object({<br>    day          = number<br>    hour         = number<br>    update_track = string<br>  })</pre> | <pre>{<br>  "day": 7,<br>  "hour": 0,<br>  "update_track": "stable"<br>}</pre> | no |
+| <a name="input_postgres_maintenance_window"></a> [postgres\_maintenance\_window](#input\_postgres\_maintenance\_window) | Optional maintenance window settings for the Cloud SQL for PostgreSQL instance. | <pre>object({<br/>    day          = number<br/>    hour         = number<br/>    update_track = string<br/>  })</pre> | <pre>{<br/>  "day": 7,<br/>  "hour": 0,<br/>  "update_track": "stable"<br/>}</pre> | no |
 | <a name="input_postgres_ssl_mode"></a> [postgres\_ssl\_mode](#input\_postgres\_ssl\_mode) | Indicates whether to enforce TLS/SSL connections to the Cloud SQL for PostgreSQL instance. | `string` | `"ENCRYPTED_ONLY"` | no |
 | <a name="input_postgres_version"></a> [postgres\_version](#input\_postgres\_version) | PostgreSQL version to use. | `string` | `"POSTGRES_16"` | no |
 | <a name="input_redis_auth_enabled"></a> [redis\_auth\_enabled](#input\_redis\_auth\_enabled) | Boolean to enable authentication on Redis instance. | `bool` | `true` | no |
