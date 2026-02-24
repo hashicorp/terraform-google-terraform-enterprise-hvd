@@ -431,12 +431,6 @@ variable "tfe_database_parameters" {
   default     = "sslmode=require"
 }
 
-variable "tfe_database_reconnect_enabled" {
-  type        = bool
-  description = "Boolean to enable database reconnection in the event of a TFE PostgreSQL database cluster failover."
-  default     = true
-}
-
 variable "postgres_version" {
   type        = string
   description = "PostgreSQL version to use."

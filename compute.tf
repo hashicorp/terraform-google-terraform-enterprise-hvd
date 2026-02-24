@@ -60,7 +60,6 @@ locals {
     tfe_database_user              = var.tfe_database_user
     tfe_database_password          = data.google_secret_manager_secret_version.tfe_database_password.secret_data
     tfe_database_parameters        = var.tfe_database_parameters
-    tfe_database_reconnect_enabled = var.tfe_database_reconnect_enabled
 
     # Object storage settings
     tfe_object_storage_type               = "google"
