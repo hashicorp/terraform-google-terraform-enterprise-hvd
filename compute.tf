@@ -21,7 +21,7 @@ locals {
 #-----------------------------------------------------------------------------------
 locals {
   tfe_startup_script_tpl = var.custom_tfe_startup_script_template != null ? "${path.cwd}/templates/${var.custom_tfe_startup_script_template}" : "${path.module}/templates/tfe_startup_script.sh.tpl"
-  redis_port = var.redis_transit_encryption_mode == "SERVER_AUTHENTICATION" ? "6378" : "6379"
+  redis_port             = var.redis_transit_encryption_mode == "SERVER_AUTHENTICATION" ? "6378" : "6379"
 
   startup_script_args = {
     # Bootstrap
@@ -32,7 +32,7 @@ locals {
     tfe_tls_ca_bundle_secret_id       = var.tfe_tls_ca_bundle_secret_id
     tfe_image_repository_url          = var.tfe_image_repository_url
     tfe_image_repository_username     = var.tfe_image_repository_username
-    tfe_image_repository_password     = var.tfe_image_repository_password != null ? var.tfe_image_repository_password : "" 
+    tfe_image_repository_password     = var.tfe_image_repository_password != null ? var.tfe_image_repository_password : ""
     tfe_image_name                    = var.tfe_image_name
     tfe_image_tag                     = var.tfe_image_tag
     container_runtime                 = var.container_runtime
@@ -48,18 +48,18 @@ locals {
     tfe_license_reporting_opt_out = var.tfe_license_reporting_opt_out
     tfe_usage_reporting_opt_out   = var.tfe_usage_reporting_opt_out
     tfe_run_pipeline_driver       = "docker"
-    tfe_run_pipeline_image        = var.tfe_run_pipeline_image != null ? var.tfe_run_pipeline_image : "" 
+    tfe_run_pipeline_image        = var.tfe_run_pipeline_image != null ? var.tfe_run_pipeline_image : ""
     tfe_backup_restore_token      = ""
     tfe_node_id                   = ""
     tfe_http_port                 = var.tfe_http_port
     tfe_https_port                = var.tfe_https_port
 
     # Database settings
-    tfe_database_host              = "${google_sql_database_instance.tfe.private_ip_address}:5432"
-    tfe_database_name              = var.tfe_database_name
-    tfe_database_user              = var.tfe_database_user
-    tfe_database_password          = data.google_secret_manager_secret_version.tfe_database_password.secret_data
-    tfe_database_parameters        = var.tfe_database_parameters
+    tfe_database_host       = "${google_sql_database_instance.tfe.private_ip_address}:5432"
+    tfe_database_name       = var.tfe_database_name
+    tfe_database_user       = var.tfe_database_user
+    tfe_database_password   = data.google_secret_manager_secret_version.tfe_database_password.secret_data
+    tfe_database_parameters = var.tfe_database_parameters
 
     # Object storage settings
     tfe_object_storage_type               = "google"
@@ -90,7 +90,7 @@ locals {
     fluent_bit_rendered_config = local.fluent_bit_rendered_config
 
     # Docker driver settings
-    tfe_run_pipeline_docker_network = var.tfe_run_pipeline_docker_network != null ? var.tfe_run_pipeline_docker_network : "" 
+    tfe_run_pipeline_docker_network = var.tfe_run_pipeline_docker_network != null ? var.tfe_run_pipeline_docker_network : ""
     tfe_hairpin_addressing          = var.tfe_hairpin_addressing
     #tfe_run_pipeline_docker_extra_hosts = "" // computed inside of tfe_user_data script if `tfe_hairpin_addressing` is `true` because VM private IP is needed
 
@@ -184,7 +184,7 @@ resource "google_compute_region_instance_group_manager" "tfe" {
     instance_redistribution_type   = "PROACTIVE"
     max_surge_fixed                = length(data.google_compute_zones.up.names)
     max_unavailable_fixed          = length(data.google_compute_zones.up.names)
-    replacement_method             = "SUBSTITUTE" 
+    replacement_method             = "SUBSTITUTE"
   }
 }
 
@@ -227,7 +227,7 @@ resource "google_compute_firewall" "vm_allow_ingress_ssh_from_cidr" {
 
 resource "google_compute_firewall" "vm_allow_ingress_ssh_from_iap" {
   count = var.allow_ingress_vm_ssh_from_iap ? 1 : 0
-  
+
   name        = "${var.friendly_name_prefix}-tfe-allow-ssh-from-iap"
   description = "Allow TCP/22 ingress to TFE GCE VM instances from IAP."
   network     = data.google_compute_network.vpc.self_link
@@ -248,7 +248,7 @@ resource "google_compute_firewall" "vm_allow_ingress_ssh_from_iap" {
 
 resource "google_compute_firewall" "vm_allow_tfe_443" {
   count = var.cidr_allow_ingress_tfe_443 != null ? 1 : 0
-  
+
   name        = "${var.friendly_name_prefix}-tfe-allow-443"
   description = "Allow TCP/443 (HTTPS) ingress to TFE GCE VM instances from specified CIDR ranges."
   network     = data.google_compute_network.vpc.self_link
@@ -293,7 +293,7 @@ resource "google_compute_firewall" "vm_allow_lb_health_checks_443" {
 
 resource "google_compute_firewall" "vm_tfe_self_allow" {
   count = var.tfe_operational_mode == "active-active" ? 1 : 0
-  
+
   name        = "${var.friendly_name_prefix}-tfe-self-allow"
   description = "Allow TFE GCE VM instances to communicate with each other over TCP/8201 (Vault cluster) when TFE operational mode is active-active."
   network     = data.google_compute_network.vpc.self_link

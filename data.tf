@@ -33,6 +33,6 @@ data "google_compute_subnetwork" "vm_subnet" {
 
 data "google_compute_subnetwork" "lb_subnet" {
   count = var.lb_subnet_name != null ? 1 : 0
-  
+
   name = var.lb_subnet_name
 }

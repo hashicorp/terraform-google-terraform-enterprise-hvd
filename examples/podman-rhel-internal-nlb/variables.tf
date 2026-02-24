@@ -17,7 +17,7 @@ variable "region" {
 variable "friendly_name_prefix" {
   type        = string
   description = "Friendly name prefix used for uniquely naming all GCP resources for this deployment. Most commonly set to either an environment (e.g. 'sandbox', 'prod'), a team name, or a project name."
-  
+
   validation {
     condition     = !strcontains(var.friendly_name_prefix, "tfe")
     error_message = "Value must not contain the substring 'tfe' to avoid redundancy in resource naming."
@@ -528,10 +528,10 @@ variable "gcs_location" {
   description = "Location of TFE GCS bucket to create."
   default     = "US"
 
-  validation { 
+  validation {
     condition     = var.gcs_storage_class == "MULTI_REGIONAL" ? contains(["US", "EU", "ASIA"], var.gcs_location) : true
     error_message = "Supported values are 'US', 'EU', and 'ASIA' when `gcs_storage_class` is `MULTI_REGIONAL`."
- }
+  }
 }
 
 variable "gcs_storage_class" {

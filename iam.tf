@@ -35,8 +35,8 @@ resource "google_secret_manager_secret_iam_member" "tfe_license" {
 }
 
 resource "google_secret_manager_secret_iam_member" "tfe_encryption_password" {
-  count     = var.tfe_encryption_password_secret_id != "" ? 1 : 0
-  
+  count = var.tfe_encryption_password_secret_id != "" ? 1 : 0
+
   secret_id = var.tfe_encryption_password_secret_id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.tfe.email}"
@@ -84,7 +84,7 @@ resource "google_project_service_identity" "gcp_project_cloud_sql_sa" {
   count    = var.postgres_kms_keyring_name != null ? 1 : 0
   provider = google-beta
 
-  service  = "sqladmin.googleapis.com"
+  service = "sqladmin.googleapis.com"
 }
 
 resource "google_kms_crypto_key_iam_member" "postgres_cmek" {
