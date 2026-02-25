@@ -6,7 +6,7 @@
 #------------------------------------------------------------------------------
 resource "google_redis_instance" "tfe" {
   count = var.tfe_operational_mode == "active-active" ? 1 : 0
-  
+
   name                    = "${var.friendly_name_prefix}-tfe-redis"
   display_name            = "${var.friendly_name_prefix}-tfe-redis"
   tier                    = var.redis_tier

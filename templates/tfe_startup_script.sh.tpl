@@ -201,7 +201,6 @@ services:
       TFE_DATABASE_USER: ${tfe_database_user}
       TFE_DATABASE_PASSWORD: ${tfe_database_password}
       TFE_DATABASE_PARAMETERS: ${tfe_database_parameters}
-      TFE_DATABASE_RECONNECT_ENABLED: ${tfe_database_reconnect_enabled}
       
       # Object storage settings
       TFE_OBJECT_STORAGE_TYPE: ${tfe_object_storage_type}
@@ -361,8 +360,6 @@ spec:
       value: ${tfe_database_password}
     - name: "TFE_DATABASE_PARAMETERS"
       value: ${tfe_database_parameters}
-    - name: "TFE_DATABASE_RECONNECT_ENABLED"
-      value: ${tfe_database_reconnect_enabled}
 
     # Object storage settings
     - name: "TFE_OBJECT_STORAGE_TYPE"

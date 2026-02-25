@@ -4,7 +4,7 @@
 #------------------------------------------------------------------------------
 # Google Secret Manager - TFE database password lookup
 #------------------------------------------------------------------------------
-data "google_secret_manager_secret_version" "tfe_database_password" { 
+data "google_secret_manager_secret_version" "tfe_database_password" {
   secret = var.tfe_database_password_secret_id
 }
 
@@ -18,7 +18,7 @@ resource "random_id" "postgres_instance_suffix" {
 resource "google_sql_database_instance" "tfe" {
   name                = "${var.friendly_name_prefix}-tfe-postgres-${random_id.postgres_instance_suffix.hex}"
   database_version    = var.postgres_version
-  encryption_key_name = var.postgres_kms_cmek_name != null ? data.google_kms_crypto_key.postgres_cmek[0].id: null 
+  encryption_key_name = var.postgres_kms_cmek_name != null ? data.google_kms_crypto_key.postgres_cmek[0].id : null
   deletion_protection = var.postgres_deletetion_protection
 
   settings {
