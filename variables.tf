@@ -176,6 +176,17 @@ variable "tfe_run_pipeline_image" {
   default     = null
 }
 
+variable "tfe_explorer_enabled" {
+  type        = bool
+  description = "Boolean to enable Terraform Enterprise Explorer. Explorer is only supported when `tfe_operational_mode` is `active-active` or `external`."
+  default     = false
+
+  validation {
+    condition     = !var.tfe_explorer_enabled || contains(["active-active", "external"], var.tfe_operational_mode)
+    error_message = "Explorer is only supported when `tfe_operational_mode` is `active-active` or `external`."
+  }
+}
+
 variable "tfe_metrics_enable" {
   type        = bool
   description = "Boolean to enable TFE metrics collection endpoints."
@@ -429,6 +440,70 @@ variable "tfe_database_parameters" {
   type        = string
   description = "Additional parameters to pass into the TFE database settings for the PostgreSQL connection URI."
   default     = "sslmode=require"
+}
+
+variable "create_tfe_explorer_db" {
+  type        = bool
+  description = "Boolean to create and use a module-managed dedicated Cloud SQL for PostgreSQL instance for Explorer when `tfe_explorer_enabled` is `true` and no explicit Explorer database host, name, and user values are provided."
+  default     = true
+}
+
+variable "tfe_explorer_database_host" {
+  type        = string
+  description = "PostgreSQL server for Explorer in `HOST[:PORT]` format. Leave as `null` to have the module create and use a dedicated Explorer Cloud SQL instance when `create_tfe_explorer_db` is `true`, or reuse the primary TFE Cloud SQL instance when `create_tfe_explorer_db` is `false`."
+  default     = null
+
+  validation {
+    condition = !var.tfe_explorer_enabled || (
+      (var.tfe_explorer_database_host == null && var.tfe_explorer_database_name == null && var.tfe_explorer_database_user == null) ||
+      (var.tfe_explorer_database_host != null && var.tfe_explorer_database_name != null && var.tfe_explorer_database_user != null)
+    )
+    error_message = "Values of `tfe_explorer_database_host`, `tfe_explorer_database_name`, and `tfe_explorer_database_user` must either all be set or all be `null` when `tfe_explorer_enabled` is `true`."
+  }
+}
+
+variable "tfe_explorer_database_name" {
+  type        = string
+  description = "Name of the PostgreSQL database used by Explorer. Leave as `null` to have the module use the Explorer database name it manages when `create_tfe_explorer_db` is `true`, or reuse the primary TFE database name when `create_tfe_explorer_db` is `false`."
+  default     = null
+}
+
+variable "tfe_explorer_database_user" {
+  type        = string
+  description = "PostgreSQL username used by Explorer. Leave as `null` to have the module use the Explorer database user it manages when `create_tfe_explorer_db` is `true`, or reuse the primary TFE database user when `create_tfe_explorer_db` is `false`."
+  default     = null
+}
+
+variable "tfe_explorer_database_password_secret_id" {
+  type        = string
+  description = "Name of Google Secret Manager secret for the Explorer database password. Leave as `null` when `tfe_explorer_database_auth_use_gcp_iam` is `true` or to reuse the primary TFE database password for the module-managed Explorer database or shared primary-database fallback."
+  default     = null
+
+  validation {
+    condition = !var.tfe_explorer_enabled || var.tfe_explorer_database_auth_use_gcp_iam || (
+      var.tfe_explorer_database_host == null
+      ? (var.create_tfe_explorer_db || var.tfe_explorer_database_password_secret_id == null)
+      : var.tfe_explorer_database_password_secret_id != null
+    )
+    error_message = "Value must be set when `tfe_explorer_enabled` is `true`, `tfe_explorer_database_auth_use_gcp_iam` is `false`, and an external Explorer database host is specified. When `create_tfe_explorer_db` is `false` and no external Explorer database host is set, leave this value as `null` so Explorer reuses the primary TFE database password."
+  }
+}
+
+variable "tfe_explorer_database_parameters" {
+  type        = string
+  description = "PostgreSQL server parameters for the Explorer connection URI. Leave as `null` to reuse `tfe_database_parameters`."
+  default     = null
+}
+
+variable "tfe_explorer_database_auth_use_gcp_iam" {
+  type        = bool
+  description = "Boolean to use Google Cloud IAM database authentication for Explorer."
+  default     = false
+
+  validation {
+    condition     = !(var.tfe_explorer_database_auth_use_gcp_iam && var.tfe_explorer_database_host == null && var.tfe_explorer_database_user != null)
+    error_message = "Leave `tfe_explorer_database_user` as `null` when `tfe_explorer_database_auth_use_gcp_iam` is `true` and the module is managing or reusing the Cloud SQL instance so it can derive the IAM database user from the TFE service account."
+  }
 }
 
 variable "postgres_version" {

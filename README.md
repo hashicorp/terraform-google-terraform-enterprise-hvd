@@ -41,6 +41,7 @@ The following _bootstrap_ secrets stored in Google Secret Manager in order to bo
 - **TFE license file** - raw contents of license file (_e.g._ `cat terraform.hclic`)
 - **TFE encryption password** - random characters (used to protect TFE's internally-managed Vault unseal key and root token)
 - **TFE (PostgreSQL) database password** - random characters between 8 and 99 characters in length; must contain at least one uppercase letter, one lowercase letter, and one digit or special character
+- **Explorer (PostgreSQL) database password** (optional) - random characters between 8 and 99 characters in length; used when providing a separate Explorer database password secret via `tfe_explorer_database_password_secret_id`
 - **TFE TLS certificate** - certificate file in PEM format, base64-encoded into a string, and stored as a secret
 - **TFE TLS certificate private key** - private key file in PEM format, base64-encoded into a string, and stored as a secret
 - **TFE TLS CA bundle** - Ca bundle file in PEM format, base64-encoded into a string, and stored as a secret
@@ -184,18 +185,25 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | [google_kms_crypto_key_iam_member.gcp_project_gcs_sa_cmek](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member) | resource |
 | [google_kms_crypto_key_iam_member.gcp_project_redis_sa_cmek](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member) | resource |
 | [google_kms_crypto_key_iam_member.postgres_cmek](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member) | resource |
+| [google_project_iam_member.tfe_cloudsql_instance_user](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_iam_member) | resource |
 | [google_project_iam_member.tfe_logging_stackdriver](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/project_iam_member) | resource |
 | [google_redis_instance.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/redis_instance) | resource |
 | [google_secret_manager_secret_iam_member.tfe_ca_bundle](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_iam_member) | resource |
 | [google_secret_manager_secret_iam_member.tfe_cert](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_iam_member) | resource |
 | [google_secret_manager_secret_iam_member.tfe_encryption_password](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_iam_member) | resource |
+| [google_secret_manager_secret_iam_member.tfe_explorer_database_password](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_iam_member) | resource |
 | [google_secret_manager_secret_iam_member.tfe_license](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_iam_member) | resource |
 | [google_secret_manager_secret_iam_member.tfe_privkey](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_iam_member) | resource |
 | [google_service_account.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account) | resource |
 | [google_service_account_key.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account_key) | resource |
 | [google_sql_database.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database) | resource |
+| [google_sql_database.tfe_explorer](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database) | resource |
 | [google_sql_database_instance.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance) | resource |
+| [google_sql_database_instance.tfe_explorer](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database_instance) | resource |
 | [google_sql_user.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_user) | resource |
+| [google_sql_user.tfe_explorer](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_user) | resource |
+| [google_sql_user.tfe_explorer_iam](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_user) | resource |
+| [google_sql_user.tfe_primary_explorer_iam](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_user) | resource |
 | [google_storage_bucket.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket) | resource |
 | [google_storage_bucket_iam_member.tfe_bucket_object_admin](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket_iam_member) | resource |
 | [google_storage_bucket_iam_member.tfe_bucket_reader](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket_iam_member) | resource |
@@ -216,6 +224,7 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | [google_kms_key_ring.redis_cmek](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_key_ring) | data source |
 | [google_project.current](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/project) | data source |
 | [google_secret_manager_secret_version.tfe_database_password](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/secret_manager_secret_version) | data source |
+| [google_secret_manager_secret_version.tfe_explorer_database_password](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/secret_manager_secret_version) | data source |
 | [google_storage_project_service_account.gcp_project_gcs_sa](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/storage_project_service_account) | data source |
 
 ## Inputs
@@ -242,6 +251,7 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | <a name="input_common_labels"></a> [common\_labels](#input\_common\_labels) | Map of common labels to apply to all GCP resources. | `map(string)` | `{}` | no |
 | <a name="input_container_runtime"></a> [container\_runtime](#input\_container\_runtime) | Container runtime to use for TFE deployment. Supported values are `docker` or `podman`. | `string` | `"docker"` | no |
 | <a name="input_create_tfe_cloud_dns_record"></a> [create\_tfe\_cloud\_dns\_record](#input\_create\_tfe\_cloud\_dns\_record) | Boolean to create Google Cloud DNS record for TFE using the value of `tfe_fqdn` as the record name, resolving to the load balancer IP. `cloud_dns_managed_zone_name` is required when `true`. | `bool` | `false` | no |
+| <a name="input_create_tfe_explorer_db"></a> [create\_tfe\_explorer\_db](#input\_create\_tfe\_explorer\_db) | Boolean to create and use a module-managed dedicated Cloud SQL for PostgreSQL instance for Explorer when `tfe_explorer_enabled` is `true` and no explicit Explorer database host, name, and user values are provided. | `bool` | `true` | no |
 | <a name="input_custom_fluent_bit_config"></a> [custom\_fluent\_bit\_config](#input\_custom\_fluent\_bit\_config) | Custom Fluent Bit configuration for log forwarding. Only valid when `tfe_log_forwarding_enabled` is `true` and `log_fwd_destination_type` is `custom`. | `string` | `null` | no |
 | <a name="input_custom_tfe_startup_script_template"></a> [custom\_tfe\_startup\_script\_template](#input\_custom\_tfe\_startup\_script\_template) | Name of custom TFE startup script template file. File must exist within a directory named `./templates` within your current working directory. | `string` | `null` | no |
 | <a name="input_docker_version"></a> [docker\_version](#input\_docker\_version) | Version of Docker to install on TFE GCE VM instances. | `string` | `"26.1.4-1"` | no |
@@ -289,6 +299,13 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | <a name="input_tfe_database_name"></a> [tfe\_database\_name](#input\_tfe\_database\_name) | Name of TFE PostgreSQL database to create. | `string` | `"tfe"` | no |
 | <a name="input_tfe_database_parameters"></a> [tfe\_database\_parameters](#input\_tfe\_database\_parameters) | Additional parameters to pass into the TFE database settings for the PostgreSQL connection URI. | `string` | `"sslmode=require"` | no |
 | <a name="input_tfe_database_user"></a> [tfe\_database\_user](#input\_tfe\_database\_user) | Name of TFE PostgreSQL database user to create. | `string` | `"tfe"` | no |
+| <a name="input_tfe_explorer_database_auth_use_gcp_iam"></a> [tfe\_explorer\_database\_auth\_use\_gcp\_iam](#input\_tfe\_explorer\_database\_auth\_use\_gcp\_iam) | Boolean to use Google Cloud IAM database authentication for Explorer. | `bool` | `false` | no |
+| <a name="input_tfe_explorer_database_host"></a> [tfe\_explorer\_database\_host](#input\_tfe\_explorer\_database\_host) | PostgreSQL server for Explorer in `HOST[:PORT]` format. Leave as `null` to have the module create and use a dedicated Explorer Cloud SQL instance when `create_tfe_explorer_db` is `true`, or reuse the primary TFE Cloud SQL instance when `create_tfe_explorer_db` is `false`. | `string` | `null` | no |
+| <a name="input_tfe_explorer_database_name"></a> [tfe\_explorer\_database\_name](#input\_tfe\_explorer\_database\_name) | Name of the PostgreSQL database used by Explorer. Leave as `null` to have the module use the Explorer database name it manages when `create_tfe_explorer_db` is `true`, or reuse the primary TFE database name when `create_tfe_explorer_db` is `false`. | `string` | `null` | no |
+| <a name="input_tfe_explorer_database_parameters"></a> [tfe\_explorer\_database\_parameters](#input\_tfe\_explorer\_database\_parameters) | PostgreSQL server parameters for the Explorer connection URI. Leave as `null` to reuse `tfe_database_parameters`. | `string` | `null` | no |
+| <a name="input_tfe_explorer_database_password_secret_id"></a> [tfe\_explorer\_database\_password\_secret\_id](#input\_tfe\_explorer\_database\_password\_secret\_id) | Name of Google Secret Manager secret for the Explorer database password. Leave as `null` when `tfe_explorer_database_auth_use_gcp_iam` is `true` or to reuse the primary TFE database password for the module-managed Explorer database or shared primary-database fallback. | `string` | `null` | no |
+| <a name="input_tfe_explorer_database_user"></a> [tfe\_explorer\_database\_user](#input\_tfe\_explorer\_database\_user) | PostgreSQL username used by Explorer. Leave as `null` to have the module use the Explorer database user it manages when `create_tfe_explorer_db` is `true`, or reuse the primary TFE database user when `create_tfe_explorer_db` is `false`. | `string` | `null` | no |
+| <a name="input_tfe_explorer_enabled"></a> [tfe\_explorer\_enabled](#input\_tfe\_explorer\_enabled) | Boolean to enable Terraform Enterprise Explorer. Explorer is only supported when `tfe_operational_mode` is `active-active` or `external`. | `bool` | `false` | no |
 | <a name="input_tfe_hairpin_addressing"></a> [tfe\_hairpin\_addressing](#input\_tfe\_hairpin\_addressing) | Boolean to enable hairpin addressing within TFE container networking for loopback prevention with a layer 4 internal load balancer. | `bool` | `true` | no |
 | <a name="input_tfe_http_port"></a> [tfe\_http\_port](#input\_tfe\_http\_port) | HTTP port for TFE application containers to listen on. | `number` | `8080` | no |
 | <a name="input_tfe_https_port"></a> [tfe\_https\_port](#input\_tfe\_https\_port) | HTTPS port for TFE application containers to listen on. | `number` | `8443` | no |
@@ -323,6 +340,7 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | <a name="output_tfe_database_name"></a> [tfe\_database\_name](#output\_tfe\_database\_name) | Name of TFE database. |
 | <a name="output_tfe_database_password"></a> [tfe\_database\_password](#output\_tfe\_database\_password) | Password of TFE database user. |
 | <a name="output_tfe_database_user"></a> [tfe\_database\_user](#output\_tfe\_database\_user) | Username of TFE database. |
+| <a name="output_tfe_explorer_database_warning"></a> [tfe\_explorer\_database\_warning](#output\_tfe\_explorer\_database\_warning) | Warning emitted when Explorer is enabled but still reuses the primary TFE database instead of a dedicated Explorer database. |
 | <a name="output_tfe_gcs_bucket_location"></a> [tfe\_gcs\_bucket\_location](#output\_tfe\_gcs\_bucket\_location) | Location of TFE GCS bucket. |
 | <a name="output_tfe_lb_ip_address"></a> [tfe\_lb\_ip\_address](#output\_tfe\_lb\_ip\_address) | IP Address of TFE front end load balancer (forwarding rule). |
 | <a name="output_tfe_load_balancing_scheme"></a> [tfe\_load\_balancing\_scheme](#output\_tfe\_load\_balancing\_scheme) | Load balancing scheme of TFE front end load balancer (forwarding rule). |

@@ -66,6 +66,22 @@ resource "google_secret_manager_secret_iam_member" "tfe_ca_bundle" {
   member    = "serviceAccount:${google_service_account.tfe.email}"
 }
 
+resource "google_secret_manager_secret_iam_member" "tfe_explorer_database_password" {
+  count = var.tfe_explorer_database_password_secret_id != null ? 1 : 0
+
+  secret_id = var.tfe_explorer_database_password_secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.tfe.email}"
+}
+
+resource "google_project_iam_member" "tfe_cloudsql_instance_user" {
+  count = var.tfe_explorer_enabled && var.tfe_explorer_database_auth_use_gcp_iam && var.tfe_explorer_database_host == null ? 1 : 0
+
+  project = data.google_client_config.current.project
+  role    = "roles/cloudsql.instanceUser"
+  member  = "serviceAccount:${google_service_account.tfe.email}"
+}
+
 resource "google_project_iam_member" "tfe_logging_stackdriver" {
   count = var.tfe_log_forwarding_enabled && var.log_fwd_destination_type == "stackdriver" ? 1 : 0
 

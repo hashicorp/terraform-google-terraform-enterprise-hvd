@@ -19,6 +19,11 @@ output "tfe_create_initial_admin_user_url" {
   description = "URL to create TFE initial admin user."
 }
 
+output "tfe_explorer_database_warning" {
+  value       = local.tfe_explorer_database_uses_tfe_database ? "WARNING: Terraform Enterprise Explorer is enabled and reuses the primary TFE Cloud SQL database because `create_tfe_explorer_db` is `false` and no dedicated Explorer database was provided. Use a dedicated Explorer database in production." : null
+  description = "Warning emitted when Explorer is enabled but still reuses the primary TFE database instead of a dedicated Explorer database."
+}
+
 #------------------------------------------------------------------------------
 # Load balancer
 #------------------------------------------------------------------------------
@@ -102,4 +107,3 @@ output "tfe_redis_use_tls" {
   value       = var.tfe_operational_mode == "active-active" ? local.startup_script_args["tfe_redis_use_tls"] : null
   description = "Whether TFE should use TLS to connect to Redis instance."
 }
-

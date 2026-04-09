@@ -20,8 +20,18 @@ locals {
 # Metadata startup script
 #-----------------------------------------------------------------------------------
 locals {
-  tfe_startup_script_tpl = var.custom_tfe_startup_script_template != null ? "${path.cwd}/templates/${var.custom_tfe_startup_script_template}" : "${path.module}/templates/tfe_startup_script.sh.tpl"
-  redis_port             = var.redis_transit_encryption_mode == "SERVER_AUTHENTICATION" ? "6378" : "6379"
+  tfe_startup_script_tpl                  = var.custom_tfe_startup_script_template != null ? "${path.cwd}/templates/${var.custom_tfe_startup_script_template}" : "${path.module}/templates/tfe_startup_script.sh.tpl"
+  redis_port                              = var.redis_transit_encryption_mode == "SERVER_AUTHENTICATION" ? "6378" : "6379"
+  tfe_explorer_iam_database_user          = trimsuffix(google_service_account.tfe.email, ".gserviceaccount.com")
+  tfe_explorer_database_is_module_managed = var.tfe_explorer_enabled && var.create_tfe_explorer_db && var.tfe_explorer_database_host == null && var.tfe_explorer_database_name == null && var.tfe_explorer_database_user == null
+  tfe_explorer_database_uses_tfe_database = var.tfe_explorer_enabled && !local.tfe_explorer_database_is_module_managed && var.tfe_explorer_database_host == null && var.tfe_explorer_database_name == null && var.tfe_explorer_database_user == null
+  tfe_explorer_managed_database_name      = coalesce(var.tfe_explorer_database_name, var.tfe_database_name)
+  tfe_explorer_managed_database_user      = var.tfe_explorer_database_auth_use_gcp_iam ? local.tfe_explorer_iam_database_user : coalesce(var.tfe_explorer_database_user, var.tfe_database_user)
+  tfe_explorer_database_host              = !var.tfe_explorer_enabled ? "" : coalesce(var.tfe_explorer_database_host, local.tfe_explorer_database_is_module_managed ? "${google_sql_database_instance.tfe_explorer[0].private_ip_address}:5432" : null, "${google_sql_database_instance.tfe.private_ip_address}:5432")
+  tfe_explorer_database_name              = !var.tfe_explorer_enabled ? "" : coalesce(var.tfe_explorer_database_name, local.tfe_explorer_database_is_module_managed ? local.tfe_explorer_managed_database_name : null, var.tfe_database_name)
+  tfe_explorer_database_user              = !var.tfe_explorer_enabled ? "" : coalesce(var.tfe_explorer_database_user, local.tfe_explorer_database_is_module_managed ? local.tfe_explorer_managed_database_user : null, local.tfe_explorer_database_uses_tfe_database && var.tfe_explorer_database_auth_use_gcp_iam ? local.tfe_explorer_iam_database_user : var.tfe_database_user)
+  tfe_explorer_database_password          = !var.tfe_explorer_enabled || var.tfe_explorer_database_auth_use_gcp_iam ? "" : (var.tfe_explorer_database_password_secret_id != null ? data.google_secret_manager_secret_version.tfe_explorer_database_password[0].secret_data : data.google_secret_manager_secret_version.tfe_database_password.secret_data)
+  tfe_explorer_database_parameters        = !var.tfe_explorer_enabled ? "" : coalesce(var.tfe_explorer_database_parameters, var.tfe_database_parameters)
 
   startup_script_args = {
     # Bootstrap
@@ -55,11 +65,18 @@ locals {
     tfe_https_port                = var.tfe_https_port
 
     # Database settings
-    tfe_database_host       = "${google_sql_database_instance.tfe.private_ip_address}:5432"
-    tfe_database_name       = var.tfe_database_name
-    tfe_database_user       = var.tfe_database_user
-    tfe_database_password   = data.google_secret_manager_secret_version.tfe_database_password.secret_data
-    tfe_database_parameters = var.tfe_database_parameters
+    tfe_database_host                      = "${google_sql_database_instance.tfe.private_ip_address}:5432"
+    tfe_database_name                      = var.tfe_database_name
+    tfe_database_user                      = var.tfe_database_user
+    tfe_database_password                  = data.google_secret_manager_secret_version.tfe_database_password.secret_data
+    tfe_database_parameters                = var.tfe_database_parameters
+    tfe_explorer_enabled                   = var.tfe_explorer_enabled
+    tfe_explorer_database_host             = local.tfe_explorer_database_host
+    tfe_explorer_database_name             = local.tfe_explorer_database_name
+    tfe_explorer_database_user             = local.tfe_explorer_database_user
+    tfe_explorer_database_password         = local.tfe_explorer_database_password
+    tfe_explorer_database_parameters       = local.tfe_explorer_database_parameters
+    tfe_explorer_database_auth_use_gcp_iam = var.tfe_explorer_enabled ? var.tfe_explorer_database_auth_use_gcp_iam : false
 
     # Object storage settings
     tfe_object_storage_type               = "google"
