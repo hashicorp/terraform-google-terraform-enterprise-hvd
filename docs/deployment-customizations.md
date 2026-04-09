@@ -31,6 +31,27 @@ lb_static_ip_address = "10.0.1.20" # optional
 lb_is_internal = false
 ```
 
+### Health check endpoint selection
+
+This module automatically selects the correct HTTPS health check endpoint based on `tfe_image_tag`:
+
+- calver releases such as `v202409-3` use `/_health_check`
+- semver releases `1.2.1` and later use `/api/v1/health/readiness`
+
+This keeps the load balancer and instance autohealing checks aligned with the TFE 1.2.1 readiness endpoint behavior.
+
+### Admin Console
+
+The TFE Admin Console is disabled by default. When you enable it, explicitly scope ingress to trusted CIDR ranges.
+
+```hcl
+tfe_admin_console_disabled        = false
+tfe_admin_https_port              = 9443
+cidr_allow_ingress_tfe_admin_console = ["10.0.0.0/16"]
+```
+
+When enabled, the module adds a second load balancer forwarding rule on `tfe_admin_https_port`, opens the matching VM firewall rule, and exposes the Admin Console URL via the `tfe_admin_console_url_pattern` output.
+
 ## DNS
 
 This module supports optionally creating a DNS record within your existing Google Cloud DNS managed zone for your TFE FQDN.

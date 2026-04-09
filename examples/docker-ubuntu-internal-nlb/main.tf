@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: MPL-2.0
 
 terraform {
+  required_version = ">= 1.9"
+
   required_providers {
     google = {
       source  = "hashicorp/google"
@@ -41,16 +43,19 @@ module "tfe" {
   tfe_tls_ca_bundle_secret_id       = var.tfe_tls_ca_bundle_secret_id
 
   # --- TFE config settings --- #
-  tfe_fqdn      = var.tfe_fqdn
-  tfe_image_tag = var.tfe_image_tag
+  tfe_fqdn                   = var.tfe_fqdn
+  tfe_image_tag              = var.tfe_image_tag
+  tfe_admin_https_port       = var.tfe_admin_https_port
+  tfe_admin_console_disabled = var.tfe_admin_console_disabled
 
   # --- Networking --- #
-  vpc_network_name              = var.vpc_network_name
-  lb_is_internal                = var.lb_is_internal
-  lb_subnet_name                = var.lb_subnet_name
-  vm_subnet_name                = var.vm_subnet_name
-  cidr_allow_ingress_tfe_443    = var.cidr_allow_ingress_tfe_443
-  allow_ingress_vm_ssh_from_iap = var.allow_ingress_vm_ssh_from_iap
+  vpc_network_name                     = var.vpc_network_name
+  lb_is_internal                       = var.lb_is_internal
+  lb_subnet_name                       = var.lb_subnet_name
+  vm_subnet_name                       = var.vm_subnet_name
+  cidr_allow_ingress_tfe_443           = var.cidr_allow_ingress_tfe_443
+  cidr_allow_ingress_tfe_admin_console = var.cidr_allow_ingress_tfe_admin_console
+  allow_ingress_vm_ssh_from_iap        = var.allow_ingress_vm_ssh_from_iap
 
   # --- DNS (optional) --- #
   create_tfe_cloud_dns_record = var.create_tfe_cloud_dns_record

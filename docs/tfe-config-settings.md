@@ -54,3 +54,9 @@ Some settings from the configuration reference are intentionally not exposed as 
 2. The setting is hard coded based on the module's design and is not intended to be configurable by users.
 
 If you feel like a setting from the configuration reference is missing from the `variables.tf` of this module, then please file a GitHub issue.
+
+## Health and admin endpoints
+
+Terraform Enterprise 1.2.0 introduced the readiness endpoint and 1.2.1 fixed the `200 OK` behavior required for load balancer integrations. This module therefore switches health checks to `/api/v1/health/readiness` for semver tags `1.2.1` and later, while preserving `/_health_check` for older calver releases.
+
+The module also exposes `tfe_admin_https_port` and `tfe_admin_console_disabled` so you can control the system admin endpoint separately from the main application port. If you enable the admin console, also set `cidr_allow_ingress_tfe_admin_console` to restrict access.

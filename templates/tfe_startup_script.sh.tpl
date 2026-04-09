@@ -194,6 +194,10 @@ services:
       TFE_NODE_ID: ${tfe_node_id}
       TFE_HTTP_PORT: ${tfe_http_port}
       TFE_HTTPS_PORT: ${tfe_https_port}
+      TFE_ADMIN_HTTPS_PORT: ${tfe_admin_https_port}
+%{ if tfe_admin_console_disabled ~}
+      TFE_ADMIN_CONSOLE_DISABLED: "true"
+%{ endif ~}
 
       # Database settings
       TFE_DATABASE_HOST: ${tfe_database_host}
@@ -266,6 +270,7 @@ services:
     ports:
       - 80:${tfe_http_port}
       - 443:${tfe_https_port}
+      - ${tfe_admin_https_port}:${tfe_admin_https_port}
 %{ if tfe_operational_mode == "active-active" ~}
       - 8201:8201
 %{ endif ~}
@@ -348,6 +353,12 @@ spec:
       value: ${tfe_http_port}
     - name: "TFE_HTTPS_PORT"
       value: ${tfe_https_port}
+    - name: "TFE_ADMIN_HTTPS_PORT"
+      value: ${tfe_admin_https_port}
+%{ if tfe_admin_console_disabled ~}
+    - name: "TFE_ADMIN_CONSOLE_DISABLED"
+      value: "true"
+%{ endif ~}
 
     # Database settings
     - name: "TFE_DATABASE_HOST"
@@ -447,6 +458,8 @@ spec:
       hostPort: 80
     - containerPort: ${tfe_https_port}
       hostPort: 443
+    - containerPort: ${tfe_admin_https_port}
+      hostPort: ${tfe_admin_https_port}
     - containerPort: 8201
       hostPort: 8201
     securityContext:
@@ -625,7 +638,26 @@ function main {
   sleep 60
 
   log "INFO" "Polling TFE health check endpoint until the app becomes ready..."
-  while ! curl -ksfS --connect-timeout 5 https://$VM_PRIVATE_IP/_health_check; do
+  HEALTH_CHECK_PATH="/_health_check"
+  NORMALIZED_TFE_IMAGE_TAG="${tfe_image_tag#v}"
+
+  if [[ "${tfe_image_tag}" =~ ^v[0-9]{6}-[0-9]+$ ]]; then
+    log "INFO" "Detected calver TFE image tag '${tfe_image_tag}'. Using '/_health_check'."
+  elif [[ "$NORMALIZED_TFE_IMAGE_TAG" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+    IFS='.' read -r TFE_VERSION_MAJOR TFE_VERSION_MINOR TFE_VERSION_PATCH <<< "$NORMALIZED_TFE_IMAGE_TAG"
+    TFE_VERSION_PATCH="${TFE_VERSION_PATCH:-0}"
+
+    if (( TFE_VERSION_MAJOR > 1 || (TFE_VERSION_MAJOR == 1 && (TFE_VERSION_MINOR > 2 || (TFE_VERSION_MINOR == 2 && TFE_VERSION_PATCH >= 1))) )); then
+      HEALTH_CHECK_PATH="/api/v1/health/readiness"
+      log "INFO" "Detected TFE image tag '${tfe_image_tag}' supports '/api/v1/health/readiness'."
+    else
+      log "INFO" "Detected TFE image tag '${tfe_image_tag}' uses legacy '/_health_check'."
+    fi
+  else
+    log "INFO" "Unable to classify TFE image tag '${tfe_image_tag}'. Using legacy '/_health_check'."
+  fi
+
+  while ! curl -ksfS --connect-timeout 5 "https://$VM_PRIVATE_IP$HEALTH_CHECK_PATH"; do
     sleep 5
   done
 
