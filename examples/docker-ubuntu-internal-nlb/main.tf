@@ -63,7 +63,15 @@ module "tfe" {
   container_runtime  = var.container_runtime
 
   # --- Database --- #
-  tfe_database_password_secret_id = var.tfe_database_password_secret_id
+  tfe_database_password_secret_id          = var.tfe_database_password_secret_id
+  tfe_explorer_enabled                     = var.tfe_explorer_enabled
+  create_tfe_explorer_db                   = var.create_tfe_explorer_db
+  tfe_explorer_database_host               = var.tfe_explorer_database_host
+  tfe_explorer_database_name               = var.tfe_explorer_database_name
+  tfe_explorer_database_user               = var.tfe_explorer_database_user
+  tfe_explorer_database_password_secret_id = var.tfe_explorer_database_password_secret_id
+  tfe_explorer_database_parameters         = var.tfe_explorer_database_parameters
+  tfe_explorer_database_auth_use_gcp_iam   = var.tfe_explorer_database_auth_use_gcp_iam
 
   # --- Log forwarding (optional) --- #
   tfe_log_forwarding_enabled = var.tfe_log_forwarding_enabled

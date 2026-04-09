@@ -31,6 +31,41 @@ lb_static_ip_address = "10.0.1.20" # optional
 lb_is_internal = false
 ```
 
+## Explorer
+
+Terraform Enterprise Explorer can be enabled with the following module inputs:
+
+```hcl
+tfe_explorer_enabled = true
+create_tfe_explorer_db = true
+```
+
+HashiCorp recommends a dedicated PostgreSQL database for Explorer. When `tfe_explorer_enabled` is `true`, this module creates and uses a dedicated Cloud SQL for PostgreSQL instance for Explorer by default.
+
+To use your own dedicated Explorer database instead, set `create_tfe_explorer_db = false` and provide the following inputs:
+
+```hcl
+tfe_explorer_enabled                     = true
+create_tfe_explorer_db                   = false
+tfe_explorer_database_host               = "explorer-db.example.internal:5432"
+tfe_explorer_database_name               = "tfe_explorer"
+tfe_explorer_database_user               = "tfe_explorer"
+tfe_explorer_database_password_secret_id = "tfe-explorer-database-password"
+tfe_explorer_database_parameters         = "sslmode=require"
+```
+
+If Explorer is enabled, `create_tfe_explorer_db = false`, and you leave all `tfe_explorer_database_*` inputs as `null`, the module reuses the primary TFE database connection details and emits the `tfe_explorer_database_warning` output. This fallback is intended for non-production use only.
+
+### Explorer database IAM authentication
+
+To use Google Cloud IAM database authentication for Explorer on a module-managed or shared module-managed Cloud SQL instance, set:
+
+```hcl
+tfe_explorer_database_auth_use_gcp_iam = true
+```
+
+When this is enabled, the module turns on Cloud SQL IAM database authentication, grants the TFE service account the `roles/cloudsql.instanceUser` role, and creates the matching Cloud SQL IAM database user automatically. For externally managed Explorer databases, you must configure the corresponding IAM authentication settings and database user outside this module.
+
 ## DNS
 
 This module supports optionally creating a DNS record within your existing Google Cloud DNS managed zone for your TFE FQDN.

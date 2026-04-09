@@ -425,6 +425,54 @@ variable "tfe_database_user" {
   default     = "tfe"
 }
 
+variable "tfe_explorer_enabled" {
+  type        = bool
+  description = "Boolean to enable Terraform Enterprise Explorer."
+  default     = false
+}
+
+variable "create_tfe_explorer_db" {
+  type        = bool
+  description = "Boolean to create a dedicated Explorer Cloud SQL instance when Explorer is enabled and no explicit Explorer database connection values are provided."
+  default     = true
+}
+
+variable "tfe_explorer_database_host" {
+  type        = string
+  description = "Explorer PostgreSQL host in `HOST[:PORT]` format when using an existing Explorer database."
+  default     = null
+}
+
+variable "tfe_explorer_database_name" {
+  type        = string
+  description = "Explorer PostgreSQL database name when using an existing Explorer database."
+  default     = null
+}
+
+variable "tfe_explorer_database_user" {
+  type        = string
+  description = "Explorer PostgreSQL username when using an existing Explorer database."
+  default     = null
+}
+
+variable "tfe_explorer_database_password_secret_id" {
+  type        = string
+  description = "Name of Explorer PostgreSQL database password secret in Google Secret Manager."
+  default     = null
+}
+
+variable "tfe_explorer_database_parameters" {
+  type        = string
+  description = "Additional parameters to pass into the Explorer database settings for the PostgreSQL connection URI."
+  default     = null
+}
+
+variable "tfe_explorer_database_auth_use_gcp_iam" {
+  type        = bool
+  description = "Boolean to use Google Cloud IAM database authentication for Explorer."
+  default     = false
+}
+
 variable "tfe_database_parameters" {
   type        = string
   description = "Additional parameters to pass into the TFE database settings for the PostgreSQL connection URI."

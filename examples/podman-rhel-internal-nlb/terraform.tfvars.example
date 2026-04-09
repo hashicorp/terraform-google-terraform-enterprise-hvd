@@ -39,6 +39,14 @@ container_runtime  = "podman"
 
 # --- Database --- #
 tfe_database_password_secret_id = "<tfe-database-password-secret-name>"
+tfe_explorer_enabled            = false
+create_tfe_explorer_db          = true
+# tfe_explorer_database_password_secret_id = "<tfe-explorer-database-password-secret-name>"
+# tfe_explorer_database_host               = "explorer-db.example.internal:5432"
+# tfe_explorer_database_name               = "tfe_explorer"
+# tfe_explorer_database_user               = "tfe_explorer"
+# tfe_explorer_database_parameters         = "sslmode=require"
+# tfe_explorer_database_auth_use_gcp_iam   = false
 
 # --- Log forwarding (optional) --- #
 tfe_log_forwarding_enabled = <true>

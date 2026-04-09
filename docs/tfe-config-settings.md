@@ -54,3 +54,11 @@ Some settings from the configuration reference are intentionally not exposed as 
 2. The setting is hard coded based on the module's design and is not intended to be configurable by users.
 
 If you feel like a setting from the configuration reference is missing from the `variables.tf` of this module, then please file a GitHub issue.
+
+## Explorer configuration
+
+Explorer configuration follows the same pattern. The module computes the final Explorer database settings in `compute.tf`, then renders `TFE_EXPLORER_DATABASE_*` environment variables into both the Docker Compose and Podman manifests.
+
+When `tfe_explorer_enabled` is `true`, the module creates and uses a dedicated Explorer Cloud SQL instance by default. If `create_tfe_explorer_db` is set to `false` and no dedicated Explorer database inputs are provided, the module falls back to the primary TFE database connection values and emits the `tfe_explorer_database_warning` output so that this non-production configuration is visible in Terraform.
+
+When `tfe_explorer_database_auth_use_gcp_iam` is `true` and the Explorer database is module-managed or reuses the module-managed primary Cloud SQL instance, the module enables Cloud SQL IAM database authentication and derives the Explorer database username from the TFE service account.
