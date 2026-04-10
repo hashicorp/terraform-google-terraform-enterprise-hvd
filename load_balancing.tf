@@ -7,17 +7,37 @@
 locals {
   lb_name_suffix = var.lb_is_internal ? "internal" : "external"
 
-  is_calver_tag            = can(regex("^v[0-9]{6}-[0-9]+$", var.tfe_image_tag))
+  is_calver_tfe_image_tag  = can(regex("^v[0-9]{6}-[0-9]+$", var.tfe_image_tag))
   normalized_tfe_image_tag = trimprefix(var.tfe_image_tag, "v")
-  semver_parts             = can(regex("^[0-9]+\\.[0-9]+(\\.[0-9]+)?$", local.normalized_tfe_image_tag)) ? split(".", local.normalized_tfe_image_tag) : []
-  semver_major             = length(local.semver_parts) > 0 ? tonumber(local.semver_parts[0]) : 0
-  semver_minor             = length(local.semver_parts) > 1 ? tonumber(local.semver_parts[1]) : 0
-  semver_patch             = length(local.semver_parts) > 2 ? tonumber(local.semver_parts[2]) : 0
+  is_semver_tfe_image_tag  = can(regex("^[0-9]+\\.[0-9]+(\\.[0-9]+)?$", local.normalized_tfe_image_tag))
+  is_commit_hash_tfe_tag   = can(regex("^[0-9a-f]{7,}$", var.tfe_image_tag))
+  tfe_image_tag_parts      = local.is_semver_tfe_image_tag ? split(".", local.normalized_tfe_image_tag) : []
+  tfe_image_tag_major      = local.is_semver_tfe_image_tag ? tonumber(local.tfe_image_tag_parts[0]) : 0
+  tfe_image_tag_minor      = local.is_semver_tfe_image_tag ? tonumber(local.tfe_image_tag_parts[1]) : 0
+  tfe_image_tag_patch      = local.is_semver_tfe_image_tag && length(local.tfe_image_tag_parts) > 2 ? tonumber(local.tfe_image_tag_parts[2]) : 0
 
-  tfe_readiness_endpoint_path = !local.is_calver_tag && length(local.semver_parts) > 0 && (
-    local.semver_major > 1 ||
-    (local.semver_major == 1 && (local.semver_minor > 2 || (local.semver_minor == 2 && local.semver_patch >= 1)))
-  ) ? "/api/v1/health/readiness" : "/_health_check"
+  tfe_readiness_uses_api = (
+    !local.is_calver_tfe_image_tag &&
+    (
+      local.is_commit_hash_tfe_tag ||
+      (
+        local.is_semver_tfe_image_tag &&
+        (
+          local.tfe_image_tag_major > 1 ||
+          (
+            local.tfe_image_tag_major == 1 &&
+            (
+              local.tfe_image_tag_minor > 2 ||
+              (local.tfe_image_tag_minor == 2 && local.tfe_image_tag_patch >= 1)
+            )
+          )
+        )
+      )
+    )
+  )
+  tfe_health_check_path = local.tfe_readiness_uses_api ? "/api/v1/health/readiness" : "/_health_check"
+  # Backward-compatible alias for existing references in other module files.
+  tfe_readiness_endpoint_path = local.tfe_health_check_path
 }
 
 #-----------------------------------------------------------------------------------
@@ -81,6 +101,6 @@ resource "google_compute_region_health_check" "tfe_backend_lb" {
 
   https_health_check {
     port         = 443
-    request_path = local.tfe_readiness_endpoint_path
+    request_path = local.tfe_health_check_path
   }
 }

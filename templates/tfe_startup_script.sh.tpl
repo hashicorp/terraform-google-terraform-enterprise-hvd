@@ -130,7 +130,7 @@ function install_podman {
 function retrieve_secret_from_gcp_sm {
   local SECRET_NAME="$1"
   local SECRET_VALUE
-  
+
   if [[ -z "$SECRET_NAME" ]]; then
     log "ERROR" "Secret name cannot be empty. Exiting."
     exit_script 5
@@ -205,7 +205,7 @@ services:
       TFE_DATABASE_USER: ${tfe_database_user}
       TFE_DATABASE_PASSWORD: ${tfe_database_password}
       TFE_DATABASE_PARAMETERS: ${tfe_database_parameters}
-      
+
       # Object storage settings
       TFE_OBJECT_STORAGE_TYPE: ${tfe_object_storage_type}
       TFE_OBJECT_STORAGE_GOOGLE_BUCKET: ${tfe_object_storage_google_bucket}
@@ -302,7 +302,7 @@ EOF
 
 function generate_tfe_podman_manifest {
   local TFE_SETTINGS_PATH="$1"
-  
+
   cat > $TFE_SETTINGS_PATH << EOF
 ---
 apiVersion: "v1"
@@ -536,7 +536,7 @@ EOF
 
 function pull_tfe_image {
   local TFE_CONTAINER_RUNTIME="$1"
-  
+
   log "INFO" "Authenticating to '${tfe_image_repository_url}' container registry."
   log "INFO" "Detected TFE image repository username is '${tfe_image_repository_username}'."
   if [[ "${tfe_image_repository_url}" == "images.releases.hashicorp.com" ]]; then
@@ -581,7 +581,7 @@ function main {
 
   log "INFO" "Creating TFE directories."
   mkdir -p $TFE_CONFIG_DIR $TFE_TLS_CERTS_DIR
-  
+
   log "INFO" "Installing software dependencies..."
   install_gcloud_cli
   if [[ "${container_runtime}" == "podman" ]]; then
@@ -654,7 +654,8 @@ function main {
       log "INFO" "Detected TFE image tag '${tfe_image_tag}' uses legacy '/_health_check'."
     fi
   else
-    log "INFO" "Unable to classify TFE image tag '${tfe_image_tag}'. Using legacy '/_health_check'."
+    log "INFO" "Unable to classify TFE image tag '${tfe_image_tag}'. Using  '/api/v1/health/readiness'."
+		HEALTH_CHECK_PATH="/api/v1/health/readiness"
   fi
 
   while ! curl -ksfS --connect-timeout 5 "https://$VM_PRIVATE_IP$HEALTH_CHECK_PATH"; do
