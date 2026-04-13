@@ -79,7 +79,7 @@ variable "tfe_image_name" {
 variable "tfe_image_tag" {
   type        = string
   description = "Tag (release) for the TFE container image. This represents which version (release) of TFE to deploy."
-  default     = "v202409-3"
+  default     = "1.2.1"
 }
 
 variable "tfe_image_repository_username" {
