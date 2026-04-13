@@ -639,13 +639,15 @@ function main {
 
   log "INFO" "Polling TFE health check endpoint until the app becomes ready..."
   HEALTH_CHECK_PATH="/_health_check"
-  NORMALIZED_TFE_IMAGE_TAG="${tfe_image_tag#v}"
+  NORMALIZED_TFE_IMAGE_TAG="$(printf '%s' '${tfe_image_tag}' | sed 's/^v//')"
 
   if [[ "${tfe_image_tag}" =~ ^v[0-9]{6}-[0-9]+$ ]]; then
     log "INFO" "Detected calver TFE image tag '${tfe_image_tag}'. Using '/_health_check'."
   elif [[ "$NORMALIZED_TFE_IMAGE_TAG" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
     IFS='.' read -r TFE_VERSION_MAJOR TFE_VERSION_MINOR TFE_VERSION_PATCH <<< "$NORMALIZED_TFE_IMAGE_TAG"
-    TFE_VERSION_PATCH="${TFE_VERSION_PATCH:-0}"
+    if [[ -z "$TFE_VERSION_PATCH" ]]; then
+      TFE_VERSION_PATCH=0
+    fi
 
     if (( TFE_VERSION_MAJOR > 1 || (TFE_VERSION_MAJOR == 1 && (TFE_VERSION_MINOR > 2 || (TFE_VERSION_MINOR == 2 && TFE_VERSION_PATCH >= 1))) )); then
       HEALTH_CHECK_PATH="/api/v1/health/readiness"
