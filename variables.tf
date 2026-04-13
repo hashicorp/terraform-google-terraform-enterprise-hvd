@@ -312,8 +312,8 @@ variable "cidr_allow_ingress_tfe_admin_console" {
   default     = null
 
   validation {
-    condition     = var.tfe_admin_console_disabled ? true : var.cidr_allow_ingress_tfe_admin_console != null
-    error_message = "Value must be set when `tfe_admin_console_disabled` is `false`."
+    condition     = var.tfe_admin_console_disabled ? true : var.cidr_allow_ingress_tfe_admin_console != null && length(var.cidr_allow_ingress_tfe_admin_console) > 0
+    error_message = "Value must be set to a non-empty list when `tfe_admin_console_disabled` is `false`."
   }
 
   validation {
