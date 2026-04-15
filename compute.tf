@@ -53,6 +53,8 @@ locals {
     tfe_node_id                   = ""
     tfe_http_port                 = var.tfe_http_port
     tfe_https_port                = var.tfe_https_port
+    tfe_admin_https_port          = var.tfe_admin_https_port
+    tfe_admin_console_disabled    = var.tfe_admin_console_disabled
 
     # Database settings
     tfe_database_host       = "${google_sql_database_instance.tfe.private_ip_address}:5432"
@@ -197,7 +199,7 @@ resource "google_compute_health_check" "tfe_auto_healing" {
 
   https_health_check {
     port         = 443
-    request_path = "/_health_check"
+    request_path = local.tfe_readiness_endpoint_path
   }
 }
 
@@ -260,6 +262,27 @@ resource "google_compute_firewall" "vm_allow_tfe_443" {
   }
 
   source_ranges = var.cidr_allow_ingress_tfe_443
+  target_tags   = ["tfe-vm"]
+
+  log_config {
+    metadata = "INCLUDE_ALL_METADATA"
+  }
+}
+
+resource "google_compute_firewall" "vm_allow_tfe_admin_console" {
+  count = var.tfe_admin_console_disabled ? 0 : 1
+
+  name        = "${var.friendly_name_prefix}-tfe-allow-admin-console"
+  description = "Allow TCP/${var.tfe_admin_https_port} (Admin Console HTTPS) ingress to TFE GCE VM instances from specified CIDR ranges."
+  network     = data.google_compute_network.vpc.self_link
+  direction   = "INGRESS"
+
+  allow {
+    protocol = "tcp"
+    ports    = [var.tfe_admin_https_port]
+  }
+
+  source_ranges = var.cidr_allow_ingress_tfe_admin_console
   target_tags   = ["tfe-vm"]
 
   log_config {

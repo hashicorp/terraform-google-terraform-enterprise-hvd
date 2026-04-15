@@ -39,4 +39,6 @@ This module includes an input variable named `tfe_image_tag` that dictates which
    tfe_image_tag = "v202410-1"
    ```
 
+   If you are upgrading to semver-based releases, note that this module automatically switches its load balancer and startup readiness checks to `/api/v1/health/readiness` for `1.2.1` and later. Earlier releases continue to use `/_health_check`.
+
 4. From the directory managing your TFE deployment, run `terraform apply` to update the TFE GCE instance template with the new target `tfe_image_tag` version. This will trigger the managed instance group to replace the existing running TFE GCE VM instance(s) with new ones, on which the target version of TFE will be installed.

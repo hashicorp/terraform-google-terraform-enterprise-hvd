@@ -130,7 +130,7 @@ function install_podman {
 function retrieve_secret_from_gcp_sm {
   local SECRET_NAME="$1"
   local SECRET_VALUE
-  
+
   if [[ -z "$SECRET_NAME" ]]; then
     log "ERROR" "Secret name cannot be empty. Exiting."
     exit_script 5
@@ -194,6 +194,10 @@ services:
       TFE_NODE_ID: ${tfe_node_id}
       TFE_HTTP_PORT: ${tfe_http_port}
       TFE_HTTPS_PORT: ${tfe_https_port}
+      TFE_ADMIN_HTTPS_PORT: ${tfe_admin_https_port}
+%{ if tfe_admin_console_disabled ~}
+      TFE_ADMIN_CONSOLE_DISABLED: "true"
+%{ endif ~}
 
       # Database settings
       TFE_DATABASE_HOST: ${tfe_database_host}
@@ -201,7 +205,7 @@ services:
       TFE_DATABASE_USER: ${tfe_database_user}
       TFE_DATABASE_PASSWORD: ${tfe_database_password}
       TFE_DATABASE_PARAMETERS: ${tfe_database_parameters}
-      
+
       # Object storage settings
       TFE_OBJECT_STORAGE_TYPE: ${tfe_object_storage_type}
       TFE_OBJECT_STORAGE_GOOGLE_BUCKET: ${tfe_object_storage_google_bucket}
@@ -266,6 +270,7 @@ services:
     ports:
       - 80:${tfe_http_port}
       - 443:${tfe_https_port}
+      - ${tfe_admin_https_port}:${tfe_admin_https_port}
 %{ if tfe_operational_mode == "active-active" ~}
       - 8201:8201
 %{ endif ~}
@@ -297,7 +302,7 @@ EOF
 
 function generate_tfe_podman_manifest {
   local TFE_SETTINGS_PATH="$1"
-  
+
   cat > $TFE_SETTINGS_PATH << EOF
 ---
 apiVersion: "v1"
@@ -348,6 +353,12 @@ spec:
       value: ${tfe_http_port}
     - name: "TFE_HTTPS_PORT"
       value: ${tfe_https_port}
+    - name: "TFE_ADMIN_HTTPS_PORT"
+      value: ${tfe_admin_https_port}
+%{ if tfe_admin_console_disabled ~}
+    - name: "TFE_ADMIN_CONSOLE_DISABLED"
+      value: "true"
+%{ endif ~}
 
     # Database settings
     - name: "TFE_DATABASE_HOST"
@@ -447,6 +458,8 @@ spec:
       hostPort: 80
     - containerPort: ${tfe_https_port}
       hostPort: 443
+    - containerPort: ${tfe_admin_https_port}
+      hostPort: ${tfe_admin_https_port}
     - containerPort: 8201
       hostPort: 8201
     securityContext:
@@ -523,7 +536,7 @@ EOF
 
 function pull_tfe_image {
   local TFE_CONTAINER_RUNTIME="$1"
-  
+
   log "INFO" "Authenticating to '${tfe_image_repository_url}' container registry."
   log "INFO" "Detected TFE image repository username is '${tfe_image_repository_username}'."
   if [[ "${tfe_image_repository_url}" == "images.releases.hashicorp.com" ]]; then
@@ -568,7 +581,7 @@ function main {
 
   log "INFO" "Creating TFE directories."
   mkdir -p $TFE_CONFIG_DIR $TFE_TLS_CERTS_DIR
-  
+
   log "INFO" "Installing software dependencies..."
   install_gcloud_cli
   if [[ "${container_runtime}" == "podman" ]]; then
@@ -625,7 +638,29 @@ function main {
   sleep 60
 
   log "INFO" "Polling TFE health check endpoint until the app becomes ready..."
-  while ! curl -ksfS --connect-timeout 5 https://$VM_PRIVATE_IP/_health_check; do
+  HEALTH_CHECK_PATH="/_health_check"
+  NORMALIZED_TFE_IMAGE_TAG="$(printf '%s' '${tfe_image_tag}' | sed 's/^v//')"
+
+  if [[ "${tfe_image_tag}" =~ ^v[0-9]{6}-[0-9]+$ ]]; then
+    log "INFO" "Detected calver TFE image tag '${tfe_image_tag}'. Using '/_health_check'."
+  elif [[ "$NORMALIZED_TFE_IMAGE_TAG" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+    IFS='.' read -r TFE_VERSION_MAJOR TFE_VERSION_MINOR TFE_VERSION_PATCH <<< "$NORMALIZED_TFE_IMAGE_TAG"
+    if [[ -z "$TFE_VERSION_PATCH" ]]; then
+      TFE_VERSION_PATCH=0
+    fi
+
+    if (( TFE_VERSION_MAJOR > 1 || (TFE_VERSION_MAJOR == 1 && (TFE_VERSION_MINOR > 2 || (TFE_VERSION_MINOR == 2 && TFE_VERSION_PATCH >= 1))) )); then
+      HEALTH_CHECK_PATH="/api/v1/health/readiness"
+      log "INFO" "Detected TFE image tag '${tfe_image_tag}' supports '/api/v1/health/readiness'."
+    else
+      log "INFO" "Detected TFE image tag '${tfe_image_tag}' uses legacy '/_health_check'."
+    fi
+  else
+    log "INFO" "Unable to classify TFE image tag '${tfe_image_tag}'. Using  '/api/v1/health/readiness'."
+		HEALTH_CHECK_PATH="/api/v1/health/readiness"
+  fi
+
+  while ! curl -ksfS --connect-timeout 5 "https://$VM_PRIVATE_IP$HEALTH_CHECK_PATH"; do
     sleep 5
   done
 

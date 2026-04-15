@@ -19,6 +19,11 @@ output "tfe_create_initial_admin_user_url" {
   description = "URL to create TFE initial admin user."
 }
 
+output "tfe_admin_console_url_pattern" {
+  value       = var.tfe_admin_console_disabled ? null : "https://${var.tfe_fqdn}:${var.tfe_admin_https_port}"
+  description = "URL pattern to access the TFE Admin Console. Only applicable when `tfe_admin_console_disabled` is `false`."
+}
+
 #------------------------------------------------------------------------------
 # Load balancer
 #------------------------------------------------------------------------------
@@ -102,4 +107,3 @@ output "tfe_redis_use_tls" {
   value       = var.tfe_operational_mode == "active-active" ? local.startup_script_args["tfe_redis_use_tls"] : null
   description = "Whether TFE should use TLS to connect to Redis instance."
 }
-

@@ -172,8 +172,10 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | [google_compute_firewall.vm_allow_ingress_ssh_from_iap](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
 | [google_compute_firewall.vm_allow_lb_health_checks_443](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
 | [google_compute_firewall.vm_allow_tfe_443](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
+| [google_compute_firewall.vm_allow_tfe_admin_console](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
 | [google_compute_firewall.vm_allow_tfe_metrics_from_cidr](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
 | [google_compute_firewall.vm_tfe_self_allow](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
+| [google_compute_forwarding_rule.tfe_admin_console_lb](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_forwarding_rule) | resource |
 | [google_compute_forwarding_rule.tfe_frontend_lb](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_forwarding_rule) | resource |
 | [google_compute_health_check.tfe_auto_healing](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_health_check) | resource |
 | [google_compute_instance_template.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template) | resource |
@@ -236,6 +238,7 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | <a name="input_vpc_network_name"></a> [vpc\_network\_name](#input\_vpc\_network\_name) | Name of VPC network to deploy TFE in. | `string` | n/a | yes |
 | <a name="input_allow_ingress_vm_ssh_from_iap"></a> [allow\_ingress\_vm\_ssh\_from\_iap](#input\_allow\_ingress\_vm\_ssh\_from\_iap) | Boolean to create firewall rule to allow TCP/22 (SSH) inbound to TFE GCE instances from Google Cloud IAP CIDR block. | `bool` | `true` | no |
 | <a name="input_cidr_allow_ingress_tfe_443"></a> [cidr\_allow\_ingress\_tfe\_443](#input\_cidr\_allow\_ingress\_tfe\_443) | List of CIDR ranges to allow TCP/443 (HTTPS) inbound to TFE load balancer. | `list(string)` | `null` | no |
+| <a name="input_cidr_allow_ingress_tfe_admin_console"></a> [cidr\_allow\_ingress\_tfe\_admin\_console](#input\_cidr\_allow\_ingress\_tfe\_admin\_console) | List of CIDR ranges to allow TCP ingress to the TFE Admin Console port. Required when `tfe_admin_console_disabled` is `false`. | `list(string)` | `null` | no |
 | <a name="input_cidr_allow_ingress_tfe_metrics"></a> [cidr\_allow\_ingress\_tfe\_metrics](#input\_cidr\_allow\_ingress\_tfe\_metrics) | List of CIDR ranges to allow TCP/9090 (HTTP) and TCP/9091 (HTTPS) inbound to TFE metrics collection endpoint. | `list(string)` | `null` | no |
 | <a name="input_cidr_allow_ingress_vm_ssh"></a> [cidr\_allow\_ingress\_vm\_ssh](#input\_cidr\_allow\_ingress\_vm\_ssh) | List of CIDR ranges to allow TCP/22 (SSH) inbound to TFE GCE instances. | `list(string)` | `null` | no |
 | <a name="input_cloud_dns_managed_zone_name"></a> [cloud\_dns\_managed\_zone\_name](#input\_cloud\_dns\_managed\_zone\_name) | Name of Google Cloud DNS managed zone to create TFE DNS record in. Required when `create_tfe_cloud_dns_record` is `true`. | `string` | `null` | no |
@@ -283,6 +286,8 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | <a name="input_redis_tier"></a> [redis\_tier](#input\_redis\_tier) | The service tier of the Redis instance. Set to `STANDARD_HA` for high availability. | `string` | `"STANDARD_HA"` | no |
 | <a name="input_redis_transit_encryption_mode"></a> [redis\_transit\_encryption\_mode](#input\_redis\_transit\_encryption\_mode) | Determines transit encryption (TLS) mode for Redis instance. | `string` | `"DISABLED"` | no |
 | <a name="input_redis_version"></a> [redis\_version](#input\_redis\_version) | The version of Redis software. | `string` | `"REDIS_7_2"` | no |
+| <a name="input_tfe_admin_console_disabled"></a> [tfe\_admin\_console\_disabled](#input\_tfe\_admin\_console\_disabled) | Boolean to disable the TFE Admin Console for advanced troubleshooting and diagnostics. | `bool` | `true` | no |
+| <a name="input_tfe_admin_https_port"></a> [tfe\_admin\_https\_port](#input\_tfe\_admin\_https\_port) | Port the TFE application container listens on for system (admin) API endpoint HTTPS traffic. | `number` | `9443` | no |
 | <a name="input_tfe_capacity_concurrency"></a> [tfe\_capacity\_concurrency](#input\_tfe\_capacity\_concurrency) | Maximum number of concurrent Terraform runs to allow on a TFE node. | `number` | `10` | no |
 | <a name="input_tfe_capacity_cpu"></a> [tfe\_capacity\_cpu](#input\_tfe\_capacity\_cpu) | Maxium number of CPU cores that a Terraform run is allowed to consume on a TFE node. Defaults to `0` which is no limit. | `number` | `0` | no |
 | <a name="input_tfe_capacity_memory"></a> [tfe\_capacity\_memory](#input\_tfe\_capacity\_memory) | Maximum amount of memory (in MiB) that a Terraform run is allowed to consume on a TFE node. | `number` | `2048` | no |
@@ -299,7 +304,7 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | <a name="input_tfe_image_repository_password"></a> [tfe\_image\_repository\_password](#input\_tfe\_image\_repository\_password) | Pasword for container registry where TFE container image is hosted. Leave as `null` if using the default TFE registry, as the default password is your TFE license file. | `string` | `null` | no |
 | <a name="input_tfe_image_repository_url"></a> [tfe\_image\_repository\_url](#input\_tfe\_image\_repository\_url) | URL of container registry where the TFE container image is hosted. Only set this away from the default if you are hosting the TFE container image in your own custom registry. | `string` | `"images.releases.hashicorp.com"` | no |
 | <a name="input_tfe_image_repository_username"></a> [tfe\_image\_repository\_username](#input\_tfe\_image\_repository\_username) | Username for container registry where TFE container image is hosted. | `string` | `"terraform"` | no |
-| <a name="input_tfe_image_tag"></a> [tfe\_image\_tag](#input\_tfe\_image\_tag) | Tag (release) for the TFE container image. This represents which version (release) of TFE to deploy. | `string` | `"v202409-3"` | no |
+| <a name="input_tfe_image_tag"></a> [tfe\_image\_tag](#input\_tfe\_image\_tag) | Tag (release) for the TFE container image. This represents which version (release) of TFE to deploy. | `string` | `"1.2.1"` | no |
 | <a name="input_tfe_license_reporting_opt_out"></a> [tfe\_license\_reporting\_opt\_out](#input\_tfe\_license\_reporting\_opt\_out) | Boolean to opt out of TFE license reporting. | `bool` | `false` | no |
 | <a name="input_tfe_log_forwarding_enabled"></a> [tfe\_log\_forwarding\_enabled](#input\_tfe\_log\_forwarding\_enabled) | Boolean to enable TFE log forwarding configuration via Fluent Bit. | `bool` | `false` | no |
 | <a name="input_tfe_metrics_enable"></a> [tfe\_metrics\_enable](#input\_tfe\_metrics\_enable) | Boolean to enable TFE metrics collection endpoints. | `bool` | `false` | no |
@@ -317,6 +322,7 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 
 | Name | Description |
 |------|-------------|
+| <a name="output_tfe_admin_console_url_pattern"></a> [tfe\_admin\_console\_url\_pattern](#output\_tfe\_admin\_console\_url\_pattern) | URL pattern to access the TFE Admin Console. Only applicable when `tfe_admin_console_disabled` is `false`. |
 | <a name="output_tfe_create_initial_admin_user_url"></a> [tfe\_create\_initial\_admin\_user\_url](#output\_tfe\_create\_initial\_admin\_user\_url) | URL to create TFE initial admin user. |
 | <a name="output_tfe_database_host"></a> [tfe\_database\_host](#output\_tfe\_database\_host) | Private IP address and port of TFE Cloud SQL for PostgreSQL database instance. |
 | <a name="output_tfe_database_instance_id"></a> [tfe\_database\_instance\_id](#output\_tfe\_database\_instance\_id) | ID of TFE Cloud SQL for PostgreSQL database instance. |
