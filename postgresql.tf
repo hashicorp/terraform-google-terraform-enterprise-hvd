@@ -29,7 +29,7 @@ resource "google_sql_database_instance" "tfe" {
     disk_autoresize   = true
 
     ip_configuration {
-      ipv4_enabled    = false
+      ipv4_enabled    = true
       private_network = data.google_compute_network.vpc.self_link
       ssl_mode        = var.postgres_ssl_mode
     }

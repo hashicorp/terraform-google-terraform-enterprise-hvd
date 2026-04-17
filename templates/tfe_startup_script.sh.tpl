@@ -109,7 +109,9 @@ function install_podman {
     if [[ "$OS_DISTRO" == "rhel" || "$OS_DISTRO" == "centos" ]]; then
       log "INFO" "Installing Podman for RHEL $OS_MAJOR_VERSION."
       dnf update -y
-      if [[ "$OS_MAJOR_VERSION" == "9" ]]; then
+      if [[ "$OS_MAJOR_VERSION" == "10" ]]; then
+        dnf install -y podman
+      elif [[ "$OS_MAJOR_VERSION" == "9" ]]; then
         dnf install -y container-tools
       elif [[ "$OS_MAJOR_VERSION" == "8" ]]; then
         dnf module install -y container-tools

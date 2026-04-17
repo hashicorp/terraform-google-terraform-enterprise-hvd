@@ -355,3 +355,20 @@ resource "google_compute_firewall" "vm_allow_tfe_metrics_from_cidr" {
     metadata = "INCLUDE_ALL_METADATA"
   }
 }
+
+# Adding private services connection for access internally to SQL and redis per https://docs.cloud.google.com/sql/docs/mysql/private-ip#network_requirements
+# Allowing GCP to automatically pick the next available IP in the subnet for the peering connection since we don't need to know the specific IP address and it avoids potential conflicts with other manually specified IPs
+resource "google_compute_global_address" "private_ip_address" {
+  name          = "google-managed-services-${data.google_compute_network.vpc.name}"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = data.google_compute_network.vpc.id
+}
+
+resource "google_service_networking_connection" "default" {
+  network                 = data.google_compute_network.vpc.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
+}
+

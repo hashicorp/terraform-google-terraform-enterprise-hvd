@@ -379,7 +379,7 @@ variable "container_runtime" {
 variable "docker_version" {
   type        = string
   description = "Version of Docker to install on TFE GCE VM instances."
-  default     = "26.1.4-1"
+  default     = "29.4.0"
 }
 
 variable "gce_image_project" {
@@ -487,7 +487,7 @@ variable "postgres_availability_type" {
 variable "postgres_machine_type" {
   type        = string
   description = "Machine size of Cloud SQL for PostgreSQL instance."
-  default     = "db-custom-4-16384"
+  default     = "db-perf-optimized-N-4" #Custom no longer supported for POSTGRES_16; using db-perf-optimized-N-4 which is the smallest available machine type for POSTGRES_16
 }
 
 variable "postgres_disk_size" {

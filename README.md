@@ -6,6 +6,10 @@ Terraform module aligned with HashiCorp Validated Designs (HVD) to deploy Terraf
 
 ## Prerequisites
 
+### Terraform GCP Prerequisites Module
+
+For assistance setting up the below prerequisites for GCP, check out the [Terraform Google Prereqs module](https://github.com/hashicorp-services/terraform-google-prereqs).  
+
 ### General
 
 - TFE license file (_e.g._ `terraform.hclic`)
@@ -63,7 +67,7 @@ One of the following logging destinations:
 
 ## Usage
 
-1. Create/configure/validate the applicable [prerequisites](#prerequisites).
+1. Create/configure/validate the applicable [prerequisites](#prerequisites), using the [Terraform GCP Prerequisites Module](#terraform-gcp-prerequisites-module) if desired.
 
 2. Nested within the [examples](./examples/) directory are subdirectories containing ready-made Terraform configurations for example scenarios on how to call and deploy this module. To get started, choose the example scenario that most closely matches your requirements. You can customize your deployment later by adding additional module [inputs](#inputs) as you see fit (see the [Deployment-Customizations](./docs/deployment-customizations.md) doc for more details).
 
