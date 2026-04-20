@@ -5,7 +5,8 @@
 # Common
 #------------------------------------------------------------------------------
 locals {
-  lb_name_suffix = var.lb_is_internal ? "internal" : "external"
+  lb_name_suffix    = var.lb_is_internal ? "internal" : "external"
+  lb_use_shared_vip = var.lb_is_internal && !var.tfe_admin_console_disabled
 
   is_calver_tfe_image_tag  = can(regex("^v[0-9]{6}-[0-9]+$", var.tfe_image_tag))
   normalized_tfe_image_tag = trimprefix(var.tfe_image_tag, "v")
@@ -48,6 +49,7 @@ resource "google_compute_address" "tfe_frontend_lb" {
   description  = "Static IP to associate with TFE load balancer forwarding rule (front end)."
   address_type = var.lb_is_internal ? "INTERNAL" : "EXTERNAL"
   network_tier = var.lb_is_internal ? null : "PREMIUM"
+  purpose      = local.lb_use_shared_vip ? "SHARED_LOADBALANCER_VIP" : null
   subnetwork   = var.lb_is_internal ? data.google_compute_subnetwork.lb_subnet[0].self_link : null
   address      = var.lb_is_internal ? var.lb_static_ip_address : null
 }
