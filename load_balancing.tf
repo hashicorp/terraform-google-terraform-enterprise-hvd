@@ -7,7 +7,7 @@
 locals {
   lb_name_suffix      = var.lb_is_internal ? "internal" : "external"
   lb_use_shared_vip   = var.lb_is_internal && !var.tfe_admin_console_disabled
-  lb_subnet_self_link = try(data.google_compute_subnetwork.lb_subnet[0].self_link, null)
+  lb_subnet_self_link = var.lb_is_internal ? data.google_compute_subnetwork.lb_subnet[0].self_link : null
 
   is_calver_tfe_image_tag  = can(regex("^v[0-9]{6}-[0-9]+$", var.tfe_image_tag))
   normalized_tfe_image_tag = trimprefix(var.tfe_image_tag, "v")
