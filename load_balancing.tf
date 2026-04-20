@@ -5,8 +5,9 @@
 # Common
 #------------------------------------------------------------------------------
 locals {
-  lb_name_suffix    = var.lb_is_internal ? "internal" : "external"
-  lb_use_shared_vip = var.lb_is_internal && !var.tfe_admin_console_disabled
+  lb_name_suffix      = var.lb_is_internal ? "internal" : "external"
+  lb_use_shared_vip   = var.lb_is_internal && !var.tfe_admin_console_disabled
+  lb_subnet_self_link = try(data.google_compute_subnetwork.lb_subnet[0].self_link, null)
 
   is_calver_tfe_image_tag  = can(regex("^v[0-9]{6}-[0-9]+$", var.tfe_image_tag))
   normalized_tfe_image_tag = trimprefix(var.tfe_image_tag, "v")
@@ -50,7 +51,7 @@ resource "google_compute_address" "tfe_frontend_lb" {
   address_type = var.lb_is_internal ? "INTERNAL" : "EXTERNAL"
   network_tier = var.lb_is_internal ? null : "PREMIUM"
   purpose      = local.lb_use_shared_vip ? "SHARED_LOADBALANCER_VIP" : null
-  subnetwork   = var.lb_is_internal ? data.google_compute_subnetwork.lb_subnet[0].self_link : null
+  subnetwork   = var.lb_is_internal ? local.lb_subnet_self_link : null
   address      = var.lb_is_internal ? var.lb_static_ip_address : null
 }
 
@@ -61,7 +62,7 @@ resource "google_compute_forwarding_rule" "tfe_frontend_lb" {
   load_balancing_scheme = var.lb_is_internal ? "INTERNAL" : "EXTERNAL"
   ports                 = [443]
   network               = var.lb_is_internal ? data.google_compute_network.vpc.self_link : null
-  subnetwork            = var.lb_is_internal ? data.google_compute_subnetwork.lb_subnet[0].self_link : null
+  subnetwork            = var.lb_is_internal ? local.lb_subnet_self_link : null
   ip_address            = google_compute_address.tfe_frontend_lb.address
 }
 
@@ -74,7 +75,7 @@ resource "google_compute_forwarding_rule" "tfe_admin_console_lb" {
   load_balancing_scheme = var.lb_is_internal ? "INTERNAL" : "EXTERNAL"
   ports                 = [var.tfe_admin_https_port]
   network               = var.lb_is_internal ? data.google_compute_network.vpc.self_link : null
-  subnetwork            = var.lb_is_internal ? data.google_compute_subnetwork.lb_subnet[0].self_link : null
+  subnetwork            = var.lb_is_internal ? local.lb_subnet_self_link : null
   ip_address            = google_compute_address.tfe_frontend_lb.address
 }
 
