@@ -62,10 +62,11 @@ module "tfe" {
   cloud_dns_managed_zone_name = var.cloud_dns_managed_zone_name
 
   # --- Compute --- #
-  mig_instance_count = var.mig_instance_count
-  gce_image_name     = var.gce_image_name
-  gce_image_project  = var.gce_image_project
-  container_runtime  = var.container_runtime
+  mig_instance_count    = var.mig_instance_count
+  gce_image_name        = var.gce_image_name
+  gce_image_project     = var.gce_image_project
+  container_runtime     = var.container_runtime
+  postgres_machine_type = var.postgres_machine_type
 
   # --- Database --- #
   tfe_database_password_secret_id = var.tfe_database_password_secret_id
