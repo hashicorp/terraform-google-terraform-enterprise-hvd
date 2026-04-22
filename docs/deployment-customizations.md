@@ -52,6 +52,8 @@ cidr_allow_ingress_tfe_admin_console = ["10.0.0.0/16"]
 
 When enabled, the module adds a second load balancer forwarding rule on `tfe_admin_https_port`, opens the matching VM firewall rule, and exposes the Admin Console URL via the `tfe_admin_console_url_pattern` output.
 
+For internal load balancer deployments, the module automatically reserves the frontend IP with shared VIP semantics when the Admin Console is enabled so both the main HTTPS endpoint (`443`) and the Admin Console port can use the same internal IP address.
+
 ## DNS
 
 This module supports optionally creating a DNS record within your existing Google Cloud DNS managed zone for your TFE FQDN.
