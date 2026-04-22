@@ -54,6 +54,20 @@ When enabled, the module adds a second load balancer forwarding rule on `tfe_adm
 
 For internal load balancer deployments, the module automatically reserves the frontend IP with shared VIP semantics when the Admin Console is enabled so both the main HTTPS endpoint (`443`) and the Admin Console port can use the same internal IP address.
 
+### Optional secondary public callback hostname
+
+This module can optionally manage a second, public-facing passthrough Network Load Balancer for `tfe_hostname_secondary`. This is intended for cases where the primary TFE endpoint remains internal but external systems still need a public hostname for OIDC callbacks, VCS webhooks, or run tasks.
+
+- Set `tfe_hostname_secondary` plus the secondary TLS secret inputs to enable the secondary hostname inside TFE
+- Set `create_secondary_tfe_lb = true` to have the module create a dedicated public external passthrough Network Load Balancer for that hostname
+- This secondary load balancer path is only supported when the primary load balancer remains internal (`lb_is_internal = true`)
+- Restrict public ingress with `cidr_allow_ingress_tfe_secondary_443`
+
+```hcl
+tfe_hostname_secondary             = "tfe-callbacks.gcp.example.com"
+create_secondary_tfe_lb            = true
+cidr_allow_ingress_tfe_secondary_443 = ["0.0.0.0/0"]
+```
 ## DNS
 
 This module supports optionally creating a DNS record within your existing Google Cloud DNS managed zone for your TFE FQDN.
@@ -67,6 +81,13 @@ This module supports optionally creating a DNS record within your existing Googl
 ```hcl
 create_tfe_cloud_dns_record = true
 cloud_dns_managed_zone_name = "cloud-dns-managed-zone-name"
+```
+
+If you enable the optional secondary public callback hostname, you can also have the module manage a second DNS record in a public Cloud DNS zone.
+
+```hcl
+create_tfe_secondary_cloud_dns_record = true
+secondary_cloud_dns_managed_zone_name = "cloud-dns-public-zone-name"
 ```
 
 ## KMS

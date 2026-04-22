@@ -1,6 +1,6 @@
 # TFE Certificate Rotation
 
-One of the required prerequisites to deploying this module is storing base64-encoded strings of your TFE TLS/SSL certificate and private key files in PEM format as secrets within GCP Secret Manager for bootstrapping automation purposes. The TFE metadata startup script is designed to retrieve the latest value of these secrets every time a new VM boots. Therefore, the process for updating TFE's TLS/SSL certificates is to update the values of the corresponding secrets in GCP Secrets Manager, and then to replace the running TFE GCE VM instance(s) within the Managed Instance Group (MIG) such that when the new instance(s) spawn and re-install TFE, they will retrieve and install the new certificates. See the section below for detailed steps.
+One of the required prerequisites to deploying this module is storing base64-encoded strings of your TFE TLS/SSL certificate and private key files in PEM format as secrets within GCP Secret Manager for bootstrapping automation purposes. The TFE metadata startup script is designed to retrieve the latest value of these secrets every time a new VM boots. Therefore, the process for updating TFE's TLS/SSL certificates is to update the values of the corresponding secrets in GCP Secrets Manager, and then to replace the running TFE GCE VM instance(s) within the Managed Instance Group (MIG) such that when the new instance(s) spawn and re-install TFE, they will retrieve and install the new certificates. If you use `tfe_hostname_secondary`, rotate the secondary certificate, key, and CA bundle secrets during the same maintenance window.
 
 ## Secrets
 
@@ -8,6 +8,10 @@ One of the required prerequisites to deploying this module is storing base64-enc
 |-----------------------|-----------------------------|
 | TLS/SSL certificate   | `tfe_tls_cert_secret_id`    |
 | TLS/SSL private key   | `tfe_tls_privkey_secret_id` |
+| TLS/SSL CA bundle     | `tfe_tls_ca_bundle_secret_id` |
+| Secondary TLS/SSL certificate | `tfe_tls_cert_secret_id_secondary` |
+| Secondary TLS/SSL private key | `tfe_tls_privkey_secret_id_secondary` |
+| Secondary TLS/SSL CA bundle   | `tfe_tls_ca_bundle_secret_id_secondary` |
 
 ## Procedure
 
@@ -15,7 +19,7 @@ Follow these steps to rotate the certificates for your TFE instance.
 
 1. Obtain your new TFE TLS/SSL certificate file and private key file, both in PEM format.
 
-2. Update the values of the existing secrets in GCP Secret Manager (`tfe_tls_cert_secret_id` and `tfe_tls_privkey_secret_id`, respectively). If you need assistance base64-encoding the PEM files into strings prior to updating the secret values in GCP, see the [prereqs reference](./prereqs.md#secrets-formatting).
+2. Update the values of the existing secrets in GCP Secret Manager (`tfe_tls_cert_secret_id`, `tfe_tls_privkey_secret_id`, and `tfe_tls_ca_bundle_secret_id`). If `tfe_hostname_secondary` is enabled, also update `tfe_tls_cert_secret_id_secondary`, `tfe_tls_privkey_secret_id_secondary`, and `tfe_tls_ca_bundle_secret_id_secondary`. If you need assistance base64-encoding the PEM files into strings prior to updating the secret values in GCP, see the [prereqs reference](./prereqs.md#secrets-formatting).
 
 3. During a maintenance window, connect to one of your existing TFE GCE VM instances and gracefully drain the node(s) from being able to execute any new Terraform runs.
 

@@ -53,6 +53,9 @@ resource "google_service_networking_connection" "psa" {
 | TFE TLS certificate (base64-encoded)             | `tfe_tls_cert_secret_id`            |
 | TFE TLS certificate private key (base64-encoded) | `tfe_tls_privkey_secret_id`         |
 | TFE TLS CA bundle (base64-encoded)               | `tfe_tls_ca_bundle_secret_id`       |
+| Secondary TFE TLS certificate (base64-encoded)   | `tfe_tls_cert_secret_id_secondary`  |
+| Secondary TFE TLS private key (base64-encoded)   | `tfe_tls_privkey_secret_id_secondary` |
+| Secondary TFE TLS CA bundle (base64-encoded)     | `tfe_tls_ca_bundle_secret_id_secondary` |
 
 ### Secrets Formatting
 
@@ -81,6 +84,7 @@ cat terraform.hclic
 - Start off with your certificate files in PEM format
 - These values should be base64-encoded
 - Ensure your command line interface (CLI) does not automatically inject new line characters during the base64-encoding
+- If you enable `tfe_hostname_secondary`, create a second certificate, key, and CA bundle secret for that hostname as well
 
 Example on macOS Terminal:
 

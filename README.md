@@ -23,6 +23,7 @@ Terraform module aligned with HashiCorp Validated Designs (HVD) to deploy Terraf
   - (Optional) Load balancer subnet (can be the same as VM subnet if desired; only used when `lb_is_internal` is `true`)
   - Private Service Access (PSA) configured in VPC network for service `servicenetworking.googleapis.com` (refer to the [prereqs reference](./docs/prereqs.md#private-service-access-psa) for more details)
 - Chosen fully qualified domain name (FQDN) for your TFE instance (_e.g._ `tfe.gcp.example.com`)
+- (Optional) Secondary hostname for public callbacks such as OIDC, VCS webhooks, and run tasks (_e.g._ `tfe-callbacks.gcp.example.com`)
 - (Optional) Google Cloud DNS zone for optional TFE DNS record creation
 
 #### Firewall rules
@@ -44,6 +45,7 @@ The following _bootstrap_ secrets stored in Google Secret Manager in order to bo
 - **TFE TLS certificate** - certificate file in PEM format, base64-encoded into a string, and stored as a secret
 - **TFE TLS certificate private key** - private key file in PEM format, base64-encoded into a string, and stored as a secret
 - **TFE TLS CA bundle** - Ca bundle file in PEM format, base64-encoded into a string, and stored as a secret
+- **Secondary TFE TLS certificate / private key / CA bundle** - optional additional PEM assets, base64-encoded into strings, used when `tfe_hostname_secondary` is enabled
 
 Refer to the [prereqs reference](./docs/prereqs.md#tfe-bootstrap-secrets) for more details on how the secrets should be created and stored.
 
@@ -148,7 +150,7 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9 |
 | <a name="requirement_google"></a> [google](#requirement\_google) | ~> 6.6 |
 | <a name="requirement_google-beta"></a> [google-beta](#requirement\_google-beta) | ~> 6.6 |
@@ -157,7 +159,7 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_google"></a> [google](#provider\_google) | ~> 6.6 |
 | <a name="provider_google-beta"></a> [google-beta](#provider\_google-beta) | ~> 6.6 |
 | <a name="provider_random"></a> [random](#provider\_random) | ~> 3.6 |
@@ -165,24 +167,30 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [google-beta_google_project_service_identity.gcp_project_cloud_sql_sa](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/google_project_service_identity) | resource |
 | [google_compute_address.tfe_frontend_lb](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address) | resource |
+| [google_compute_address.tfe_secondary_frontend_lb](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address) | resource |
 | [google_compute_firewall.vm_allow_ingress_ssh_from_cidr](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
 | [google_compute_firewall.vm_allow_ingress_ssh_from_iap](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
 | [google_compute_firewall.vm_allow_lb_health_checks_443](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
 | [google_compute_firewall.vm_allow_tfe_443](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
 | [google_compute_firewall.vm_allow_tfe_admin_console](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
 | [google_compute_firewall.vm_allow_tfe_metrics_from_cidr](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
+| [google_compute_firewall.vm_allow_tfe_secondary_443](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
 | [google_compute_firewall.vm_tfe_self_allow](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) | resource |
 | [google_compute_forwarding_rule.tfe_admin_console_lb](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_forwarding_rule) | resource |
 | [google_compute_forwarding_rule.tfe_frontend_lb](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_forwarding_rule) | resource |
+| [google_compute_forwarding_rule.tfe_secondary_frontend_lb](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_forwarding_rule) | resource |
 | [google_compute_health_check.tfe_auto_healing](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_health_check) | resource |
 | [google_compute_instance_template.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance_template) | resource |
 | [google_compute_region_backend_service.tfe_backend_lb](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_backend_service) | resource |
+| [google_compute_region_backend_service.tfe_secondary_backend_lb](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_backend_service) | resource |
 | [google_compute_region_health_check.tfe_backend_lb](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_health_check) | resource |
+| [google_compute_region_health_check.tfe_secondary_backend_lb](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_health_check) | resource |
 | [google_compute_region_instance_group_manager.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_region_instance_group_manager) | resource |
 | [google_dns_record_set.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/dns_record_set) | resource |
+| [google_dns_record_set.tfe_secondary](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/dns_record_set) | resource |
 | [google_kms_crypto_key_iam_member.gcp_project_gcs_sa_cmek](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member) | resource |
 | [google_kms_crypto_key_iam_member.gcp_project_redis_sa_cmek](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member) | resource |
 | [google_kms_crypto_key_iam_member.postgres_cmek](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member) | resource |
@@ -193,6 +201,9 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | [google_secret_manager_secret_iam_member.tfe_encryption_password](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_iam_member) | resource |
 | [google_secret_manager_secret_iam_member.tfe_license](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_iam_member) | resource |
 | [google_secret_manager_secret_iam_member.tfe_privkey](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_iam_member) | resource |
+| [google_secret_manager_secret_iam_member.tfe_secondary_ca_bundle](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_iam_member) | resource |
+| [google_secret_manager_secret_iam_member.tfe_secondary_cert](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_iam_member) | resource |
+| [google_secret_manager_secret_iam_member.tfe_secondary_privkey](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret_iam_member) | resource |
 | [google_service_account.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account) | resource |
 | [google_service_account_key.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account_key) | resource |
 | [google_sql_database.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/sql_database) | resource |
@@ -210,6 +221,7 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | [google_compute_subnetwork.vm_subnet](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_subnetwork) | data source |
 | [google_compute_zones.up](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_zones) | data source |
 | [google_dns_managed_zone.tfe](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/dns_managed_zone) | data source |
+| [google_dns_managed_zone.tfe_secondary](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/dns_managed_zone) | data source |
 | [google_kms_crypto_key.gcs_cmek](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_crypto_key) | data source |
 | [google_kms_crypto_key.postgres_cmek](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_crypto_key) | data source |
 | [google_kms_crypto_key.redis_cmek](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/kms_crypto_key) | data source |
@@ -223,7 +235,7 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_friendly_name_prefix"></a> [friendly\_name\_prefix](#input\_friendly\_name\_prefix) | Friendly name prefix used for uniquely naming all GCP resources for this deployment. Most commonly set to either an environment (e.g. 'sandbox', 'prod'), a team name, or a project name. | `string` | n/a | yes |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | ID of GCP project to deploy TFE in. | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | GCP region (location) to deploy TFE in. | `string` | n/a | yes |
@@ -240,11 +252,14 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | <a name="input_cidr_allow_ingress_tfe_443"></a> [cidr\_allow\_ingress\_tfe\_443](#input\_cidr\_allow\_ingress\_tfe\_443) | List of CIDR ranges to allow TCP/443 (HTTPS) inbound to TFE load balancer. | `list(string)` | `null` | no |
 | <a name="input_cidr_allow_ingress_tfe_admin_console"></a> [cidr\_allow\_ingress\_tfe\_admin\_console](#input\_cidr\_allow\_ingress\_tfe\_admin\_console) | List of CIDR ranges to allow TCP ingress to the TFE Admin Console port. Required when `tfe_admin_console_disabled` is `false`. | `list(string)` | `null` | no |
 | <a name="input_cidr_allow_ingress_tfe_metrics"></a> [cidr\_allow\_ingress\_tfe\_metrics](#input\_cidr\_allow\_ingress\_tfe\_metrics) | List of CIDR ranges to allow TCP/9090 (HTTP) and TCP/9091 (HTTPS) inbound to TFE metrics collection endpoint. | `list(string)` | `null` | no |
+| <a name="input_cidr_allow_ingress_tfe_secondary_443"></a> [cidr\_allow\_ingress\_tfe\_secondary\_443](#input\_cidr\_allow\_ingress\_tfe\_secondary\_443) | List of CIDR ranges to allow TCP/443 (HTTPS) inbound to the optional secondary public TFE load balancer. | `list(string)` | <pre>[<br/>  "0.0.0.0/0"<br/>]</pre> | no |
 | <a name="input_cidr_allow_ingress_vm_ssh"></a> [cidr\_allow\_ingress\_vm\_ssh](#input\_cidr\_allow\_ingress\_vm\_ssh) | List of CIDR ranges to allow TCP/22 (SSH) inbound to TFE GCE instances. | `list(string)` | `null` | no |
 | <a name="input_cloud_dns_managed_zone_name"></a> [cloud\_dns\_managed\_zone\_name](#input\_cloud\_dns\_managed\_zone\_name) | Name of Google Cloud DNS managed zone to create TFE DNS record in. Required when `create_tfe_cloud_dns_record` is `true`. | `string` | `null` | no |
 | <a name="input_common_labels"></a> [common\_labels](#input\_common\_labels) | Map of common labels to apply to all GCP resources. | `map(string)` | `{}` | no |
 | <a name="input_container_runtime"></a> [container\_runtime](#input\_container\_runtime) | Container runtime to use for TFE deployment. Supported values are `docker` or `podman`. | `string` | `"docker"` | no |
+| <a name="input_create_secondary_tfe_lb"></a> [create\_secondary\_tfe\_lb](#input\_create\_secondary\_tfe\_lb) | Boolean to create a dedicated public external passthrough Network Load Balancer for `tfe_hostname_secondary`. This is only supported when the primary load balancer remains internal (`lb_is_internal = true`). | `bool` | `false` | no |
 | <a name="input_create_tfe_cloud_dns_record"></a> [create\_tfe\_cloud\_dns\_record](#input\_create\_tfe\_cloud\_dns\_record) | Boolean to create Google Cloud DNS record for TFE using the value of `tfe_fqdn` as the record name, resolving to the load balancer IP. `cloud_dns_managed_zone_name` is required when `true`. | `bool` | `false` | no |
+| <a name="input_create_tfe_secondary_cloud_dns_record"></a> [create\_tfe\_secondary\_cloud\_dns\_record](#input\_create\_tfe\_secondary\_cloud\_dns\_record) | Boolean to create a Google Cloud DNS record for `tfe_hostname_secondary`, resolving to the optional secondary public load balancer. `secondary_cloud_dns_managed_zone_name` is required when `true`. | `bool` | `false` | no |
 | <a name="input_custom_fluent_bit_config"></a> [custom\_fluent\_bit\_config](#input\_custom\_fluent\_bit\_config) | Custom Fluent Bit configuration for log forwarding. Only valid when `tfe_log_forwarding_enabled` is `true` and `log_fwd_destination_type` is `custom`. | `string` | `null` | no |
 | <a name="input_custom_tfe_startup_script_template"></a> [custom\_tfe\_startup\_script\_template](#input\_custom\_tfe\_startup\_script\_template) | Name of custom TFE startup script template file. File must exist within a directory named `./templates` within your current working directory. | `string` | `null` | no |
 | <a name="input_docker_version"></a> [docker\_version](#input\_docker\_version) | Version of Docker to install on TFE GCE VM instances. | `string` | `"26.1.4-1"` | no |
@@ -286,6 +301,7 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | <a name="input_redis_tier"></a> [redis\_tier](#input\_redis\_tier) | The service tier of the Redis instance. Set to `STANDARD_HA` for high availability. | `string` | `"STANDARD_HA"` | no |
 | <a name="input_redis_transit_encryption_mode"></a> [redis\_transit\_encryption\_mode](#input\_redis\_transit\_encryption\_mode) | Determines transit encryption (TLS) mode for Redis instance. | `string` | `"DISABLED"` | no |
 | <a name="input_redis_version"></a> [redis\_version](#input\_redis\_version) | The version of Redis software. | `string` | `"REDIS_7_2"` | no |
+| <a name="input_secondary_cloud_dns_managed_zone_name"></a> [secondary\_cloud\_dns\_managed\_zone\_name](#input\_secondary\_cloud\_dns\_managed\_zone\_name) | Name of Google Cloud DNS managed zone to create the secondary TFE DNS record in. Required when `create_tfe_secondary_cloud_dns_record` is `true`. | `string` | `null` | no |
 | <a name="input_tfe_admin_console_disabled"></a> [tfe\_admin\_console\_disabled](#input\_tfe\_admin\_console\_disabled) | Boolean to disable the TFE Admin Console for advanced troubleshooting and diagnostics. | `bool` | `true` | no |
 | <a name="input_tfe_admin_https_port"></a> [tfe\_admin\_https\_port](#input\_tfe\_admin\_https\_port) | Port the TFE application container listens on for system (admin) API endpoint HTTPS traffic. | `number` | `9443` | no |
 | <a name="input_tfe_capacity_concurrency"></a> [tfe\_capacity\_concurrency](#input\_tfe\_capacity\_concurrency) | Maximum number of concurrent Terraform runs to allow on a TFE node. | `number` | `10` | no |
@@ -295,6 +311,7 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | <a name="input_tfe_database_parameters"></a> [tfe\_database\_parameters](#input\_tfe\_database\_parameters) | Additional parameters to pass into the TFE database settings for the PostgreSQL connection URI. | `string` | `"sslmode=require"` | no |
 | <a name="input_tfe_database_user"></a> [tfe\_database\_user](#input\_tfe\_database\_user) | Name of TFE PostgreSQL database user to create. | `string` | `"tfe"` | no |
 | <a name="input_tfe_hairpin_addressing"></a> [tfe\_hairpin\_addressing](#input\_tfe\_hairpin\_addressing) | Boolean to enable hairpin addressing within TFE container networking for loopback prevention with a layer 4 internal load balancer. | `bool` | `true` | no |
+| <a name="input_tfe_hostname_secondary"></a> [tfe\_hostname\_secondary](#input\_tfe\_hostname\_secondary) | Optional secondary hostname for TFE. Use this when you need a second externally reachable hostname for OIDC callbacks, VCS webhooks, or run tasks. | `string` | `null` | no |
 | <a name="input_tfe_http_port"></a> [tfe\_http\_port](#input\_tfe\_http\_port) | HTTP port for TFE application containers to listen on. | `number` | `8080` | no |
 | <a name="input_tfe_https_port"></a> [tfe\_https\_port](#input\_tfe\_https\_port) | HTTPS port for TFE application containers to listen on. | `number` | `8443` | no |
 | <a name="input_tfe_iact_subnets"></a> [tfe\_iact\_subnets](#input\_tfe\_iact\_subnets) | Comma-separated list of subnets in CIDR notation that are allowed to retrieve the TFE initial admin creation token via the API or web browser. | `string` | `null` | no |
@@ -310,18 +327,24 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | <a name="input_tfe_metrics_enable"></a> [tfe\_metrics\_enable](#input\_tfe\_metrics\_enable) | Boolean to enable TFE metrics collection endpoints. | `bool` | `false` | no |
 | <a name="input_tfe_metrics_http_port"></a> [tfe\_metrics\_http\_port](#input\_tfe\_metrics\_http\_port) | HTTP port for TFE metrics collection endpoint to listen on. | `number` | `9090` | no |
 | <a name="input_tfe_metrics_https_port"></a> [tfe\_metrics\_https\_port](#input\_tfe\_metrics\_https\_port) | HTTPS port for TFE metrics collection endpoint to listen on. | `number` | `9091` | no |
+| <a name="input_tfe_oidc_hostname_choice"></a> [tfe\_oidc\_hostname\_choice](#input\_tfe\_oidc\_hostname\_choice) | Hostname choice for OIDC callback URLs. Valid values are `primary` or `secondary`. | `string` | `"primary"` | no |
 | <a name="input_tfe_operational_mode"></a> [tfe\_operational\_mode](#input\_tfe\_operational\_mode) | [Operational mode](https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/operation-modes) for TFE. Valid values are `active-active` or `external`. | `string` | `"active-active"` | no |
 | <a name="input_tfe_run_pipeline_docker_network"></a> [tfe\_run\_pipeline\_docker\_network](#input\_tfe\_run\_pipeline\_docker\_network) | Name of Docker network where the containers that execute Terraform runs (agents) will be created. The network must already exist, it will not be created automatically. Leave as `null` to use the default network created during the TFE installation. | `string` | `null` | no |
 | <a name="input_tfe_run_pipeline_image"></a> [tfe\_run\_pipeline\_image](#input\_tfe\_run\_pipeline\_image) | Name of container image used to execute Terraform runs on a TFE node. Leave as `null` to use the default agent that ships with TFE. | `string` | `null` | no |
+| <a name="input_tfe_run_task_hostname_choice"></a> [tfe\_run\_task\_hostname\_choice](#input\_tfe\_run\_task\_hostname\_choice) | Hostname choice for run task callbacks. Valid values are `primary` or `secondary`. | `string` | `"primary"` | no |
+| <a name="input_tfe_tls_ca_bundle_secret_id_secondary"></a> [tfe\_tls\_ca\_bundle\_secret\_id\_secondary](#input\_tfe\_tls\_ca\_bundle\_secret\_id\_secondary) | Name of Google Secret Manager secret for the secondary TFE TLS CA bundle in PEM format. Secret must be stored as a base64-encoded string. Required when `tfe_hostname_secondary` is set. | `string` | `null` | no |
+| <a name="input_tfe_tls_cert_secret_id_secondary"></a> [tfe\_tls\_cert\_secret\_id\_secondary](#input\_tfe\_tls\_cert\_secret\_id\_secondary) | Name of Google Secret Manager secret for the secondary TFE TLS certificate in PEM format. Secret must be stored as a base64-encoded string. Required when `tfe_hostname_secondary` is set. | `string` | `null` | no |
 | <a name="input_tfe_tls_enforce"></a> [tfe\_tls\_enforce](#input\_tfe\_tls\_enforce) | Boolean to enforce TLS, Strict-Transport-Security headers, and secure cookies within TFE. | `bool` | `false` | no |
+| <a name="input_tfe_tls_privkey_secret_id_secondary"></a> [tfe\_tls\_privkey\_secret\_id\_secondary](#input\_tfe\_tls\_privkey\_secret\_id\_secondary) | Name of Google Secret Manager secret for the secondary TFE TLS private key in PEM format. Secret must be stored as a base64-encoded string. Required when `tfe_hostname_secondary` is set. | `string` | `null` | no |
 | <a name="input_tfe_usage_reporting_opt_out"></a> [tfe\_usage\_reporting\_opt\_out](#input\_tfe\_usage\_reporting\_opt\_out) | Boolean to opt out of TFE usage reporting. | `bool` | `false` | no |
 | <a name="input_tfe_vault_disable_mlock"></a> [tfe\_vault\_disable\_mlock](#input\_tfe\_vault\_disable\_mlock) | Boolean to disable mlock for internal (embedded) Vault within TFE. | `bool` | `false` | no |
+| <a name="input_tfe_vcs_hostname_choice"></a> [tfe\_vcs\_hostname\_choice](#input\_tfe\_vcs\_hostname\_choice) | Hostname choice for VCS webhook callback URLs. Valid values are `primary` or `secondary`. | `string` | `"primary"` | no |
 | <a name="input_vpc_network_project_id"></a> [vpc\_network\_project\_id](#input\_vpc\_network\_project\_id) | ID of GCP project where the existing VPC network resides, if it is different than the `project_id` where TFE will be deployed. | `string` | `null` | no |
 
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_tfe_admin_console_url_pattern"></a> [tfe\_admin\_console\_url\_pattern](#output\_tfe\_admin\_console\_url\_pattern) | URL pattern to access the TFE Admin Console. Only applicable when `tfe_admin_console_disabled` is `false`. |
 | <a name="output_tfe_create_initial_admin_user_url"></a> [tfe\_create\_initial\_admin\_user\_url](#output\_tfe\_create\_initial\_admin\_user\_url) | URL to create TFE initial admin user. |
 | <a name="output_tfe_database_host"></a> [tfe\_database\_host](#output\_tfe\_database\_host) | Private IP address and port of TFE Cloud SQL for PostgreSQL database instance. |
@@ -339,5 +362,7 @@ Please note that there is no official Service Level Agreement (SLA) for support 
 | <a name="output_tfe_redis_use_tls"></a> [tfe\_redis\_use\_tls](#output\_tfe\_redis\_use\_tls) | Whether TFE should use TLS to connect to Redis instance. |
 | <a name="output_tfe_redis_user"></a> [tfe\_redis\_user](#output\_tfe\_redis\_user) | Username of TFE Redis instance. |
 | <a name="output_tfe_retrieve_iact_url"></a> [tfe\_retrieve\_iact\_url](#output\_tfe\_retrieve\_iact\_url) | URL to retrieve TFE initial admin creation token. |
+| <a name="output_tfe_secondary_lb_ip_address"></a> [tfe\_secondary\_lb\_ip\_address](#output\_tfe\_secondary\_lb\_ip\_address) | IP address of the optional secondary public TFE load balancer. |
+| <a name="output_tfe_secondary_url"></a> [tfe\_secondary\_url](#output\_tfe\_secondary\_url) | URL of the optional secondary TFE hostname based on `tfe_hostname_secondary`. |
 | <a name="output_tfe_url"></a> [tfe\_url](#output\_tfe\_url) | URL of TFE application based on `tfe_fqdn` input value. |
 <!-- END_TF_DOCS -->

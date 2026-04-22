@@ -66,6 +66,30 @@ resource "google_secret_manager_secret_iam_member" "tfe_ca_bundle" {
   member    = "serviceAccount:${google_service_account.tfe.email}"
 }
 
+resource "google_secret_manager_secret_iam_member" "tfe_secondary_cert" {
+  count = var.tfe_tls_cert_secret_id_secondary != null ? 1 : 0
+
+  secret_id = var.tfe_tls_cert_secret_id_secondary
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.tfe.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "tfe_secondary_privkey" {
+  count = var.tfe_tls_privkey_secret_id_secondary != null ? 1 : 0
+
+  secret_id = var.tfe_tls_privkey_secret_id_secondary
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.tfe.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "tfe_secondary_ca_bundle" {
+  count = var.tfe_tls_ca_bundle_secret_id_secondary != null ? 1 : 0
+
+  secret_id = var.tfe_tls_ca_bundle_secret_id_secondary
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.tfe.email}"
+}
+
 resource "google_project_iam_member" "tfe_logging_stackdriver" {
   count = var.tfe_log_forwarding_enabled && var.log_fwd_destination_type == "stackdriver" ? 1 : 0
 
