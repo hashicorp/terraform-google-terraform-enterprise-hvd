@@ -52,7 +52,9 @@ resource "google_compute_address" "tfe_frontend_lb" {
   address      = var.lb_is_internal ? var.lb_static_ip_address : null
 }
 
-/**
+# Merged duplicate forwarding rule resources to support optional admin console port forwarding when enabled
+# Prevents IP address conflict error that otherwise occurs when both forwarding rules are created with the same IP address.
+/**  
 resource "google_compute_forwarding_rule" "tfe_frontend_lb" {
   name                  = "${var.friendly_name_prefix}-tfe-frontend-lb-${local.lb_name_suffix}"
   backend_service       = google_compute_region_backend_service.tfe_backend_lb.id
