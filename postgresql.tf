@@ -62,12 +62,14 @@ resource "google_sql_database_instance" "tfe" {
 resource "google_sql_database" "tfe" {
   name     = var.tfe_database_name
   instance = google_sql_database_instance.tfe.name
+  deletion_policy = "ABANDON"
 }
 
 resource "google_sql_user" "tfe" {
   name     = var.tfe_database_user
   instance = google_sql_database_instance.tfe.name
   password = data.google_secret_manager_secret_version.tfe_database_password.secret_data
+  deletion_policy = "ABANDON"
 }
 
 #------------------------------------------------------------------------------
