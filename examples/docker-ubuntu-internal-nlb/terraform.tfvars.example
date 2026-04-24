@@ -39,6 +39,7 @@ mig_instance_count = 1
 gce_image_name     = "ubuntu-pro-2404-noble-amd64-v20241004"
 gce_image_project  = "ubuntu-os-pro-cloud"
 container_runtime  = "docker"
+postgres_machine_type = "db-perf-optimized-N-4" #Custom type no longer supported for PostgreSQL v16+
 
 # --- Database --- #
 tfe_database_password_secret_id = "<tfe-database-password-secret-name>"

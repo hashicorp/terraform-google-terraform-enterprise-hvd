@@ -1,4 +1,4 @@
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2024, 2025, 2026
 # SPDX-License-Identifier: MPL-2.0
 
 #------------------------------------------------------------------------------
@@ -55,6 +55,9 @@ resource "google_compute_address" "tfe_frontend_lb" {
   address      = var.lb_is_internal ? var.lb_static_ip_address : null
 }
 
+# Merged duplicate forwarding rule resources to support optional admin console port forwarding when enabled
+# Prevents IP address conflict error that otherwise occurs when both forwarding rules are created with the same IP address.
+/**  
 resource "google_compute_forwarding_rule" "tfe_frontend_lb" {
   name                  = "${var.friendly_name_prefix}-tfe-frontend-lb-${local.lb_name_suffix}"
   backend_service       = google_compute_region_backend_service.tfe_backend_lb.id
@@ -65,15 +68,15 @@ resource "google_compute_forwarding_rule" "tfe_frontend_lb" {
   subnetwork            = var.lb_is_internal ? local.lb_subnet_self_link : null
   ip_address            = google_compute_address.tfe_frontend_lb.address
 }
+**/
 
-resource "google_compute_forwarding_rule" "tfe_admin_console_lb" {
-  count = var.tfe_admin_console_disabled ? 0 : 1
+resource "google_compute_forwarding_rule" "tfe_frontend_lb" {
 
-  name                  = "${var.friendly_name_prefix}-tfe-admin-console-lb-${local.lb_name_suffix}"
+  name                  = "${var.friendly_name_prefix}-tfe-frontend-lb-${local.lb_name_suffix}"
   backend_service       = google_compute_region_backend_service.tfe_backend_lb.id
   ip_protocol           = "TCP"
   load_balancing_scheme = var.lb_is_internal ? "INTERNAL" : "EXTERNAL"
-  ports                 = [var.tfe_admin_https_port]
+  ports                 = var.tfe_admin_console_disabled ? [443] : [443, var.tfe_admin_https_port] #Adds forwarding to admin port as well if enabled; default 9443
   network               = var.lb_is_internal ? data.google_compute_network.vpc.self_link : null
   subnetwork            = var.lb_is_internal ? local.lb_subnet_self_link : null
   ip_address            = google_compute_address.tfe_frontend_lb.address
