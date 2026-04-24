@@ -1,3 +1,16 @@
+## v1.1.0
+
+## What's Changed
+* fix: use shared VIP for internal admin console forwarding rule by @abuxton in https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/pull/29
+* Release 1.0.0 by @abuxton in https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/pull/32
+* fix: Updated PostgreSQL machine type & LB IP conflict & Database Resource Destruction by @mekkim in https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/pull/31
+* upstream merge template repository by @github-actions[bot] in https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/pull/33
+
+## New Contributors
+* @mekkim made their first contribution in https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/pull/31
+
+**Full Changelog**: https://github.com/hashicorp/terraform-google-terraform-enterprise-hvd/compare/1.0.0...1.1.0
+
 ## v1.0.0
 
 ## What's Changed
