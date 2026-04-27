@@ -110,3 +110,59 @@ resource "google_compute_region_health_check" "tfe_backend_lb" {
     request_path = local.tfe_health_check_path
   }
 }
+
+#-----------------------------------------------------------------------------------
+# Secondary frontend (optional)
+#-----------------------------------------------------------------------------------
+resource "google_compute_address" "tfe_secondary_frontend_lb" {
+  count = local.secondary_lb_enabled ? 1 : 0
+
+  name         = "${var.friendly_name_prefix}-tfe-secondary-frontend-lb-ip"
+  description  = "Static IP to associate with the optional secondary public TFE load balancer forwarding rule."
+  address_type = "EXTERNAL"
+  network_tier = "PREMIUM"
+}
+
+resource "google_compute_forwarding_rule" "tfe_secondary_frontend_lb" {
+  count = local.secondary_lb_enabled ? 1 : 0
+
+  name                  = "${var.friendly_name_prefix}-tfe-secondary-frontend-lb-external"
+  backend_service       = google_compute_region_backend_service.tfe_secondary_backend_lb[0].id
+  ip_protocol           = "TCP"
+  load_balancing_scheme = "EXTERNAL"
+  ports                 = [443]
+  ip_address            = google_compute_address.tfe_secondary_frontend_lb[0].address
+}
+
+#-----------------------------------------------------------------------------------
+# Secondary backend (optional)
+#-----------------------------------------------------------------------------------
+resource "google_compute_region_backend_service" "tfe_secondary_backend_lb" {
+  count = local.secondary_lb_enabled ? 1 : 0
+
+  name                  = "${var.friendly_name_prefix}-tfe-secondary-backend-lb-external"
+  protocol              = "TCP"
+  load_balancing_scheme = "EXTERNAL"
+
+  backend {
+    description    = "TFE secondary external regional backend service."
+    group          = google_compute_region_instance_group_manager.tfe.instance_group
+    balancing_mode = "CONNECTION"
+    failover       = false
+  }
+
+  health_checks = [google_compute_region_health_check.tfe_secondary_backend_lb[0].self_link]
+}
+
+resource "google_compute_region_health_check" "tfe_secondary_backend_lb" {
+  count = local.secondary_lb_enabled ? 1 : 0
+
+  name               = "${var.friendly_name_prefix}-tfe-secondary-backend-svc-health-check"
+  check_interval_sec = 5
+  timeout_sec        = 5
+
+  https_health_check {
+    port         = 443
+    request_path = local.tfe_health_check_path
+  }
+}

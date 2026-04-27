@@ -59,6 +59,24 @@ variable "tfe_tls_ca_bundle_secret_id" {
   description = "Name of Google Secret Manager secret for private/custom TLS Certificate Authority (CA) bundle in PEM format. Secret must be stored as a base64-encoded string."
 }
 
+variable "tfe_tls_cert_secret_id_secondary" {
+  type        = string
+  description = "Name of Google Secret Manager secret for the optional secondary TFE TLS certificate in PEM format."
+  default     = null
+}
+
+variable "tfe_tls_privkey_secret_id_secondary" {
+  type        = string
+  description = "Name of Google Secret Manager secret for the optional secondary TFE TLS private key in PEM format."
+  default     = null
+}
+
+variable "tfe_tls_ca_bundle_secret_id_secondary" {
+  type        = string
+  description = "Name of Google Secret Manager secret for the optional secondary TFE TLS CA bundle in PEM format."
+  default     = null
+}
+
 variable "tfe_encryption_password_secret_id" {
   type        = string
   description = "Name of Google Secret Manager secret for TFE encryption password."
@@ -105,6 +123,30 @@ variable "tfe_image_repository_password" {
 variable "tfe_fqdn" {
   type        = string
   description = "Fully qualified domain name (FQDN) of TFE instance. This name should resolve to the TFE load balancer IP address and will be what users/clients use to access TFE."
+}
+
+variable "tfe_hostname_secondary" {
+  type        = string
+  description = "Optional secondary hostname for TFE."
+  default     = null
+}
+
+variable "tfe_oidc_hostname_choice" {
+  type        = string
+  description = "Hostname choice for OIDC callback URLs."
+  default     = "primary"
+}
+
+variable "tfe_vcs_hostname_choice" {
+  type        = string
+  description = "Hostname choice for VCS webhook callback URLs."
+  default     = "primary"
+}
+
+variable "tfe_run_task_hostname_choice" {
+  type        = string
+  description = "Hostname choice for run task callbacks."
+  default     = "primary"
 }
 
 variable "tfe_operational_mode" {
@@ -324,6 +366,18 @@ variable "cidr_allow_ingress_tfe_admin_console" {
   }
 }
 
+variable "create_secondary_tfe_lb" {
+  type        = bool
+  description = "Boolean to create a dedicated public secondary load balancer for `tfe_hostname_secondary`."
+  default     = false
+}
+
+variable "cidr_allow_ingress_tfe_secondary_443" {
+  type        = list(string)
+  description = "List of CIDR ranges to allow TCP/443 (HTTPS) inbound to the optional secondary public TFE load balancer."
+  default     = ["0.0.0.0/0"]
+}
+
 variable "cidr_allow_ingress_vm_ssh" {
   type        = list(string)
   description = "List of CIDR ranges to allow TCP/22 (SSH) inbound to TFE GCE instances."
@@ -360,6 +414,18 @@ variable "cloud_dns_managed_zone_name" {
     condition     = var.create_tfe_cloud_dns_record ? var.cloud_dns_managed_zone_name != null : true
     error_message = "Value must be set when `create_tfe_cloud_dns_record` is `true`."
   }
+}
+
+variable "create_tfe_secondary_cloud_dns_record" {
+  type        = bool
+  description = "Boolean to create a Google Cloud DNS record for `tfe_hostname_secondary` when the module also creates the optional secondary load balancer."
+  default     = false
+}
+
+variable "secondary_cloud_dns_managed_zone_name" {
+  type        = string
+  description = "Name of Google Cloud DNS managed zone to create the secondary TFE DNS record in."
+  default     = null
 }
 
 #------------------------------------------------------------------------------

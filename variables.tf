@@ -59,6 +59,39 @@ variable "tfe_tls_ca_bundle_secret_id" {
   description = "Name of Google Secret Manager secret for private/custom TLS Certificate Authority (CA) bundle in PEM format. Secret must be stored as a base64-encoded string."
 }
 
+variable "tfe_tls_cert_secret_id_secondary" {
+  type        = string
+  description = "Name of Google Secret Manager secret for the secondary TFE TLS certificate in PEM format. Secret must be stored as a base64-encoded string. Required when `tfe_hostname_secondary` is set."
+  default     = null
+
+  validation {
+    condition     = var.tfe_hostname_secondary != null ? var.tfe_tls_cert_secret_id_secondary != null : true
+    error_message = "Value must be set when `tfe_hostname_secondary` is set."
+  }
+}
+
+variable "tfe_tls_privkey_secret_id_secondary" {
+  type        = string
+  description = "Name of Google Secret Manager secret for the secondary TFE TLS private key in PEM format. Secret must be stored as a base64-encoded string. Required when `tfe_hostname_secondary` is set."
+  default     = null
+
+  validation {
+    condition     = var.tfe_hostname_secondary != null ? var.tfe_tls_privkey_secret_id_secondary != null : true
+    error_message = "Value must be set when `tfe_hostname_secondary` is set."
+  }
+}
+
+variable "tfe_tls_ca_bundle_secret_id_secondary" {
+  type        = string
+  description = "Name of Google Secret Manager secret for the secondary TFE TLS CA bundle in PEM format. Secret must be stored as a base64-encoded string. Required when `tfe_hostname_secondary` is set."
+  default     = null
+
+  validation {
+    condition     = var.tfe_hostname_secondary != null ? var.tfe_tls_ca_bundle_secret_id_secondary != null : true
+    error_message = "Value must be set when `tfe_hostname_secondary` is set."
+  }
+}
+
 variable "tfe_encryption_password_secret_id" {
   type        = string
   description = "Name of Google Secret Manager secret for TFE encryption password."
@@ -105,6 +138,60 @@ variable "tfe_image_repository_password" {
 variable "tfe_fqdn" {
   type        = string
   description = "Fully qualified domain name (FQDN) of TFE instance. This name should resolve to the TFE load balancer IP address and will be what users/clients use to access TFE."
+}
+
+variable "tfe_hostname_secondary" {
+  type        = string
+  description = "Optional secondary hostname for TFE. Use this when you need a second externally reachable hostname for OIDC callbacks, VCS webhooks, or run tasks."
+  default     = null
+}
+
+variable "tfe_oidc_hostname_choice" {
+  type        = string
+  description = "Hostname choice for OIDC callback URLs. Valid values are `primary` or `secondary`."
+  default     = "primary"
+
+  validation {
+    condition     = contains(["primary", "secondary"], var.tfe_oidc_hostname_choice)
+    error_message = "Value must be `primary` or `secondary`."
+  }
+
+  validation {
+    condition     = var.tfe_oidc_hostname_choice != "secondary" || var.tfe_hostname_secondary != null
+    error_message = "Value can only be `secondary` when `tfe_hostname_secondary` is set."
+  }
+}
+
+variable "tfe_vcs_hostname_choice" {
+  type        = string
+  description = "Hostname choice for VCS webhook callback URLs. Valid values are `primary` or `secondary`."
+  default     = "primary"
+
+  validation {
+    condition     = contains(["primary", "secondary"], var.tfe_vcs_hostname_choice)
+    error_message = "Value must be `primary` or `secondary`."
+  }
+
+  validation {
+    condition     = var.tfe_vcs_hostname_choice != "secondary" || var.tfe_hostname_secondary != null
+    error_message = "Value can only be `secondary` when `tfe_hostname_secondary` is set."
+  }
+}
+
+variable "tfe_run_task_hostname_choice" {
+  type        = string
+  description = "Hostname choice for run task callbacks. Valid values are `primary` or `secondary`."
+  default     = "primary"
+
+  validation {
+    condition     = contains(["primary", "secondary"], var.tfe_run_task_hostname_choice)
+    error_message = "Value must be `primary` or `secondary`."
+  }
+
+  validation {
+    condition     = var.tfe_run_task_hostname_choice != "secondary" || var.tfe_hostname_secondary != null
+    error_message = "Value can only be `secondary` when `tfe_hostname_secondary` is set."
+  }
 }
 
 variable "tfe_operational_mode" {
@@ -324,6 +411,27 @@ variable "cidr_allow_ingress_tfe_admin_console" {
   }
 }
 
+variable "create_secondary_tfe_lb" {
+  type        = bool
+  description = "Boolean to create a dedicated public external passthrough Network Load Balancer for `tfe_hostname_secondary`. This is only supported when the primary load balancer remains internal (`lb_is_internal = true`)."
+  default     = false
+
+  validation {
+    condition     = !var.create_secondary_tfe_lb || var.tfe_hostname_secondary != null
+    error_message = "Value can only be `true` when `tfe_hostname_secondary` is set."
+  }
+
+  validation {
+    condition     = !var.create_secondary_tfe_lb || var.lb_is_internal
+    error_message = "Value can only be `true` when `lb_is_internal` is `true`."
+  }
+}
+
+variable "cidr_allow_ingress_tfe_secondary_443" {
+  type        = list(string)
+  description = "List of CIDR ranges to allow TCP/443 (HTTPS) inbound to the optional secondary public TFE load balancer."
+  default     = ["0.0.0.0/0"]
+}
 variable "cidr_allow_ingress_vm_ssh" {
   type        = list(string)
   description = "List of CIDR ranges to allow TCP/22 (SSH) inbound to TFE GCE instances."
@@ -359,6 +467,28 @@ variable "cloud_dns_managed_zone_name" {
   validation {
     condition     = var.create_tfe_cloud_dns_record ? var.cloud_dns_managed_zone_name != null : true
     error_message = "Value must be set when `create_tfe_cloud_dns_record` is `true`."
+  }
+}
+
+variable "create_tfe_secondary_cloud_dns_record" {
+  type        = bool
+  description = "Boolean to create a Google Cloud DNS record for `tfe_hostname_secondary`, resolving to the optional secondary public load balancer. `secondary_cloud_dns_managed_zone_name` is required when `true`."
+  default     = false
+
+  validation {
+    condition     = !var.create_tfe_secondary_cloud_dns_record || var.create_secondary_tfe_lb
+    error_message = "Value can only be `true` when `create_secondary_tfe_lb` is `true`."
+  }
+}
+
+variable "secondary_cloud_dns_managed_zone_name" {
+  type        = string
+  description = "Name of Google Cloud DNS managed zone to create the secondary TFE DNS record in. Required when `create_tfe_secondary_cloud_dns_record` is `true`."
+  default     = null
+
+  validation {
+    condition     = var.create_tfe_secondary_cloud_dns_record ? var.secondary_cloud_dns_managed_zone_name != null : true
+    error_message = "Value must be set when `create_tfe_secondary_cloud_dns_record` is `true`."
   }
 }
 
