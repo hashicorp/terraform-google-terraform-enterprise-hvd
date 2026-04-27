@@ -1,4 +1,4 @@
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2024, 2025, 2026
 # SPDX-License-Identifier: MPL-2.0
 
 terraform {
@@ -73,10 +73,11 @@ module "tfe" {
   secondary_cloud_dns_managed_zone_name = var.secondary_cloud_dns_managed_zone_name
 
   # --- Compute --- #
-  mig_instance_count = var.mig_instance_count
-  gce_image_name     = var.gce_image_name
-  gce_image_project  = var.gce_image_project
-  container_runtime  = var.container_runtime
+  mig_instance_count    = var.mig_instance_count
+  gce_image_name        = var.gce_image_name
+  gce_image_project     = var.gce_image_project
+  container_runtime     = var.container_runtime
+  postgres_machine_type = var.postgres_machine_type
 
   # --- Database --- #
   tfe_database_password_secret_id = var.tfe_database_password_secret_id

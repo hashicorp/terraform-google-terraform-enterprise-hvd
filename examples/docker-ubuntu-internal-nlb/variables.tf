@@ -553,7 +553,7 @@ variable "postgres_availability_type" {
 variable "postgres_machine_type" {
   type        = string
   description = "Machine size of Cloud SQL for PostgreSQL instance."
-  default     = "db-custom-4-16384"
+  default     = "db-perf-optimized-N-4"
 }
 
 variable "postgres_disk_size" {
