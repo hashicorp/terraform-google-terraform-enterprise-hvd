@@ -10,11 +10,18 @@ data "google_dns_managed_zone" "tfe" {
   name = var.cloud_dns_managed_zone_name
 }
 
+data "google_dns_managed_zone" "tfe_secondary" {
+  count = var.create_tfe_secondary_cloud_dns_record && var.secondary_cloud_dns_managed_zone_name != null ? 1 : 0
+
+  name = var.secondary_cloud_dns_managed_zone_name
+}
+
 #------------------------------------------------------------------------------
 # Cloud DNS record set
 #------------------------------------------------------------------------------
 locals {
-  tfe_dns_record_name = !endswith(var.tfe_fqdn, ".") ? "${var.tfe_fqdn}." : var.tfe_fqdn
+  tfe_dns_record_name           = !endswith(var.tfe_fqdn, ".") ? "${var.tfe_fqdn}." : var.tfe_fqdn
+  tfe_secondary_dns_record_name = var.tfe_hostname_secondary != null && !endswith(var.tfe_hostname_secondary, ".") ? "${var.tfe_hostname_secondary}." : var.tfe_hostname_secondary
 }
 
 resource "google_dns_record_set" "tfe" {
@@ -25,4 +32,14 @@ resource "google_dns_record_set" "tfe" {
   type         = "A"
   ttl          = 60
   rrdatas      = [google_compute_address.tfe_frontend_lb.address]
+}
+
+resource "google_dns_record_set" "tfe_secondary" {
+  count = var.create_tfe_secondary_cloud_dns_record && var.secondary_cloud_dns_managed_zone_name != null ? 1 : 0
+
+  managed_zone = data.google_dns_managed_zone.tfe_secondary[0].name
+  name         = local.tfe_secondary_dns_record_name
+  type         = "A"
+  ttl          = 60
+  rrdatas      = [google_compute_address.tfe_secondary_frontend_lb[0].address]
 }

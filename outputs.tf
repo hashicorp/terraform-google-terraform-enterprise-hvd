@@ -24,6 +24,11 @@ output "tfe_admin_console_url_pattern" {
   description = "URL pattern to access the TFE Admin Console. Only applicable when `tfe_admin_console_disabled` is `false`."
 }
 
+output "tfe_secondary_url" {
+  value       = var.tfe_hostname_secondary != null ? "https://${var.tfe_hostname_secondary}" : null
+  description = "URL of the optional secondary TFE hostname based on `tfe_hostname_secondary`."
+}
+
 #------------------------------------------------------------------------------
 # Load balancer
 #------------------------------------------------------------------------------
@@ -35,6 +40,11 @@ output "tfe_lb_ip_address" {
 output "tfe_load_balancing_scheme" {
   value       = google_compute_forwarding_rule.tfe_frontend_lb.load_balancing_scheme
   description = "Load balancing scheme of TFE front end load balancer (forwarding rule)."
+}
+
+output "tfe_secondary_lb_ip_address" {
+  value       = local.secondary_lb_enabled ? google_compute_address.tfe_secondary_frontend_lb[0].address : null
+  description = "IP address of the optional secondary public TFE load balancer."
 }
 
 #------------------------------------------------------------------------------

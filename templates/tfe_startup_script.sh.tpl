@@ -179,6 +179,12 @@ services:
     environment:
       # Application settings
       TFE_HOSTNAME: ${tfe_hostname}
+%{ if tfe_hostname_secondary != "" ~}
+      TFE_HOSTNAME_SECONDARY: ${tfe_hostname_secondary}
+      TFE_OIDC_HOSTNAME_CHOICE: ${tfe_oidc_hostname_choice}
+      TFE_VCS_HOSTNAME_CHOICE: ${tfe_vcs_hostname_choice}
+      TFE_RUN_TASK_HOSTNAME_CHOICE: ${tfe_run_task_hostname_choice}
+%{ endif ~}
       TFE_LICENSE: $TFE_LICENSE
       TFE_LICENSE_PATH: ""
       TFE_OPERATIONAL_MODE: ${tfe_operational_mode}
@@ -224,6 +230,11 @@ services:
       TFE_TLS_CERT_FILE: ${tfe_tls_cert_file}
       TFE_TLS_KEY_FILE: ${tfe_tls_key_file}
       TFE_TLS_CA_BUNDLE_FILE: ${tfe_tls_ca_bundle_file}
+%{ if tfe_hostname_secondary != "" ~}
+      TFE_TLS_CERT_FILE_SECONDARY: ${tfe_tls_cert_file_secondary}
+      TFE_TLS_KEY_FILE_SECONDARY: ${tfe_tls_key_file_secondary}
+      TFE_TLS_CA_BUNDLE_FILE_SECONDARY: ${tfe_tls_ca_bundle_file_secondary}
+%{ endif ~}
       TFE_TLS_CIPHERS: ${tfe_tls_ciphers}
       TFE_TLS_ENFORCE: ${tfe_tls_enforce}
       TFE_TLS_VERSION: ${tfe_tls_version}
@@ -241,7 +252,11 @@ services:
       TFE_RUN_PIPELINE_DOCKER_NETWORK: ${tfe_run_pipeline_docker_network}
 %{ if tfe_hairpin_addressing ~}
       # Prevent loopback with layer 4 load balancer with hairpinning TFE agent traffic
+%{ if tfe_hostname_secondary != "" ~}
+      TFE_RUN_PIPELINE_DOCKER_EXTRA_HOSTS: ${tfe_hostname}:$VM_PRIVATE_IP,${tfe_hostname_secondary}:$VM_PRIVATE_IP
+%{ else ~}
       TFE_RUN_PIPELINE_DOCKER_EXTRA_HOSTS: ${tfe_hostname}:$VM_PRIVATE_IP
+%{ endif ~}
 %{ endif ~}
 
       # Network settings
@@ -259,6 +274,9 @@ services:
 %{ if tfe_hairpin_addressing ~}
     extra_hosts:
       - ${tfe_hostname}:$VM_PRIVATE_IP
+%{ if tfe_hostname_secondary != "" ~}
+      - ${tfe_hostname_secondary}:$VM_PRIVATE_IP
+%{ endif ~}
 %{ endif ~}
     cap_add:
       - IPC_LOCK
@@ -317,12 +335,25 @@ spec:
     - ip: $VM_PRIVATE_IP
       hostnames:
         - "${tfe_hostname}"
+%{ if tfe_hostname_secondary != "" ~}
+        - "${tfe_hostname_secondary}"
+%{ endif ~}
 %{ endif ~}
   containers:
   - env:
     # Application settings
     - name: "TFE_HOSTNAME"
       value: ${tfe_hostname}
+%{ if tfe_hostname_secondary != "" ~}
+    - name: "TFE_HOSTNAME_SECONDARY"
+      value: ${tfe_hostname_secondary}
+    - name: "TFE_OIDC_HOSTNAME_CHOICE"
+      value: ${tfe_oidc_hostname_choice}
+    - name: "TFE_VCS_HOSTNAME_CHOICE"
+      value: ${tfe_vcs_hostname_choice}
+    - name: "TFE_RUN_TASK_HOSTNAME_CHOICE"
+      value: ${tfe_run_task_hostname_choice}
+%{ endif ~}
     - name: "TFE_LICENSE"
       value: $TFE_LICENSE
     - name: "TFE_LICENSE_PATH"
@@ -401,6 +432,14 @@ spec:
       value: ${tfe_tls_key_file}
     - name: "TFE_TLS_CA_BUNDLE_FILE"
       value: ${tfe_tls_ca_bundle_file}
+%{ if tfe_hostname_secondary != "" ~}
+    - name: "TFE_TLS_CERT_FILE_SECONDARY"
+      value: ${tfe_tls_cert_file_secondary}
+    - name: "TFE_TLS_KEY_FILE_SECONDARY"
+      value: ${tfe_tls_key_file_secondary}
+    - name: "TFE_TLS_CA_BUNDLE_FILE_SECONDARY"
+      value: ${tfe_tls_ca_bundle_file_secondary}
+%{ endif ~}
     - name: "TFE_TLS_CIPHERS"
       value: ${tfe_tls_ciphers}
     - name: "TFE_TLS_ENFORCE"
@@ -429,8 +468,13 @@ spec:
       value: ${tfe_run_pipeline_docker_network}
 %{ if tfe_hairpin_addressing ~}
       # Prevent loopback with layer 4 load balancer with hairpinning TFE agent traffic
+%{ if tfe_hostname_secondary != "" ~}
+    - name: "TFE_RUN_PIPELINE_DOCKER_EXTRA_HOSTS"
+      value: ${tfe_hostname}:$VM_PRIVATE_IP,${tfe_hostname_secondary}:$VM_PRIVATE_IP
+%{ else ~}
     - name: "TFE_RUN_PIPELINE_DOCKER_EXTRA_HOSTS"
       value: ${tfe_hostname}:$VM_PRIVATE_IP
+%{ endif ~}
 %{ endif ~}
 
     # Network settings
@@ -601,6 +645,17 @@ function main {
   retrieve_cert_from_gcp_sm "${tfe_tls_privkey_secret_id}" "$TFE_TLS_CERTS_DIR/key.pem"
   log "INFO" "Retrieving TFE_TLS_CA_BUNDLE_FILE..."
   retrieve_cert_from_gcp_sm "${tfe_tls_ca_bundle_secret_id}" "$TFE_TLS_CERTS_DIR/bundle.pem"
+%{ if tfe_hostname_secondary != "" ~}
+  log "INFO" "Retrieving TFE_TLS_CERT_FILE_SECONDARY..."
+  retrieve_cert_from_gcp_sm "${tfe_tls_cert_secret_id_secondary}" "$TFE_TLS_CERTS_DIR/cert-secondary.pem"
+  log "INFO" "Retrieving TFE_TLS_KEY_FILE_SECONDARY..."
+  retrieve_cert_from_gcp_sm "${tfe_tls_privkey_secret_id_secondary}" "$TFE_TLS_CERTS_DIR/key-secondary.pem"
+  log "INFO" "Retrieving TFE_TLS_CA_BUNDLE_FILE_SECONDARY..."
+  retrieve_cert_from_gcp_sm "${tfe_tls_ca_bundle_secret_id_secondary}" "$TFE_TLS_CERTS_DIR/bundle-secondary.pem"
+  log "INFO" "Appending secondary TLS CA bundle to primary CA bundle."
+  printf '\n' >> "$TFE_TLS_CERTS_DIR/bundle.pem"
+  cat "$TFE_TLS_CERTS_DIR/bundle-secondary.pem" >> "$TFE_TLS_CERTS_DIR/bundle.pem"
+%{ endif ~}
 
   if [[ "${tfe_log_forwarding_enabled}" == "true" ]]; then
     log "INFO" "Generating '$TFE_LOG_FORWARDING_CONFIG_PATH' file for log forwarding."

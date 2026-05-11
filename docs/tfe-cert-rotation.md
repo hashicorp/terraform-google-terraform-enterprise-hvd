@@ -1,6 +1,6 @@
 # TFE Certificate Rotation
 
-One of the required prerequisites to deploying this module is storing base64-encoded strings of your TFE TLS/SSL certificate and private key files in PEM format as secrets within GCP Secret Manager for bootstrapping automation purposes. The TFE metadata startup script is designed to retrieve the latest value of these secrets every time a new VM boots. Therefore, the process for updating TFE's TLS/SSL certificates is to update the values of the corresponding secrets in GCP Secrets Manager, and then to replace the running TFE GCE VM instance(s) within the Managed Instance Group (MIG) such that when the new instance(s) spawn and re-install TFE, they will retrieve and install the new certificates. See the section below for detailed steps.
+One of the required prerequisites to deploying this module is storing base64-encoded strings of your TFE TLS/SSL certificate and private key files in PEM format as secrets within GCP Secret Manager for bootstrapping automation purposes. The TFE metadata startup script is designed to retrieve the latest value of these secrets every time a new VM boots. Therefore, the process for updating TFE's TLS/SSL certificates is to update the values of the corresponding secrets in GCP Secrets Manager, and then to replace the running TFE GCE VM instance(s) within the Managed Instance Group (MIG) such that when the new instance(s) spawn and re-install TFE, they will retrieve and install the new certificates. If you use `tfe_hostname_secondary`, rotate the secondary certificate, key, and CA bundle secrets during the same maintenance window.
 
 ## Secrets
 
@@ -8,6 +8,10 @@ One of the required prerequisites to deploying this module is storing base64-enc
 |-----------------------|-----------------------------|
 | TLS/SSL certificate   | `tfe_tls_cert_secret_id`    |
 | TLS/SSL private key   | `tfe_tls_privkey_secret_id` |
+| TLS/SSL CA bundle     | `tfe_tls_ca_bundle_secret_id` |
+| Secondary TLS/SSL certificate | `tfe_tls_cert_secret_id_secondary` |
+| Secondary TLS/SSL private key | `tfe_tls_privkey_secret_id_secondary` |
+| Secondary TLS/SSL CA bundle   | `tfe_tls_ca_bundle_secret_id_secondary` |
 
 ## Procedure
 
