@@ -80,6 +80,15 @@ variable "tfe_image_tag" {
   type        = string
   description = "Tag (release) for the TFE container image. This represents which version (release) of TFE to deploy."
   default     = "1.2.1"
+
+  validation {
+    condition = (
+      can(regex("^v[0-9]{6}-[0-9]+$", var.tfe_image_tag)) ||
+      can(regex("^v?[0-9]+\\.[0-9]+(\\.[0-9]+)?$", var.tfe_image_tag)) ||
+      can(regex("^[0-9a-f]{7,}$", var.tfe_image_tag))
+    )
+    error_message = "tfe_image_tag must be a supported calver tag (for example v202409-3), semver tag (for example 1.2.1 or v1.2.1), or raw commit hash."
+  }
 }
 
 variable "tfe_image_repository_username" {
