@@ -21,18 +21,31 @@ tfe_image_tag              = "<v202409-3>"
 tfe_admin_https_port       = 9443
 tfe_admin_console_disabled = true
 
+# Optional secondary hostname for external callbacks such as OIDC, VCS, and run tasks.
+# tfe_hostname_secondary       = "<tfe-secondary.gcp.example.com>"
+# tfe_oidc_hostname_choice     = "secondary"
+# tfe_vcs_hostname_choice      = "secondary"
+# tfe_run_task_hostname_choice = "secondary"
+# tfe_tls_cert_secret_id_secondary      = "<tfe-secondary-tls-cert-base64>"
+# tfe_tls_privkey_secret_id_secondary   = "<tfe-secondary-tls-privkey-base64>"
+# tfe_tls_ca_bundle_secret_id_secondary = "<tfe-secondary-tls-ca-bundle-base64>"
+
 # --- Networking --- #
 vpc_network_name                     = "<tfe-vpc-network-name>"
 lb_is_internal                       = true
 lb_subnet_name                       = "<tfe-lb-subnet-name>" # can be the same as VM subnet if desired
 vm_subnet_name                       = "<tfe-vm-subnet-name>"
 cidr_allow_ingress_tfe_443           = ["<0.0.0.0/0>"] # CIDR ranges of TFE users/clients, VCS, and other tooling that will access TFE
+# create_secondary_tfe_lb            = true
+# cidr_allow_ingress_tfe_secondary_443 = ["<0.0.0.0/0>"]
 cidr_allow_ingress_tfe_admin_console = ["<10.0.0.0/16>"] # required when tfe_admin_console_disabled = false
 allow_ingress_vm_ssh_from_iap        = true
 
 # --- DNS (optional) --- #
 create_tfe_cloud_dns_record = <true>
 cloud_dns_managed_zone_name = "<google-cloud-dns-zone-name>"
+# create_tfe_secondary_cloud_dns_record = <true>
+# secondary_cloud_dns_managed_zone_name = "<google-cloud-dns-public-zone-name>"
 
 # --- Compute --- #
 mig_instance_count = 1

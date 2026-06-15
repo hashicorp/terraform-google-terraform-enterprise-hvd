@@ -20,27 +20,36 @@ locals {
 # Metadata startup script
 #-----------------------------------------------------------------------------------
 locals {
-  tfe_startup_script_tpl = var.custom_tfe_startup_script_template != null ? "${path.cwd}/templates/${var.custom_tfe_startup_script_template}" : "${path.module}/templates/tfe_startup_script.sh.tpl"
-  redis_port             = var.redis_transit_encryption_mode == "SERVER_AUTHENTICATION" ? "6378" : "6379"
+  tfe_startup_script_tpl     = var.custom_tfe_startup_script_template != null ? "${path.cwd}/templates/${var.custom_tfe_startup_script_template}" : "${path.module}/templates/tfe_startup_script.sh.tpl"
+  redis_port                 = var.redis_transit_encryption_mode == "SERVER_AUTHENTICATION" ? "6378" : "6379"
+  secondary_hostname_enabled = var.tfe_hostname_secondary != null
+  secondary_lb_enabled       = local.secondary_hostname_enabled && var.create_secondary_tfe_lb
 
   startup_script_args = {
     # Bootstrap
-    tfe_license_secret_id             = var.tfe_license_secret_id
-    tfe_encryption_password_secret_id = var.tfe_encryption_password_secret_id
-    tfe_tls_cert_secret_id            = var.tfe_tls_cert_secret_id
-    tfe_tls_privkey_secret_id         = var.tfe_tls_privkey_secret_id
-    tfe_tls_ca_bundle_secret_id       = var.tfe_tls_ca_bundle_secret_id
-    tfe_image_repository_url          = var.tfe_image_repository_url
-    tfe_image_repository_username     = var.tfe_image_repository_username
-    tfe_image_repository_password     = var.tfe_image_repository_password != null ? var.tfe_image_repository_password : ""
-    tfe_image_name                    = var.tfe_image_name
-    tfe_image_tag                     = var.tfe_image_tag
-    container_runtime                 = var.container_runtime
-    docker_version                    = var.docker_version
+    tfe_license_secret_id                 = var.tfe_license_secret_id
+    tfe_encryption_password_secret_id     = var.tfe_encryption_password_secret_id
+    tfe_tls_cert_secret_id                = var.tfe_tls_cert_secret_id
+    tfe_tls_privkey_secret_id             = var.tfe_tls_privkey_secret_id
+    tfe_tls_ca_bundle_secret_id           = var.tfe_tls_ca_bundle_secret_id
+    tfe_tls_cert_secret_id_secondary      = var.tfe_tls_cert_secret_id_secondary != null ? var.tfe_tls_cert_secret_id_secondary : ""
+    tfe_tls_privkey_secret_id_secondary   = var.tfe_tls_privkey_secret_id_secondary != null ? var.tfe_tls_privkey_secret_id_secondary : ""
+    tfe_tls_ca_bundle_secret_id_secondary = var.tfe_tls_ca_bundle_secret_id_secondary != null ? var.tfe_tls_ca_bundle_secret_id_secondary : ""
+    tfe_image_repository_url              = var.tfe_image_repository_url
+    tfe_image_repository_username         = var.tfe_image_repository_username
+    tfe_image_repository_password         = var.tfe_image_repository_password != null ? var.tfe_image_repository_password : ""
+    tfe_image_name                        = var.tfe_image_name
+    tfe_image_tag                         = var.tfe_image_tag
+    container_runtime                     = var.container_runtime
+    docker_version                        = var.docker_version
 
     # https://developer.hashicorp.com/terraform/enterprise/flexible-deployments/install/configuration
     # TFE application settings
     tfe_hostname                  = var.tfe_fqdn
+    tfe_hostname_secondary        = var.tfe_hostname_secondary != null ? var.tfe_hostname_secondary : ""
+    tfe_oidc_hostname_choice      = var.tfe_oidc_hostname_choice
+    tfe_vcs_hostname_choice       = var.tfe_vcs_hostname_choice
+    tfe_run_task_hostname_choice  = var.tfe_run_task_hostname_choice
     tfe_operational_mode          = var.tfe_operational_mode
     tfe_capacity_concurrency      = var.tfe_capacity_concurrency
     tfe_capacity_cpu              = var.tfe_capacity_cpu
@@ -77,12 +86,15 @@ locals {
     tfe_redis_use_tls  = var.redis_transit_encryption_mode == "SERVER_AUTHENTICATION" ? true : false
 
     # TLS settings
-    tfe_tls_cert_file      = "/etc/ssl/private/terraform-enterprise/cert.pem"
-    tfe_tls_key_file       = "/etc/ssl/private/terraform-enterprise/key.pem"
-    tfe_tls_ca_bundle_file = "/etc/ssl/private/terraform-enterprise/bundle.pem"
-    tfe_tls_enforce        = var.tfe_tls_enforce
-    tfe_tls_ciphers        = "" # Leave blank to use the default ciphers
-    tfe_tls_version        = "" # Leave blank to use both TLS v1.2 and TLS v1.3
+    tfe_tls_cert_file                = "/etc/ssl/private/terraform-enterprise/cert.pem"
+    tfe_tls_key_file                 = "/etc/ssl/private/terraform-enterprise/key.pem"
+    tfe_tls_ca_bundle_file           = "/etc/ssl/private/terraform-enterprise/bundle.pem"
+    tfe_tls_cert_file_secondary      = "/etc/ssl/private/terraform-enterprise/cert-secondary.pem"
+    tfe_tls_key_file_secondary       = "/etc/ssl/private/terraform-enterprise/key-secondary.pem"
+    tfe_tls_ca_bundle_file_secondary = "/etc/ssl/private/terraform-enterprise/bundle-secondary.pem"
+    tfe_tls_enforce                  = var.tfe_tls_enforce
+    tfe_tls_ciphers                  = "" # Leave blank to use the default ciphers
+    tfe_tls_version                  = "" # Leave blank to use both TLS v1.2 and TLS v1.3
 
     # Observability settings
     tfe_log_forwarding_enabled = var.tfe_log_forwarding_enabled
@@ -292,7 +304,12 @@ resource "google_compute_firewall" "vm_allow_tfe_admin_console" {
 
 locals {
   // https://cloud.google.com/load-balancing/docs/health-check-concepts
-  health_check_probe_cidrs = var.lb_is_internal ? ["130.211.0.0/22", "35.191.0.0/16"] : ["35.191.0.0/16", "209.85.152.0/22", "209.85.204.0/22"]
+  internal_health_check_probe_cidrs = ["130.211.0.0/22", "35.191.0.0/16"]
+  external_health_check_probe_cidrs = ["35.191.0.0/16", "209.85.152.0/22", "209.85.204.0/22"]
+  health_check_probe_cidrs = distinct(concat(
+    var.lb_is_internal ? local.internal_health_check_probe_cidrs : local.external_health_check_probe_cidrs,
+    local.secondary_lb_enabled ? local.external_health_check_probe_cidrs : []
+  ))
 }
 
 resource "google_compute_firewall" "vm_allow_lb_health_checks_443" {
@@ -349,6 +366,26 @@ resource "google_compute_firewall" "vm_allow_tfe_metrics_from_cidr" {
   }
 
   source_ranges = var.cidr_allow_ingress_tfe_metrics
+  target_tags   = ["tfe-vm"]
+
+  log_config {
+    metadata = "INCLUDE_ALL_METADATA"
+  }
+}
+resource "google_compute_firewall" "vm_allow_tfe_secondary_443" {
+  count = local.secondary_lb_enabled ? 1 : 0
+
+  name        = "${var.friendly_name_prefix}-tfe-secondary-allow-443"
+  description = "Allow TCP/443 (HTTPS) ingress to TFE GCE VM instances from the optional secondary public TFE load balancer CIDR ranges."
+  network     = data.google_compute_network.vpc.self_link
+  direction   = "INGRESS"
+
+  allow {
+    protocol = "tcp"
+    ports    = [443]
+  }
+
+  source_ranges = var.cidr_allow_ingress_tfe_secondary_443
   target_tags   = ["tfe-vm"]
 
   log_config {
